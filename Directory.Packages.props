@@ -1,0 +1,7 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+</Project>
