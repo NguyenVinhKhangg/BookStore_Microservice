@@ -8,7 +8,7 @@
 ```
 /<root-solution-folder>
 │
-├── BookManagementApi/
+├── <Tên bảng>ManagementApi/
 │   ├── Controllers/
 │   ├── Data/
 │   ├── DTOs/
@@ -19,39 +19,6 @@
 │   ├── Services/
 │   ├── Validations/
 │   └── BookManagementApi.csproj
-│
-├── CouponsApi/
-│   ├── Controllers/
-│   ├── DTOs/
-│   ├── Migrations/
-│   ├── Models/
-│   ├── Profile/
-│   ├── Repositories/
-│   ├── Services/
-│   ├── Validations/
-│   └── CouponsApi.csproj
-│
-├── ReviewsApi/
-│   ├── Controllers/
-│   ├── DTOs/
-│   ├── Migrations/
-│   ├── Models/
-│   ├── Profile/
-│   ├── Repositories/
-│   ├── Services/
-│   ├── Validations/
-│   └── ReviewsApi.csproj
-│
-├── UserManagementApi/
-│   ├── Controllers/
-│   ├── DTOs/
-│   ├── Migrations/
-│   ├── Models/
-│   ├── Profile/
-│   ├── Repositories/
-│   ├── Services/
-│   ├── Utilities/
-│   └── UserManagementApi.csproj
 │
 └── README.md
 ```
