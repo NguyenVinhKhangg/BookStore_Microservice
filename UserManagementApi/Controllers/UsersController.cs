@@ -19,7 +19,7 @@ namespace UserManagementApi.Controllers
             _userService = userService;
         }
 
-        //[Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [EnableQuery]  
         [HttpGet("/odata/users")]
         public IQueryable<UserDTO> GetUsersOData()
