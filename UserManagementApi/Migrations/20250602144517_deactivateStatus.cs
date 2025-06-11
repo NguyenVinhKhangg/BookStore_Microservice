@@ -11,7 +11,7 @@ namespace UserManagementApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "IsActive",
+                name: "IsDeactivated",
                 table: "Users",
                 newName: "DeactivatedStatus");
         }
@@ -22,7 +22,7 @@ namespace UserManagementApi.Migrations
             migrationBuilder.RenameColumn(
                 name: "DeactivatedStatus",
                 table: "Users",
-                newName: "IsActive");
+                newName: "IsDeactivated");
         }
     }
 }

@@ -17,37 +17,6 @@ namespace UserManagementApi.Repositories.Implement
             _context = context;
         }
 
-        public async Task<IEnumerable<Users>> GetAllUsersAdminAsync()
-        {
-            try
-            {
-                return await _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.RoleID != 1)
-                    .OrderBy(u => u.DeactivatedStatus)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to get all users", ex);
-            }
-        }
-
-        public async Task<IEnumerable<Users>> GetAllUsersAsync()
-        {
-            try
-            {
-                return await _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.RoleID == 2 && !u.DeactivatedStatus)
-                    .OrderBy(u => u.DeactivatedStatus)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to get all users", ex);
-            }
-        }
 
         public async Task<Users> GetUserByIdAsync(int id)
         {
@@ -281,54 +250,6 @@ namespace UserManagementApi.Repositories.Implement
             }
         }
 
-        public async Task<IEnumerable<Users>> SearchUsersByNameAsync(string name)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(name))
-                {
-                    return await _context.Users
-                        .Include(u => u.Role)
-                        .Where(u => u.RoleID == 2)
-                        .OrderBy(u => u.DeactivatedStatus)
-                        .ToListAsync();
-                }
-
-                return await _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.FullName.ToLower().Contains(name.ToLower()) && !u.DeactivatedStatus && u.RoleID == 2)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to search users", ex);
-            }
-        }
-
-        public async Task<IEnumerable<Users>> SearchUsersByNameAdminAsync(string name)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(name))
-                {
-                    return await _context.Users
-                        .Include(u => u.Role)
-                        .Where(u => u.RoleID != 1)
-                        .OrderBy(u => u.DeactivatedStatus)
-                        .ToListAsync();
-                }
-
-                return await _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.FullName.ToLower().Contains(name.ToLower()) && u.RoleID != 1)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to search users", ex);
-            }
-        }
-
         public async Task<Users> VerifyLoginAsync(string email, string password)
         {
             try
@@ -365,100 +286,11 @@ namespace UserManagementApi.Repositories.Implement
             {
                 throw new Exception("Error: Fail to get total users", ex);
             }
-        }
+        }    
 
-        public async Task<PageList<Users>> GetUsersWithPagingAdminAsync(int pageNumber, int pageSize, string searchTerm = null, string searchField = "name")
+        public IQueryable<Users> GetUsersQueryable()
         {
-            try
-            {
-                var query = _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.RoleID != 1);
-
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    switch (searchField.ToLower())
-                    {
-                        case "name":
-                            query = query.Where(u => u.FullName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        case "email":
-                            query = query.Where(u => u.Email.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        case "status":
-                            query = query.Where(u => searchTerm.ToLower() == "deactive" ? u.DeactivatedStatus : !u.DeactivatedStatus);
-                            break;
-                        case "role":
-                            query = query.Where(u => u.Role.RoleName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        default:
-                            query = query.Where(u => u.FullName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                    }
-                }
-
-                query = query.OrderBy(u => u.DeactivatedStatus);
-
-                int totalCount = await query.CountAsync();
-
-                var items = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                    .ToListAsync();
-
-                return new PageList<Users>(items, totalCount, pageNumber, pageSize);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to get users with paging", ex);
-            }
-        }
-
-        public async Task<PageList<Users>> GetUsersWithPagingStaffAsync(int pageNumber, int pageSize, string searchTerm = null, string searchField = "name")
-        {
-            try
-            {
-                var query = _context.Users
-                    .Include(u => u.Role)
-                    .Where(u => u.RoleID == 2 && !u.DeactivatedStatus);
-
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    switch (searchField.ToLower())
-                    {
-                        case "name":
-                            query = query.Where(u => u.FullName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        case "email":
-                            query = query.Where(u => u.Email.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        case "status":
-                            query = query.Where(u => u.DeactivatedStatus == (searchTerm.ToLower() == "deactive"));
-                            break;
-                        case "role":
-                            query = query.Where(u => u.Role.RoleName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                        default:
-                            query = query.Where(u => u.FullName.ToLower().Contains(searchTerm.ToLower()));
-                            break;
-                    }
-                }
-
-                query = query.OrderBy(u => u.DeactivatedStatus);
-
-                int totalCount = await query.CountAsync();
-
-                var items = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                    .ToListAsync();
-
-                return new PageList<Users>(items, totalCount, pageNumber, pageSize);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error: Fail to get users with paging", ex);
-            }
+            return _context.Users.Include(u => u.Role);
         }
     }
 }
