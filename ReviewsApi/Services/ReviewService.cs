@@ -35,58 +35,45 @@ namespace ReviewsApi.Services
 
         public async Task<ReviewReadDto> GetByIdAsync(int id)
         {
-            if (id <= 0) {
-                throw new ValidationException("Review ID must be greater than 0.");
-            }
-
             var review = await _repository.GetByIdAsync(id);
-            if (review == null || !review.IsActive) {
+            if (review == null || !review.IsActive)
                 throw new KeyNotFoundException("Review not found or inactive");
-            }
             return _mapper.Map<ReviewReadDto>(review);
         }
 
         public async Task<ReviewReadDto> CreateAsync(ReviewCreateDto reviewDto)
         {
             var validationResult = await _createValidator.ValidateAsync(reviewDto);
-            if (!validationResult.IsValid) {
+            if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-            }
 
             var review = _mapper.Map<Review>(reviewDto);
+            review.ReviewDate = DateTime.UtcNow;
+            review.IsActive = true;
             await _repository.AddAsync(review);
             return _mapper.Map<ReviewReadDto>(review);
         }
 
         public async Task UpdateAsync(int id, ReviewUpdateDto reviewDto)
         {
-            if (id <= 0) {
-                throw new ValidationException("Review ID must be greater than 0.");
-            }
-
             var validationResult = await _updateValidator.ValidateAsync(reviewDto);
-            if (!validationResult.IsValid) {
+            if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-            }
 
             var review = await _repository.GetByIdAsync(id);
-            if (review == null || !review.IsActive) {
+            if (review == null || !review.IsActive)
                 throw new KeyNotFoundException("Review not found or inactive");
-            }
+
             _mapper.Map(reviewDto, review);
             await _repository.UpdateAsync(review);
         }
 
         public async Task DeleteAsync(int id)
         {
-            if (id <= 0) {
-                throw new ValidationException("Review ID must be greater than 0.");
-            }
-
             var review = await _repository.GetByIdAsync(id);
-            if (review == null || !review.IsActive) {
+            if (review == null || !review.IsActive)
                 throw new KeyNotFoundException("Review not found or already inactive");
-            }
+
             review.IsActive = false;
             await _repository.UpdateAsync(review);
         }

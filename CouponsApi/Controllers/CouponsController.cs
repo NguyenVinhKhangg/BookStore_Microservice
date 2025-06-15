@@ -1,6 +1,7 @@
 ﻿using CouponsApi.DTOs;
 using CouponsApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -17,7 +18,9 @@ namespace CouponsApi.Controllers
             _service = service;
         }
 
+        // OData endpoint: /odata/Coupons
         [HttpGet]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<CouponReadDto>>> GetCoupons()
         {
             var coupons = await _service.GetAllAsync();
@@ -36,8 +39,20 @@ namespace CouponsApi.Controllers
             }
         }
 
+        [HttpGet("bycode/{code}")]
+        public async Task<ActionResult<CouponReadDto>> GetCouponByCode(string code)
+        {
+            try {
+                var coupon = await _service.GetByCodeAsync(code);
+                return Ok(coupon);
+            }
+            catch (KeyNotFoundException) {
+                return NotFound("Coupon not found or inactive");
+            }
+        }
+
         [HttpPost]
-        public async Task<ActionResult<CouponReadDto>> PostCoupon(CouponCreateDto couponDto)
+        public async Task<ActionResult<CouponReadDto>> PostCoupon(CouponDTO couponDto)
         {
             try {
                 var coupon = await _service.CreateAsync(couponDto);
@@ -46,17 +61,13 @@ namespace CouponsApi.Controllers
             catch (FluentValidation.ValidationException ex) {
                 return BadRequest(ex.Errors);
             }
-            catch (DbUpdateException ex) {
-                return BadRequest("Invalid coupon data: " + ex.InnerException?.Message);
-            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCoupon(int id, CouponUpdateDto couponDto)
         {
-            if (id != couponDto.CouponID) {
+            if (id != couponDto.CouponID)
                 return BadRequest("CouponID mismatch");
-            }
             try {
                 await _service.UpdateAsync(id, couponDto);
                 return NoContent();
@@ -66,9 +77,6 @@ namespace CouponsApi.Controllers
             }
             catch (KeyNotFoundException) {
                 return NotFound("Coupon not found or inactive");
-            }
-            catch (DbUpdateException ex) {
-                return BadRequest("Invalid coupon data: " + ex.InnerException?.Message);
             }
         }
 

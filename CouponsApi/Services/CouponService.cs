@@ -12,13 +12,13 @@ namespace CouponsApi.Services
     {
         private readonly ICouponRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IValidator<CouponCreateDto> _createValidator;
+        private readonly IValidator<CouponDTO> _createValidator;
         private readonly IValidator<CouponUpdateDto> _updateValidator;
 
         public CouponService(
             ICouponRepository repository,
             IMapper mapper,
-            IValidator<CouponCreateDto> createValidator,
+            IValidator<CouponDTO> createValidator,
             IValidator<CouponUpdateDto> updateValidator)
         {
             _repository = repository;
@@ -35,23 +35,30 @@ namespace CouponsApi.Services
 
         public async Task<CouponReadDto> GetByIdAsync(int id)
         {
-            if (id <= 0) {
+            if (id <= 0)
                 throw new ValidationException("Coupon ID must be greater than 0.");
-            }
 
             var coupon = await _repository.GetByIdAsync(id);
-            if (coupon == null || !coupon.IsActive) {
+            if (coupon == null || !coupon.IsActive)
                 throw new KeyNotFoundException("Coupon not found or inactive");
-            }
+
             return _mapper.Map<CouponReadDto>(coupon);
         }
 
-        public async Task<CouponReadDto> CreateAsync(CouponCreateDto couponDto)
+        public async Task<CouponReadDto> GetByCodeAsync(string code)
+        {
+            var coupon = await _repository.GetByCodeAsync(code);
+            if (coupon == null || !coupon.IsActive)
+                throw new KeyNotFoundException("Coupon not found or inactive");
+
+            return _mapper.Map<CouponReadDto>(coupon);
+        }
+
+        public async Task<CouponReadDto> CreateAsync(CouponDTO couponDto)
         {
             var validationResult = await _createValidator.ValidateAsync(couponDto);
-            if (!validationResult.IsValid) {
+            if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-            }
 
             var coupon = _mapper.Map<Coupons>(couponDto);
             await _repository.AddAsync(coupon);
@@ -60,33 +67,30 @@ namespace CouponsApi.Services
 
         public async Task UpdateAsync(int id, CouponUpdateDto couponDto)
         {
-            if (id <= 0) {
+            if (id <= 0)
                 throw new ValidationException("Coupon ID must be greater than 0.");
-            }
 
             var validationResult = await _updateValidator.ValidateAsync(couponDto);
-            if (!validationResult.IsValid) {
+            if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-            }
 
             var coupon = await _repository.GetByIdAsync(id);
-            if (coupon == null || !coupon.IsActive) {
+            if (coupon == null || !coupon.IsActive)
                 throw new KeyNotFoundException("Coupon not found or inactive");
-            }
+
             _mapper.Map(couponDto, coupon);
             await _repository.UpdateAsync(coupon);
         }
 
         public async Task DeleteAsync(int id)
         {
-            if (id <= 0) {
+            if (id <= 0)
                 throw new ValidationException("Coupon ID must be greater than 0.");
-            }
 
             var coupon = await _repository.GetByIdAsync(id);
-            if (coupon == null || !coupon.IsActive) {
+            if (coupon == null || !coupon.IsActive)
                 throw new KeyNotFoundException("Coupon not found or already inactive");
-            }
+
             coupon.IsActive = false;
             await _repository.UpdateAsync(coupon);
         }

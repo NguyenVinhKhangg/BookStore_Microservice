@@ -1,16 +1,31 @@
 using CouponsApi.Data;
+using CouponsApi.DTOs;
 using CouponsApi.Repositories;
 using CouponsApi.Services;
 using CouponsApi.Validations;
 using FluentValidation;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+var odataBuilder = new ODataConventionModelBuilder();
+odataBuilder.EntitySet<CouponReadDto>("Coupons");
+
+builder.Services.AddControllers()
+    .AddOData(opt => opt
+        .AddRouteComponents("odata", odataBuilder.GetEdmModel())
+        .Select()
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .SetMaxTop(100)
+        .Count()
+    );
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -9,7 +9,8 @@ namespace CouponsApi.Services
     {
         Task<IEnumerable<CouponReadDto>> GetAllAsync();
         Task<CouponReadDto> GetByIdAsync(int id);
-        Task<CouponReadDto> CreateAsync(CouponCreateDto couponDto);
+        Task<CouponReadDto> GetByCodeAsync(string code);
+        Task<CouponReadDto> CreateAsync(CouponDTO couponDto);
         Task UpdateAsync(int id, CouponUpdateDto couponDto);
         Task DeleteAsync(int id);
     }
