@@ -8,10 +8,9 @@ namespace ReviewsApi.Profiles
     {
         public ReviewProfile()
         {
-            CreateMap<Review, ReviewReadDto>();
+            CreateMap<Review, ReviewReadDto>().ReverseMap();
             CreateMap<ReviewCreateDto, Review>();
             CreateMap<ReviewUpdateDto, Review>();
-            CreateMap<Review, ReviewUpdateDto>();
         }
     }
 }

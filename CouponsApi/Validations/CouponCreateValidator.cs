@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace CouponsApi.Validations
 {
-    public class CouponCreateValidator : AbstractValidator<CouponCreateDto>
+    public class CouponCreateValidator : AbstractValidator<CouponDTO>
     {
         private readonly ICouponRepository _repository;
 

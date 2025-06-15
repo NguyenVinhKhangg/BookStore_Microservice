@@ -18,21 +18,17 @@ namespace CouponsApi.Repositories
 
         public async Task<IEnumerable<Coupons>> GetAllAsync()
         {
-            return await _context.Coupon
-                .Where(c => c.IsActive)
-                .ToListAsync();
+            return await _context.Coupon.Where(c => c.IsActive).ToListAsync();
         }
 
         public async Task<Coupons> GetByIdAsync(int id)
         {
-            return await _context.Coupon
-                .FirstOrDefaultAsync(c => c.CouponID == id);
+            return await _context.Coupon.FirstOrDefaultAsync(c => c.CouponID == id);
         }
 
         public async Task<Coupons> GetByCodeAsync(string code)
         {
-            return await _context.Coupon
-                .FirstOrDefaultAsync(c => c.Code == code);
+            return await _context.Coupon.FirstOrDefaultAsync(c => c.Code == code);
         }
 
         public async Task AddAsync(Coupons coupon)
@@ -51,9 +47,11 @@ namespace CouponsApi.Repositories
         {
             var coupon = await _context.Coupon.FindAsync(id);
             if (coupon != null) {
-                _context.Coupon.Remove(coupon);
+                coupon.IsActive = false;
+                _context.Entry(coupon).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
         }
+
     }
 }

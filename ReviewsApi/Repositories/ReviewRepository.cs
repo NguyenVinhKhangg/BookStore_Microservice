@@ -9,30 +9,13 @@ namespace ReviewsApi.Repositories
     public class ReviewRepository : IReviewRepository
     {
         private readonly ReviewDbContext _context;
+        public ReviewRepository(ReviewDbContext context) => _context = context;
 
-        public ReviewRepository(ReviewDbContext context)
-        {
-            _context = context;
-        }
+        public async Task<IEnumerable<Review>> GetAllAsync() =>
+            await _context.Reviews.Where(r => r.IsActive).ToListAsync();
 
-        public async Task<IEnumerable<Review>> GetAllAsync()
-        {
-            return await _context.Reviews
-                .Where(r => r.IsActive)
-                .ToListAsync();
-        }
-
-        public async Task<Review> GetByIdAsync(int id)
-        {
-            return await _context.Reviews
-                .FirstOrDefaultAsync(r => r.ReviewID == id);
-        }
-
-        public async Task<Review> GetByBookIdAndUserIdAsync(int bookId, int userId)
-        {
-            return await _context.Reviews
-                .FirstOrDefaultAsync(r => r.BookID == bookId && r.UserID == userId);
-        }
+        public async Task<Review?> GetByIdAsync(int id) =>
+            await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewID == id);
 
         public async Task AddAsync(Review review)
         {
@@ -50,9 +33,15 @@ namespace ReviewsApi.Repositories
         {
             var review = await _context.Reviews.FindAsync(id);
             if (review != null) {
-                _context.Reviews.Remove(review);
+                review.IsActive = false;
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<Review?> GetByBookIdAndUserIdAsync(int bookId, int userId)
+        {
+            return await _context.Reviews
+                .FirstOrDefaultAsync(r => r.BookID == bookId && r.UserID == userId);
+        }
+
     }
 }

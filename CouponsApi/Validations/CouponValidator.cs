@@ -15,22 +15,22 @@ namespace CouponsApi.Validations
             _repository = repository;
 
             // Validation for CouponCreateDto
-            When(dto => dto is CouponCreateDto, () =>
+            When(dto => dto is CouponDTO, () =>
             {
-                RuleFor(dto => ((CouponCreateDto)dto).Code)
+                RuleFor(dto => ((CouponDTO)dto).Code)
                     .NotEmpty().WithMessage("Code is required.")
                     .Length(1, 50).WithMessage("Code must be between 1 and 50 characters.")
                     .MustAsync(BeUniqueCode).WithMessage("Coupon code already exists.");
 
-                RuleFor(dto => ((CouponCreateDto)dto).DiscountPercent)
+                RuleFor(dto => ((CouponDTO)dto).DiscountPercent)
                     .InclusiveBetween(0.01m, 99.99m).WithMessage("DiscountPercent must be between 0.01 and 99.99.");
 
-                RuleFor(dto => ((CouponCreateDto)dto).ValidFrom)
+                RuleFor(dto => ((CouponDTO)dto).ValidFrom)
                     .NotEmpty().WithMessage("ValidFrom is required.");
 
-                RuleFor(dto => ((CouponCreateDto)dto).ValidTo)
+                RuleFor(dto => ((CouponDTO)dto).ValidTo)
                     .NotEmpty().WithMessage("ValidTo is required.")
-                    .GreaterThan(dto => ((CouponCreateDto)dto).ValidFrom).WithMessage("ValidTo must be after ValidFrom.");
+                    .GreaterThan(dto => ((CouponDTO)dto).ValidFrom).WithMessage("ValidTo must be after ValidFrom.");
             });
 
             // Validation for CouponUpdateDto
