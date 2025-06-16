@@ -31,7 +31,7 @@ namespace CategoryManagementApi.Controllers
             return _service.GetCategoriesQueryable();
         }
 
-        [Authorize(Roles = "Admin,User,Staff")]
+        //[Authorize(Roles = "Admin,User,Staff")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -40,7 +40,7 @@ namespace CategoryManagementApi.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
         {
