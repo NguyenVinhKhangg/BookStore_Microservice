@@ -12,5 +12,8 @@ namespace CategoryManagementApi.Services.Interface
 
         // Thêm cho OData
         IQueryable<CategoryDTO> GetCategoriesQueryable();
+
+        Task<bool> ActivateAsync(int id);
+        Task<bool> DeactivateAsync(int id);
     }
 }

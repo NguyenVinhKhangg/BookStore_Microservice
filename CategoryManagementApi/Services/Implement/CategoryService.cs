@@ -57,5 +57,23 @@ namespace CategoryManagementApi.Services.Implement
         {
             return _repo.GetCategoriesQueryable().ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider);
         }
+
+        public async Task<bool> ActivateAsync(int id)
+        {
+            var category = await _repo.GetByIdAsync(id);
+            if (category == null) return false;
+            category.IsActive = true;
+            await _repo.UpdateAsync(category);
+            return true;
+        }
+
+        public async Task<bool> DeactivateAsync(int id)
+        {
+            var category = await _repo.GetByIdAsync(id);
+            if (category == null) return false;
+            category.IsActive = false;
+            await _repo.UpdateAsync(category);
+            return true;
+        }
     }
 }
