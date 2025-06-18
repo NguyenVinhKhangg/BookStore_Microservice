@@ -8,11 +8,12 @@ using UserManagementApi.Services.Interface;
 
 namespace UserManagementApi.Controllers
 {
-   /* [ApiController]
-    [Route("api/[controller]")]*/
+    [ApiController]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+
 
         public UsersController(IUserService userService)
         {
@@ -34,6 +35,9 @@ namespace UserManagementApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var user = await _userService.RegisterUserAsync(registerDTO);
                 return Ok(new
                 {

@@ -71,7 +71,6 @@ namespace BookManagementApi.Services
         }
 
         
-
         public async Task<bool> UnhideBookAsync(int id)
         {
             return await _repo.UnhideAsync(id);

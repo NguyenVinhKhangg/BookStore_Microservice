@@ -10,25 +10,25 @@ namespace UserManagementApi.Profile
         {
             CreateMap<CreateUserDTO, Users>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber.ToString("D10")))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber))
                 .ForMember(dest => dest.RoleID, opt => opt.MapFrom(src => src.RoleId))
                 .ForMember(dest => dest.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
-
+                
             CreateMap<UpdateUserDTO, Users>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber.ToString("D10")))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber))
                 .ForMember(dest => dest.RoleID, opt => opt.MapFrom(src => src.RoleId))
                 .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password)))
                 .ForMember(dest => dest.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
 
             CreateMap<UpdateProfileDTO, Users>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber.ToString("D10")))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber  ))
                 .ForMember(dest => dest.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
 
             CreateMap<RegisterDTO, Users>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber.ToString("D10")))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phonenumber))
                 .ForMember(dest => dest.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
 
             CreateMap<Users, UserDTO>()

@@ -128,7 +128,7 @@ namespace UserManagementApi.Repositories.Implement
                     FullName = registerDTO.FullName,
                     Email = registerDTO.Email,
                     Password = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password),
-                    PhoneNumber = registerDTO.Phonenumber.ToString("D10"),
+                    PhoneNumber = registerDTO.Phonenumber,
                     Address = registerDTO.Address,
                     RoleID = DEFAULT_ROLE_ID,
                     CreatedAt = DateTime.Now,
@@ -143,7 +143,7 @@ namespace UserManagementApi.Repositories.Implement
             }
             catch (Exception ex)
             {
-                throw new Exception("Error: Fail to register user", ex);
+                throw ;
             }
         }
 

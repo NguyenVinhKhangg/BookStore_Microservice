@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReviewsApi", "ReviewsApi\Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CategoryManagementApi", "CategoryManagementApi\CategoryManagementApi.csproj", "{CBF1E1D8-4060-45F4-A7C9-36967201147D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockManagementAPI", "StockManagementAPI\StockManagementAPI.csproj", "{0E051937-4A6A-465B-954D-6BBC8C196A33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{CBF1E1D8-4060-45F4-A7C9-36967201147D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBF1E1D8-4060-45F4-A7C9-36967201147D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBF1E1D8-4060-45F4-A7C9-36967201147D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E051937-4A6A-465B-954D-6BBC8C196A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E051937-4A6A-465B-954D-6BBC8C196A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E051937-4A6A-465B-954D-6BBC8C196A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E051937-4A6A-465B-954D-6BBC8C196A33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
