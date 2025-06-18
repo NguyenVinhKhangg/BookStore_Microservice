@@ -1,18 +1,32 @@
 using CouponsApi.Repositories;
 using CouponsApi.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 using ReviewsApi.Data;
+using ReviewsApi.DTOs;
 using ReviewsApi.Repositories;
 using ReviewsApi.Services;
 using ReviewsApi.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
+var odataBuilder = new ODataConventionModelBuilder();
+odataBuilder.EntitySet<ReviewCreateDto>("Reviews");
 
 // Add services to the container.
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddOData(opt => opt
+        .AddRouteComponents("odata", odataBuilder.GetEdmModel())
+        .Select()
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .SetMaxTop(100)
+        .Count()
+    );
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

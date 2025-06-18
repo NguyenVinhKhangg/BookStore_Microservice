@@ -3,6 +3,7 @@ using ReviewsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace ReviewsApi.Controllers
 {
@@ -11,13 +12,10 @@ namespace ReviewsApi.Controllers
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewService _service;
-
-        public ReviewsController(IReviewService service)
-        {
-            _service = service;
-        }
+        public ReviewsController(IReviewService service) => _service = service;
 
         [HttpGet]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetReviews()
         {
             var reviews = await _service.GetAllAsync();
@@ -46,17 +44,13 @@ namespace ReviewsApi.Controllers
             catch (FluentValidation.ValidationException ex) {
                 return BadRequest(ex.Errors);
             }
-            catch (DbUpdateException ex) {
-                return BadRequest("Invalid review data: " + ex.InnerException?.Message);
-            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReview(int id, ReviewUpdateDto reviewDto)
         {
-            if (id != reviewDto.ReviewID) {
+            if (id != reviewDto.ReviewID)
                 return BadRequest("ReviewID mismatch");
-            }
             try {
                 await _service.UpdateAsync(id, reviewDto);
                 return NoContent();
@@ -66,9 +60,6 @@ namespace ReviewsApi.Controllers
             }
             catch (KeyNotFoundException) {
                 return NotFound("Review not found or inactive");
-            }
-            catch (DbUpdateException ex) {
-                return BadRequest("Invalid review data: " + ex.InnerException?.Message);
             }
         }
 

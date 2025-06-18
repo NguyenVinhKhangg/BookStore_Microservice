@@ -5,6 +5,7 @@ namespace ReviewsApi.DTOs
     public class ReviewCreateDto
     {
         [Required]
+        [Key]
         public int BookID { get; set; }
 
         [Required]
@@ -22,6 +23,7 @@ namespace ReviewsApi.DTOs
     public class ReviewUpdateDto
     {
         [Required]
+        [Key]
         public int ReviewID { get; set; }
 
         [Required]
@@ -41,6 +43,7 @@ namespace ReviewsApi.DTOs
 
     public class ReviewReadDto
     {
+        [Key]
         public int ReviewID { get; set; }
         public int BookID { get; set; }
         public int UserID { get; set; }
