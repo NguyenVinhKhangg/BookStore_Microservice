@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CouponsApi", "CouponsApi\Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReviewsApi", "ReviewsApi\ReviewsApi.csproj", "{AD3FDFFC-5E54-4078-9E88-2B5717E44CF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartManagementApi", "CartManagementApi\CartManagementApi.csproj", "{E921EEC2-88E2-4791-9A7A-56708C91A943}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartItemManagementApi", "CartItemManagementApi\CartItemManagementApi.csproj", "{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{AD3FDFFC-5E54-4078-9E88-2B5717E44CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD3FDFFC-5E54-4078-9E88-2B5717E44CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD3FDFFC-5E54-4078-9E88-2B5717E44CF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E921EEC2-88E2-4791-9A7A-56708C91A943}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E921EEC2-88E2-4791-9A7A-56708C91A943}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E921EEC2-88E2-4791-9A7A-56708C91A943}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E921EEC2-88E2-4791-9A7A-56708C91A943}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
