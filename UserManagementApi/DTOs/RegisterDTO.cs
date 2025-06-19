@@ -25,9 +25,9 @@ namespace BussinessObject.DTO.UserDTO
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Phone number cannot be empty")]
-        [Range(0100000000, 0999999999, ErrorMessage = "Phone number must start with 0 and contain 10 digits")]
+        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Phone number must start with 0 and contain 10 digits")]
         [Display(Name = "Phone Number")]
-        public int Phonenumber { get; set; }
+        public string Phonenumber { get; set; }
 
         [PastDate(ErrorMessage = "Birth date must be in the past")]
         [Display(Name = "Birth Day")]

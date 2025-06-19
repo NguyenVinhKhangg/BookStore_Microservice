@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BussinessObject.DTO.UserDTO;
 using System.Security.Claims;
 using UserManagementApi.DTOs;
@@ -26,18 +27,6 @@ namespace UserManagementApi.Services.Implement
             _emailService = emailService;
             _jwtService = jwtService;
             _otpStorage = new Dictionary<string, (string otp, DateTime expiry)>();
-        }
-
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAdminAsync()
-        {
-            var users = await _userRepository.GetAllUsersAdminAsync();
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
-        }
-
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
-        {
-            var users = await _userRepository.GetAllUsersAsync();
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
         }
 
         public async Task<UserDTO> GetUserByIdAsync(int id)
@@ -104,18 +93,6 @@ namespace UserManagementApi.Services.Implement
             return await _userRepository.ActivateUserAsync(id);
         }
 
-        public async Task<IEnumerable<UserDTO>> SearchUsersByNameAsync(string name)
-        {
-            var users = await _userRepository.SearchUsersByNameAsync(name);
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
-        }
-
-        public async Task<IEnumerable<UserDTO>> SearchUsersByNameAdminAsync(string name)
-        {
-            var users = await _userRepository.SearchUsersByNameAdminAsync(name);
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
-        }
-
         public async Task<LoginResponseDTO> LoginAsync(LoginDTO loginDTO)
         {
             var user = await _userRepository.VerifyLoginAsync(loginDTO.Email, loginDTO.Password);
@@ -166,21 +143,6 @@ namespace UserManagementApi.Services.Implement
             return await _userRepository.GetTotalUserAsync();
         }
 
-        public async Task<PageList<UserDTO>> GetUsersWithPagingAdminAsync(int pageNumber, int pageSize, string searchTerm = null, string searchField = "name")
-        {
-            var usersPageList = await _userRepository.GetUsersWithPagingAdminAsync(pageNumber, pageSize, searchTerm, searchField);
-            var userDTOs = _mapper.Map<IEnumerable<UserDTO>>(usersPageList.Items);
-
-            return new PageList<UserDTO>(userDTOs.ToList(), usersPageList.TotalCount, pageNumber, pageSize);
-        }
-
-        public async Task<PageList<UserDTO>> GetUsersWithPagingStaffAsync(int pageNumber, int pageSize, string searchTerm = null, string searchField = "name")
-        {
-            var usersPageList = await _userRepository.GetUsersWithPagingStaffAsync(pageNumber, pageSize, searchTerm, searchField);
-            var userDTOs = _mapper.Map<IEnumerable<UserDTO>>(usersPageList.Items);
-
-            return new PageList<UserDTO>(userDTOs.ToList(), usersPageList.TotalCount, pageNumber, pageSize);
-        }
 
         public async Task ChangePasswordAsync(int userId, ChangePasswordDTO changePasswordDTO)
         {
@@ -254,6 +216,11 @@ namespace UserManagementApi.Services.Implement
         {
             Random random = new Random();
             return random.Next(100000, 999999).ToString();
+        }
+
+        public IQueryable<UserDTO> GetUsersQueryable()
+        {
+            return _userRepository.GetUsersQueryable().ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
         }
     }
 }

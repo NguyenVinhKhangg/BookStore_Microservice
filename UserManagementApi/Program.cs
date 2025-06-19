@@ -1,10 +1,13 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.ModelBuilder;
 using System;
 using System.Text;
 using UserManagementApi.Data;
+using UserManagementApi.DTOs;
+using UserManagementApi.Models; // or DTO namespace
 using UserManagementApi.Profile;
 using UserManagementApi.Repositories.Implement;
 using UserManagementApi.Repositories.Interface;
@@ -21,7 +24,19 @@ namespace UserManagementApi
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddOData(opt =>
+                {
+                    var builder = new ODataConventionModelBuilder();
+                    builder.EntitySet<UserDTO>("Users");
+                    opt.AddRouteComponents("odata", builder.GetEdmModel())
+                        .Select()
+                        .Filter()
+                        .OrderBy()
+                        .Expand()
+                        .Count()
+                        .SetMaxTop(100);
+                });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BussinessObject.DTO.UserDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using System.Security.Claims;
-using BussinessObject.DTO.UserDTO;
 using UserManagementApi.DTOs;
 using UserManagementApi.Services.Interface;
 
@@ -9,13 +10,22 @@ namespace UserManagementApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+
+        public UsersController(IUserService userService)
         {
             _userService = userService;
+        }
+
+        [Authorize(Roles = "Admin,Staff")]
+        [EnableQuery]  
+        [HttpGet("/odata/users")]
+        public IQueryable<UserDTO> GetUsersOData()
+        {
+            return _userService.GetUsersQueryable();
         }
 
         #region Authentication Endpoints (No Auth Required)
@@ -25,6 +35,9 @@ namespace UserManagementApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var user = await _userService.RegisterUserAsync(registerDTO);
                 return Ok(new
                 {
@@ -216,29 +229,6 @@ namespace UserManagementApi.Controllers
         #region Admin Only Endpoints
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("admin/users")]
-        public async Task<IActionResult> GetAllUsersAdmin([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchTerm = null, [FromQuery] string searchField = "name")
-        {
-            try
-            {
-                var users = await _userService.GetUsersWithPagingAdminAsync(pageNumber, pageSize, searchTerm, searchField);
-                return Ok(new
-                {
-                    success = true,
-                    data = users
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
-
-        [Authorize(Roles = "Admin")]
         [HttpGet("admin/users/{id}")]
         public async Task<IActionResult> GetUserByIdAdmin(int id)
         {
@@ -354,29 +344,7 @@ namespace UserManagementApi.Controllers
                 });
             }
         }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("admin/search")]
-        public async Task<IActionResult> SearchUsersAdmin([FromQuery] string name)
-        {
-            try
-            {
-                var users = await _userService.SearchUsersByNameAdminAsync(name);
-                return Ok(new
-                {
-                    success = true,
-                    data = users
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
+      
 
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/total")]
@@ -403,55 +371,6 @@ namespace UserManagementApi.Controllers
 
         #endregion
 
-        #region Staff Only Endpoints
-
-        [Authorize(Roles = "Staff,Admin")]
-        [HttpGet("staff/users")]
-        public async Task<IActionResult> GetAllUsersStaff([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchTerm = null, [FromQuery] string searchField = "name")
-        {
-            try
-            {
-                var users = await _userService.GetUsersWithPagingStaffAsync(pageNumber, pageSize, searchTerm, searchField);
-                return Ok(new
-                {
-                    success = true,
-                    data = users
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
-
-        [Authorize(Roles = "Staff,Admin")]
-        [HttpGet("staff/search")]
-        public async Task<IActionResult> SearchUsersStaff([FromQuery] string name)
-        {
-            try
-            {
-                var users = await _userService.SearchUsersByNameAsync(name);
-                return Ok(new
-                {
-                    success = true,
-                    data = users
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
-
-        #endregion
 
         #region Helper Methods
 
@@ -463,21 +382,6 @@ namespace UserManagementApi.Controllers
                 throw new UnauthorizedAccessException("Invalid token or user ID not found");
             }
             return userId;
-        }
-
-        private string GetCurrentUserRole()
-        {
-            return User.FindFirst(ClaimTypes.Role)?.Value ?? "User";
-        }
-
-        private bool IsCurrentUserAdmin()
-        {
-            return User.IsInRole("Admin");
-        }
-
-        private bool IsCurrentUserStaff()
-        {
-            return User.IsInRole("Staff") || User.IsInRole("Admin");
         }
 
         #endregion

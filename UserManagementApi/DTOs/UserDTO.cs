@@ -4,6 +4,7 @@ namespace UserManagementApi.DTOs
 {
     public class UserDTO
     {
+        [Key]
         public int UserID { get; set; }
 
         [Required]
@@ -17,14 +18,14 @@ namespace UserManagementApi.DTOs
         public string Address { get; set; }
 
         [Required]
-        public int Phonenumber { get; set; }
+        public string Phonenumber { get; set; }
 
         [Required]
         public int RoleId { get; set; }
 
         public string RoleName { get; set; }
 
-        public bool IsActive { get; set; }
+        public bool IsDeactivated { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime? BirthDay { get; set; }
