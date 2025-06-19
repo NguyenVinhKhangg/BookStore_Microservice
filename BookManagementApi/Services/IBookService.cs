@@ -13,7 +13,6 @@ namespace BookManagementApi.Services
         Task<bool> HideBookAsync(int bookId);
         Task<bool> BookExistsAsync(int id);
         Task<bool> UnhideBookAsync(int id);
-
-
+        Task<bool> UpdateBookStockAsync(int bookId, int quantityChange);
     }
 }

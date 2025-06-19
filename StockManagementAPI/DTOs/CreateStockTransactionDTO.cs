@@ -6,9 +6,8 @@ namespace StockManagementAPI.DTOs
     public class CreateStockTransactionDTO
     {
         [Required(ErrorMessage = "Transaction type is required")]
-        [RegularExpression("^(StockIn|StockOut|Adjustment)$",
-            ErrorMessage = "Transaction type must be one of: StockIn, StockOut, Adjustment")]
-        public string TransactionType { get; set; }
+        [RegularExpression("^(StockIn)$", ErrorMessage = "Only StockIn transactions are supported")]
+        public string TransactionType { get; set; } = "StockIn";
 
         [StringLength(255, ErrorMessage = "Note cannot exceed 255 characters")]
         public string? Note { get; set; }

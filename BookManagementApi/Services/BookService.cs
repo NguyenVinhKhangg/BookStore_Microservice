@@ -76,6 +76,36 @@ namespace BookManagementApi.Services
             return await _repo.UnhideAsync(id);
         }
 
+        public async Task<bool> UpdateBookStockAsync(int bookId, int quantityChange)
+        {
+            try
+            {
+                var book = await _repo.GetByIdAsync(bookId);
+                if (book == null) return false;
 
+                // Cập nhật số lượng
+                int newStock = book.Stock + quantityChange;
+                
+                // Đảm bảo số lượng không âm
+                if (newStock < 0) 
+                {
+                    newStock = 0;
+                    // Log cảnh báo
+                    // _logger.LogWarning($"Book {bookId} stock would be negative. Setting to 0.");
+                }
+                
+                book.Stock = newStock;
+                
+                // Nếu là nhập kho, có thể cập nhật giá
+                // if (quantityChange > 0) { ... }
+                
+                return await _repo.UpdateAsync(book);
+            }
+            catch (Exception)
+            {
+                // Log exception
+                return false;
+            }
+        }
     }
 }

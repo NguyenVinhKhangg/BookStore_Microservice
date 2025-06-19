@@ -1,6 +1,6 @@
-﻿
-using BookManagementApi.ApiClients;
+﻿using BookManagementApi.ApiClients;
 using BookManagementApi.Data;
+using BookManagementApi.MessageConsumers;
 using BookManagementApi.Repositories;
 using BookManagementApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +41,8 @@ namespace BookManagementApi
                     new MediaTypeWithQualityHeaderValue("application/json"));
             });
 
+            // Trong builder.Services.AddHostedService
+            builder.Services.AddHostedService<StockMessageConsumer>();
 
             var app = builder.Build();
 
