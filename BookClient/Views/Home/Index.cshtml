@@ -1,0 +1,114 @@
+﻿@model IEnumerable<BookClient.Models.Book>
+@using BookClient.Models
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Books Index";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var allBooks = ViewBag.AllBooks as List<Book> ?? new List<Book>();
+    var selectedCategoryIds = (ViewBag.SelectedCategoryIds as string)?.Split(',')
+        .Where(id => int.TryParse(id, out _)).Select(int.Parse).ToList() ?? new List<int>();
+}
+
+<div class="container">
+   
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="get" asp-action="Index" class="d-flex flex-wrap gap-2" id="category-filter-form">
+                @foreach (var category in categories)
+                {
+                    <a href="javascript:void(0)"
+                       class="btn btn-outline-primary @(selectedCategoryIds.Contains(category.CategoryID) ? "active" : "")"
+                       data-category-id="@category.CategoryID">@category.Name</a>
+                }
+            </form>
+        </div>
+    </div>
+
+    <div class="post-title pb-30">
+        <h2>Tất Cả Sách</h2>
+        <a asp-action="Create" asp-controller="Home" class="btn btn-primary ms-2">Tạo sách mới</a>
+    </div>
+    <div id="books-list" class="row g-4">
+        @if (!Model.Any())
+        {
+            <p>Không có sách nào phù hợp với bộ lọc.</p>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius:10px; transition:transform .3s;">
+                        <div class="position-relative" style="aspect-ratio:9/16;">
+                            <a asp-action="Details" asp-controller="Home" asp-route-id="@item.BookID">
+                                <img src="@(item.ImageUrl ?? "https://via.placeholder.com/150x266")"
+                                     alt="@item.Title"
+                                     class="card-img-top img-fluid"
+                                     style="aspect-ratio:9/16; object-fit:cover;"
+                                     onmouseover="this.parentElement.parentElement.style.transform='scale(1.03)'"
+                                     onmouseout="this.parentElement.parentElement.style.transform='scale(1)'" />
+                            </a>
+                        </div>
+                        <div class="card-body text-center p-3">
+                            <h5 class="card-title fw-semibold mb-1 text-truncate">@item.Title</h5>
+                            <p class="card-text text-muted small mb-1">@item.AuthorName</p>
+                            <p class="card-text text-muted small mb-1">@item.CategoryName</p>
+                            <p class="text-success fw-bold mb-1">@item.Price.ToString("C2")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const scrollContent = document.querySelector('.scroll-content');
+            if (scrollContent) {
+                scrollContent.addEventListener('mouseover', () => {
+                    scrollContent.style.animationPlayState = 'paused';
+                    console.log('Scroll paused');
+                });
+                scrollContent.addEventListener('mouseout', () => {
+                    scrollContent.style.animationPlayState = 'running';
+                    console.log('Scroll resumed');
+                });
+            } else {
+                console.error('scroll-content not found');
+            }
+
+            const form = document.getElementById('category-filter-form');
+            const buttons = form.querySelectorAll('a.btn');
+            let selectedCategories = new Set(@Html.Raw(JsonSerializer.Serialize(selectedCategoryIds.Select(id => id.ToString()))));
+            console.log('Initial selectedCategories:', Array.from(selectedCategories));
+
+            function updateFilterUrl() {
+                const categoryIds = Array.from(selectedCategories).join(',');
+                const url = '@Url.Action("Index", "Home")' + (categoryIds ? `?categoryIds=${categoryIds}` : '');
+                console.log('Navigating to:', url);
+                window.location.href = url;
+            }
+
+            buttons.forEach(button => {
+                const categoryId = button.getAttribute('data-category-id');
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (selectedCategories.has(categoryId)) {
+                        selectedCategories.delete(categoryId);
+                        button.classList.remove('active');
+                    } else {
+                        selectedCategories.add(categoryId);
+                        button.classList.add('active');
+                    }
+                    console.log('Updated selectedCategories:', Array.from(selectedCategories));
+                    updateFilterUrl();
+                });
+            });
+        });
+    </script>
+}

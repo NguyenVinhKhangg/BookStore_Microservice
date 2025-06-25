@@ -1,4 +1,5 @@
 ﻿using BookManagementApi.DTOs;
+using BookManagementApi.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,6 +15,11 @@ namespace BookManagementApi.Services
         Task<bool> BookExistsAsync(int id);
         Task<bool> UnhideBookAsync(int id);
 
-
+        Task<PageList<Book>> GetBooksByTitleOrAuthorOrPrice(
+        string searchQuery,
+        int pageNumber = 1,
+        int pageSize = 4,
+        string sortBy = "Title",
+        bool ascending = true);
     }
 }

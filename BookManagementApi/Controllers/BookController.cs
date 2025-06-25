@@ -28,13 +28,16 @@ namespace BookManagementApi.Controllers
             return CreatedAtAction(nameof(GetBook), new { id = created.BookID }, new { message = "Book has been added successfully.", data = created });
         }
 
-        // Get all books
         [HttpGet]
         public async Task<IActionResult> GetBooks()
         {
             var books = await _bookService.GetBooksAsync();
+            if (books == null || !books.Any())
+                return NotFound(new { message = "No books found." });
+
             return Ok(books);
         }
+
 
         // Get book detail by id
         [HttpGet("{id}/detailBook")]
