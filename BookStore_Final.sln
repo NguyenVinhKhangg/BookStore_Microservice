@@ -16,11 +16,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartItemManagementApi", "CartItemManagementApi\CartItemManagementApi.csproj", "{FCC27BD7-00C7-463A-AEDA-A3161E1D49BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookImgManagementApi", "BookImgManagementApi\BookImgManagementApi.csproj", "{E22D38A8-8077-4A22-A43C-8E5D65FE3D25}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CategoryManagementApi", "CategoryManagementApi\CategoryManagementApi.csproj", "{CBF1E1D8-4060-45F4-A7C9-36967201147D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockManagementAPI", "StockManagementAPI\StockManagementAPI.csproj", "{0E051937-4A6A-465B-954D-6BBC8C196A33}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateWay", "ApiGateWay\ApiGateWay.csproj", "{9E22BFBB-B0D5-4D30-B82C-96A46208357E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminUI", "AdminUI\AdminUI.csproj", "{33B4EE69-32AF-4BAC-B986-AA5B5D923139}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +71,10 @@ Global
 		{9E22BFBB-B0D5-4D30-B82C-96A46208357E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E22BFBB-B0D5-4D30-B82C-96A46208357E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E22BFBB-B0D5-4D30-B82C-96A46208357E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

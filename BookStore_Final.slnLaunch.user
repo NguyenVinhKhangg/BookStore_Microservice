@@ -3,11 +3,11 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "BookManagementApi\\BookManagementApi.csproj",
+        "Path": "UserManagementApi\\UserManagementApi.csproj",
         "Action": "Start"
       },
       {
-        "Path": "CategoryManagementApi\\CategoryManagementApi.csproj",
+        "Path": "AdminUI\\AdminUI.csproj",
         "Action": "Start"
       }
     ]

@@ -30,6 +30,7 @@ namespace UserManagementApi.Controllers
 
         #region Authentication Endpoints (No Auth Required)
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
         {
@@ -56,6 +57,7 @@ namespace UserManagementApi.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
