@@ -9,5 +9,7 @@ namespace AdminUI.Services.AuthenServices
         Task<bool> LogoutAsync();
         Task<string> GetCurrentUserTokenAsync();
         Task<bool> IsAuthenticatedAsync();
+        Task<ForgotPasswordResponseModel> ForgotPasswordAsync(ForgotPasswordViewModel model);
+        Task<ResetPasswordResponseModel> ResetPasswordAsync(ResetPasswordViewModel model);
     }
 }

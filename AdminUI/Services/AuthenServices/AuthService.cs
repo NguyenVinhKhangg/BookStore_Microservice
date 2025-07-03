@@ -154,6 +154,160 @@ namespace AdminUI.Services.AuthenServices
             }
         }
 
+        public async Task<ForgotPasswordResponseModel> ForgotPasswordAsync(ForgotPasswordViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation($"Sending forgot password request for email: {model.Email}");
+
+                var forgotPasswordData = new
+                {
+                    email = model.Email
+                };
+
+                var jsonContent = JsonSerializer.Serialize(forgotPasswordData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("/gateway/users/forgot-password", content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation($"Forgot password API response: {response.StatusCode}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var forgotPasswordResponse = JsonSerializer.Deserialize<ForgotPasswordResponseModel>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    // Lưu email vào session để dùng cho reset password
+                    if (forgotPasswordResponse.Success)
+                    {
+                        var session = _httpContextAccessor.HttpContext.Session;
+                        session.SetString("ResetEmail", model.Email);
+                        session.SetString("OTPExpiration", DateTime.UtcNow.AddMinutes(2).ToString());
+                    }
+
+                    return forgotPasswordResponse ?? new ForgotPasswordResponseModel
+                    {
+                        Success = false,
+                        Message = "Invalid response from server"
+                    };
+                }
+                else
+                {
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ForgotPasswordResponseModel>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        return errorResponse ?? new ForgotPasswordResponseModel
+                        {
+                            Success = false,
+                            Message = $"Request failed: {response.StatusCode}"
+                        };
+                    }
+                    catch
+                    {
+                        return new ForgotPasswordResponseModel
+                        {
+                            Success = false,
+                            Message = $"Request failed: {response.StatusCode} - {responseContent}"
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during forgot password process");
+                return new ForgotPasswordResponseModel
+                {
+                    Success = false,
+                    Message = "An error occurred while processing your request. Please try again."
+                };
+            }
+        }
+
+        public async Task<ResetPasswordResponseModel> ResetPasswordAsync(ResetPasswordViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation($"Sending reset password request for email: {model.Email}");
+
+                var resetPasswordData = new
+                {
+                    email = model.Email,
+                    otp = model.OTP,
+                    newPassword = model.NewPassword
+                };
+
+                var jsonContent = JsonSerializer.Serialize(resetPasswordData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("/gateway/users/reset-password", content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation($"Reset password API response: {response.StatusCode}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var resetPasswordResponse = JsonSerializer.Deserialize<ResetPasswordResponseModel>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    // Xóa session sau khi reset thành công
+                    if (resetPasswordResponse.Success)
+                    {
+                        var session = _httpContextAccessor.HttpContext.Session;
+                        session.Remove("ResetEmail");
+                        session.Remove("OTPExpiration");
+                    }
+
+                    return resetPasswordResponse ?? new ResetPasswordResponseModel
+                    {
+                        Success = false,
+                        Message = "Invalid response from server"
+                    };
+                }
+                else
+                {
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ResetPasswordResponseModel>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        return errorResponse ?? new ResetPasswordResponseModel
+                        {
+                            Success = false,
+                            Message = $"Reset failed: {response.StatusCode}"
+                        };
+                    }
+                    catch
+                    {
+                        return new ResetPasswordResponseModel
+                        {
+                            Success = false,
+                            Message = $"Reset failed: {response.StatusCode} - {responseContent}"
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during reset password process");
+                return new ResetPasswordResponseModel
+                {
+                    Success = false,
+                    Message = "An error occurred while resetting password. Please try again."
+                };
+            }
+        }
+
         public async Task<string> GetCurrentUserTokenAsync()
         {
             var session = _httpContextAccessor.HttpContext.Session;
@@ -165,5 +319,6 @@ namespace AdminUI.Services.AuthenServices
             var token = await GetCurrentUserTokenAsync();
             return !string.IsNullOrEmpty(token);
         }
+
     }
 }
