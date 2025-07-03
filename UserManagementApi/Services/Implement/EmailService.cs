@@ -27,7 +27,7 @@ namespace UserManagementApi.Services.Implement
                 var mailMessage = new MailMessage
                 {
                     From = new MailAddress(senderEmail, senderName),
-                    Subject = "BookStore - Password Reset OTP",
+                    Subject = "Book Store - Password Reset OTP",
                     Body = $@"
                         <h2>Password Reset Request</h2>
                         <p>You have requested to reset your password. Please use the following OTP to complete the process:</p>

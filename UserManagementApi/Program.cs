@@ -115,8 +115,9 @@ namespace UserManagementApi
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllUsers");
             app.UseHttpsRedirection();
-     
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
 
