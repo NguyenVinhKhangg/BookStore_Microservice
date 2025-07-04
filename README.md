@@ -75,5 +75,8 @@ git clone <repository-url>
 ---
 
 ## 6. Hướng dẫn chạy dự án
-- B1: Chuột phải vào dự án ApiGateWay -> Open in terminal -> Chạy lệnh: dotnet run --launch-profile ApiGateWay
+- B1: Chuột phải vào dự án ApiGateWay -> Open in terminal -> Chạy lệnh:
+```sh
+dotnet run --launch-profile ApiGateWay
+``` 
 - B2: Chạy các Api cần thiết và UI. 
