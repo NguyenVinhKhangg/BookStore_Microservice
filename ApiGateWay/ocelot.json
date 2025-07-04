@@ -71,6 +71,22 @@
       // ✅ Không có AuthenticationOptions
     },
     {
+      "DownstreamPathTemplate": "/api/users/profile",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/profile",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/odata/users",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
