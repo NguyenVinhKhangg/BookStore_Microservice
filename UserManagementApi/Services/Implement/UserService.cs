@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BussinessObject.DTO.UserDTO;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 using UserManagementApi.DTOs;
 using UserManagementApi.Models;
@@ -17,16 +18,23 @@ namespace UserManagementApi.Services.Implement
         private readonly IMapper _mapper;
         private readonly IJwtService _jwtService;
         private readonly IEmailService _emailService;
-        private readonly Dictionary<string, (string otp, DateTime expiry)> _otpStorage;
+        private readonly IMemoryCache _memoryCache;
 
-        public UserService(IConfiguration configuration,IUserRepository userRepository, IMapper mapper, IEmailService emailService, IJwtService jwtService)
+        public UserService(
+        IConfiguration configuration,
+        IUserRepository userRepository,
+        IMapper mapper,
+        IEmailService emailService,
+        IJwtService jwtService,
+        IMemoryCache memoryCache) 
         {
             _configuration = configuration;
             _userRepository = userRepository;
             _mapper = mapper;
             _emailService = emailService;
             _jwtService = jwtService;
-            _otpStorage = new Dictionary<string, (string otp, DateTime expiry)>();
+            _memoryCache = memoryCache;
+            
         }
 
         public async Task<UserDTO> GetUserByIdAsync(int id)
@@ -168,13 +176,20 @@ namespace UserManagementApi.Services.Implement
             }
 
             var otp = GenerateOTP();
-            var expiryTime = DateTime.Now.AddMinutes(2);
+            var expiryTime = DateTime.Now.AddMinutes(5); 
 
-            // Store OTP in memory (in production, consider using Redis or database)
-            _otpStorage[forgotPasswordDTO.Email] = (otp, expiryTime);
+            // ✅ Lưu OTP vào MemoryCache thay vì Dictionary
+            var cacheKey = $"otp_{forgotPasswordDTO.Email}";
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = expiryTime,
+                Priority = CacheItemPriority.High
+            };
+
+            _memoryCache.Set(cacheKey, new { OTP = otp, Expiry = expiryTime }, cacheOptions);
 
             // Send OTP email
-            await _emailService.SendOTPEmailAsync(forgotPasswordDTO.Email, otp);
+            await _emailService.SendOtpEmailAsync(forgotPasswordDTO.Email, otp);
         }
 
         public async Task ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO)
@@ -185,17 +200,20 @@ namespace UserManagementApi.Services.Implement
                 throw new Exception("Email not found.");
             }
 
-            // Verify OTP
-            if (!_otpStorage.ContainsKey(resetPasswordDTO.Email))
+            // ✅ Lấy OTP từ MemoryCache
+            var cacheKey = $"otp_{resetPasswordDTO.Email}";
+            if (!_memoryCache.TryGetValue(cacheKey, out var cachedOtpData))
             {
                 throw new Exception("OTP not found or expired.");
             }
 
-            var (storedOtp, expiry) = _otpStorage[resetPasswordDTO.Email];
+            var otpInfo = (dynamic)cachedOtpData;
+            string storedOtp = otpInfo.OTP;
+            DateTime expiry = otpInfo.Expiry;
 
             if (DateTime.Now > expiry)
             {
-                _otpStorage.Remove(resetPasswordDTO.Email);
+                _memoryCache.Remove(cacheKey);
                 throw new Exception("OTP has expired.");
             }
 
@@ -208,8 +226,8 @@ namespace UserManagementApi.Services.Implement
             user.Password = resetPasswordDTO.NewPassword; // Will be hashed in repository
             await _userRepository.UpdateUserAsync(user, true);
 
-            // Remove used OTP
-            _otpStorage.Remove(resetPasswordDTO.Email);
+            // ✅ Xóa OTP đã sử dụng
+            _memoryCache.Remove(cacheKey);
         }
 
         private string GenerateOTP()

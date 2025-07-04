@@ -59,6 +59,7 @@ namespace UserManagementApi
                         Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? ""))
                 };
             });
+            builder.Services.AddMemoryCache();
             builder.Services.AddAuthorization();
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();

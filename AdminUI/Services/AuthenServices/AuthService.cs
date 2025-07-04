@@ -240,16 +240,20 @@ namespace AdminUI.Services.AuthenServices
                 {
                     email = model.Email,
                     otp = model.OTP,
-                    newPassword = model.NewPassword
+                    newPassword = model.NewPassword,
+                    confirmNewPassword = model.ConfirmNewPassword // ✅ Thêm field này
                 };
 
                 var jsonContent = JsonSerializer.Serialize(resetPasswordData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
+                _logger.LogInformation($"Reset password request data: {jsonContent}"); // Debug
+
                 var response = await _httpClient.PostAsync("/gateway/users/reset-password", content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Reset password API response: {response.StatusCode}");
+                _logger.LogInformation($"Reset password API content: {responseContent}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -257,6 +261,15 @@ namespace AdminUI.Services.AuthenServices
                     {
                         PropertyNameCaseInsensitive = true
                     });
+
+                    if (resetPasswordResponse == null)
+                    {
+                        return new ResetPasswordResponseModel
+                        {
+                            Success = true,
+                            Message = "Password reset successfully."
+                        };
+                    }
 
                     // Xóa session sau khi reset thành công
                     if (resetPasswordResponse.Success)
@@ -266,11 +279,7 @@ namespace AdminUI.Services.AuthenServices
                         session.Remove("OTPExpiration");
                     }
 
-                    return resetPasswordResponse ?? new ResetPasswordResponseModel
-                    {
-                        Success = false,
-                        Message = "Invalid response from server"
-                    };
+                    return resetPasswordResponse;
                 }
                 else
                 {
@@ -287,7 +296,7 @@ namespace AdminUI.Services.AuthenServices
                             Message = $"Reset failed: {response.StatusCode}"
                         };
                     }
-                    catch
+                    catch (JsonException)
                     {
                         return new ResetPasswordResponseModel
                         {

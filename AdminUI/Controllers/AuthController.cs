@@ -147,16 +147,27 @@ namespace AdminUI.Controllers
                 return RedirectToAction("ForgotPassword");
             }
 
-            var result = await _authService.ResetPasswordAsync(model);
+            try
+            {
+                var result = await _authService.ResetPasswordAsync(model);
 
-            if (result.Success)
-            {
-                TempData["SuccessMessage"] = result.Message;
-                return RedirectToAction("Login");
+                if (result != null && result.Success)
+                {
+                    TempData["SuccessMessage"] = result.Message ?? "Password reset successfully.";
+                    return RedirectToAction("Login");
+                }
+                else
+                {
+                    // ✅ Xử lý trường hợp result hoặc Message null
+                    string errorMessage = result?.Message ?? "An error occurred while resetting password.";
+                    ModelState.AddModelError(string.Empty, errorMessage);
+                    return View(model);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, result.Message);
+                _logger.LogError(ex, "Error in ResetPassword controller action");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
                 return View(model);
             }
         }

@@ -2,7 +2,7 @@
 {
     public interface IEmailService
     {
-        Task SendOTPEmailAsync(string email, string otp);
+        Task SendEmailAsync(string to, string subject, string body);
+        Task SendOtpEmailAsync(string email, string otp);
     }
 }
-
