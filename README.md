@@ -64,7 +64,7 @@ git clone <repository-url>
 - Mỗi API là một microservice độc lập, có thể deploy riêng.
 - Các project sử dụng .NET 8, C# 12, Entity Framework Core, AutoMapper, FluentValidation, Swashbuckle (Swagger).
 - Đảm bảo cấu hình connection string và các biến môi trường phù hợp trước khi chạy.
-
+- Đảm bảo trong database có dữ liệu phù hợp với cấu hình dự án. 
 ---
 
 ## 5. Đóng góp
@@ -73,3 +73,10 @@ git clone <repository-url>
 - Đảm bảo tuân thủ coding convention và cấu trúc thư mục như trên.
 
 ---
+
+## 6. Hướng dẫn chạy dự án
+- B1: Chuột phải vào dự án ApiGateWay -> Open in terminal -> Chạy lệnh:
+```sh
+dotnet run --launch-profile ApiGateWay
+``` 
+- B2: Chạy các Api cần thiết và UI. 
