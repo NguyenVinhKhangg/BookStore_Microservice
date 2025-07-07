@@ -20,7 +20,7 @@ namespace UserManagementApi.Controllers
             _userService = userService;
         }
 
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin")]
         [EnableQuery]  
         [HttpGet("/odata/users")]
         public IQueryable<UserDTO> GetUsersOData()
@@ -64,6 +64,31 @@ namespace UserManagementApi.Controllers
             try
             {
                 var response = await _userService.LoginAsync(loginDTO);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Login successful",
+                    data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("login-admin")]
+        public async Task<IActionResult> LoginAdmin([FromBody] LoginDTO loginDTO)
+        {
+            try
+            {
+                var response = await _userService.LoginAdminAsync(loginDTO);
                 return Ok(new
                 {
                     success = true,
@@ -283,6 +308,28 @@ namespace UserManagementApi.Controllers
         {
             try
             {
+                // ✅ ADDED: Custom validation for password field
+                if (!string.IsNullOrWhiteSpace(updateUserDTO.Password))
+                {
+                    // Validate password only if provided
+                    if (updateUserDTO.Password.Length < 6 || updateUserDTO.Password.Length > 30)
+                    {
+                        ModelState.AddModelError("Password", "Password must be between 6 and 30 characters");
+                    }
+                    else if (!System.Text.RegularExpressions.Regex.IsMatch(updateUserDTO.Password, @"^(?=.*[0-9])(?=.*[a-zA-Z]).*$"))
+                    {
+                        ModelState.AddModelError("Password", "Password must contain at least 1 digit");
+                    }
+                }
+                else
+                {
+                    // ✅ Remove password from ModelState if not provided
+                    ModelState.Remove("Password");
+                }
+
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var updatedUser = await _userService.UpdateUserAsync(id, updateUserDTO);
                 return Ok(new
                 {

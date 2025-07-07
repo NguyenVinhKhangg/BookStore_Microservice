@@ -1,8 +1,208 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="fade-in-up">
+    <!-- Dashboard Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="admin-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Users</h6>
+                            <h3 class="text-primary">1,234</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 12% from last month
+                            </small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="admin-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Books</h6>
+                            <h3 class="text-info">856</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 5% from last month
+                            </small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="admin-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Orders</h6>
+                            <h3 class="text-warning">342</h3>
+                            <small class="text-danger">
+                                <i class="fas fa-arrow-down"></i> 3% from last month
+                            </small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="admin-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <h3 class="text-success">$12,345</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 8% from last month
+                            </small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-bolt"></i> Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <a asp-controller="UserManagement" asp-action="Create" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a asp-controller="Books" asp-action="Create" class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-book-medical"></i> Add New Book
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a asp-controller="Stock" asp-action="Create" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-warehouse"></i> Stock Transaction
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a asp-controller="Reports" asp-action="Index" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-chart-bar"></i> View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-clock"></i> Recent Activities
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="activity-timeline">
+                <div class="activity-item">
+                    <div class="activity-icon bg-success">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>New user registered</h6>
+                        <p class="text-muted mb-1">John Doe registered as a new customer</p>
+                        <small class="text-muted">5 minutes ago</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon bg-info">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>New book added</h6>
+                        <p class="text-muted mb-1">"The Great Gatsby" was added to inventory</p>
+                        <small class="text-muted">15 minutes ago</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon bg-warning">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h6>New order placed</h6>
+                        <p class="text-muted mb-1">Order #1234 placed by Jane Smith</p>
+                        <small class="text-muted">1 hour ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Styles {
+    <style>
+        .activity-timeline {
+            position: relative;
+        }
+
+        .activity-item {
+            display: flex;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+            .activity-item:before {
+                content: '';
+                position: absolute;
+                left: 20px;
+                top: 40px;
+                height: calc(100% + 1.5rem);
+                width: 2px;
+                background: #e9ecef;
+            }
+
+            .activity-item:last-child:before {
+                display: none;
+            }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+            .activity-content h6 {
+                margin-bottom: 0.25rem;
+                font-weight: 600;
+            }
+    </style>
+}

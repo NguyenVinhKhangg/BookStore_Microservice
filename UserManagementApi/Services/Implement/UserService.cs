@@ -119,6 +119,24 @@ namespace UserManagementApi.Services.Implement
             };
         }
 
+        public async Task<LoginResponseDTO> LoginAdminAsync(LoginDTO loginDTO)
+        {
+            var user = await _userRepository.VerifyLoginAdminAsync(loginDTO.Email, loginDTO.Password);
+            var userDTO = _mapper.Map<UserDTO>(user);
+
+            // Generate JWT token
+            var token = _jwtService.GenerateToken(user);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+
+            return new LoginResponseDTO
+            {
+                User = userDTO,
+                Token = token,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.Now.AddMinutes(int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "50"))
+            };
+        }
+
         public async Task<LoginResponseDTO> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest)
         {
             var principal = _jwtService.GetPrincipalFromExpiredToken(refreshTokenRequest.Token);

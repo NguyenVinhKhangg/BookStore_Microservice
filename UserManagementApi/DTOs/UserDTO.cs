@@ -25,9 +25,14 @@ namespace UserManagementApi.DTOs
 
         public string RoleName { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; } 
+
         public bool IsDeactivated { get; set; }
 
         [DataType(DataType.Date)]
+
         public DateTime? BirthDay { get; set; }
     }
 }

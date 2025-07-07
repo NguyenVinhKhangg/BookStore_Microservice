@@ -33,7 +33,7 @@ namespace UserManagementApi.Models
         [ForeignKey("Role")]
         public int RoleID { get; set; }
 
-        public bool DeactivatedStatus { get; set; } = true;
+        public bool DeactivatedStatus { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

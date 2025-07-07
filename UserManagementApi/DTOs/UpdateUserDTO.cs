@@ -28,17 +28,16 @@ namespace BussinessObject.DTO.UserDTO
         [Display(Name = "Phone Number")]
         public string Phonenumber { get; set; }
 
+        // ✅ FIXED: Remove [Required] since it's nullable and optional
         [PastDate(ErrorMessage = "Birth date must be in the past")]
         [Display(Name = "Birth Day")]
         [DataType(DataType.Date)]
         public DateTime? BirthDay { get; set; }
 
-        // Password không bắt buộc
-        [StringLength(30, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 30 characters")]
-        [RegularExpression(@"^(?=.*[0-9])(?=.*[a-zA-Z]).*$", ErrorMessage = "Password must contain at least 1 digit")]
-        [DataType(DataType.Password)]
+        // ✅ FIXED: Password is completely optional - no validation attributes
         [Display(Name = "Password (leave blank to keep unchanged)")]
-        public string Password { get; set; }
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
 
         [Required(ErrorMessage = "Role cannot be empty")]
         [Range(2, 3, ErrorMessage = "Role must be either Staff (3) or User (2)")]

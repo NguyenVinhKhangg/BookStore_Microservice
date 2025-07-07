@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h4>
+                    <i class="fas fa-cogs"></i> Admin Panel
+                </h4>
+            </div>
+            <div class="sidebar-content">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+
+                    @{
+                        var userInfo = Context.Session.GetString("UserInfo");
+                        AdminUI.Models.Authentication.UserModel currentUser = null;
+
+                        if (!string.IsNullOrEmpty(userInfo))
+                        {
+                            currentUser = System.Text.Json.JsonSerializer.Deserialize<AdminUI.Models.Authentication.UserModel>(userInfo);
+                        }
+                    }
+
+                    <!-- ✅ UPDATED: Only show User Management for Admin (RoleId = 1) -->
+                    @if (currentUser != null && (currentUser.RoleId == 1 || currentUser.RoleName?.ToLower() == "admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="UserManagement" asp-action="Index">
+                                <i class="fas fa-users"></i> User Management
+                            </a>
+                        </li>
+                    }
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Books" asp-action="Index">
+                            <i class="fas fa-book"></i> Book Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Stock" asp-action="Index">
+                            <i class="fas fa-warehouse"></i> Stock Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Orders" asp-action="Index">
+                            <i class="fas fa-shopping-cart"></i> Order Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Reports" asp-action="Index">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Navigation -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn btn-link sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="page-title mb-0">@ViewData["Title"]</h5>
+                </div>
+                <div class="topbar-right">
+                    @if (currentUser != null)
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle user-menu" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i>
+                                <span>@currentUser.Fullname</span>
+                                <!-- ✅ ADDED: Role indicator -->
+                                @switch (currentUser.RoleName?.ToLower())
+                                {
+                                    case "admin":
+                                        <span class="badge bg-danger ms-1">Admin</span>
+                                        break;
+                                    case "staff":
+                                        <span class="badge bg-warning ms-1">Staff</span>
+                                        break;
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <div class="dropdown-item-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user-tag"></i> Role: @currentUser.RoleName
+                                        </small>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                        <i class="fas fa-user"></i> My Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="content">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

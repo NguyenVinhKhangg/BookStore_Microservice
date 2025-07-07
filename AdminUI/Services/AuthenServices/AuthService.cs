@@ -44,11 +44,11 @@ namespace AdminUI.Services.AuthenServices
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 // Ensure BaseAddress is not null before constructing the full URL
-                var fullUrl = new Uri(_httpClient.BaseAddress, "/gateway/users/login");
+                var fullUrl = new Uri(_httpClient.BaseAddress, "/gateway/users/login-admin");
                 _logger.LogInformation($"Full request URL: {fullUrl}");
 
                 // Gọi API qua Gateway
-                var response = await _httpClient.PostAsync("/gateway/users/login", content);
+                var response = await _httpClient.PostAsync("/gateway/users/login-admin", content);
 
                 _logger.LogInformation($"API Response Status: {response.StatusCode}");
                 _logger.LogInformation($"Response Headers: {response.Headers}");

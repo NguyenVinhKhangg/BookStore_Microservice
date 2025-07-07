@@ -19,6 +19,19 @@
       // ✅ Không có AuthenticationOptions
     },
     {
+      "DownstreamPathTemplate": "/api/users/login-admin",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/login-admin",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
       "DownstreamPathTemplate": "/api/users/register",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
