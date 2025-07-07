@@ -20,6 +20,7 @@ namespace UserManagementApi.Services.Interface
         Task ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDTO);
         Task ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO);
         Task<LoginResponseDTO> LoginAsync(LoginDTO loginDTO);
+        Task<LoginResponseDTO> LoginAdminAsync(LoginDTO loginDTO);
         Task<LoginResponseDTO> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest);
         IQueryable<UserDTO> GetUsersQueryable();
     }

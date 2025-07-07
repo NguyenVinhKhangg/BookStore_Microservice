@@ -1,0 +1,385 @@
+﻿@model IEnumerable<AdminUI.Models.User.UserManagementViewModel>
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as AdminUI.Models.User.UserSearchFilterViewModel;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 0;
+}
+
+<div class="fade-in-up">
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm" 
+                       placeholder="Search by name or email..." />
+            </div>
+            <div class="col-md-3">
+                <label for="RoleFilter" class="form-label">
+                    <i class="fas fa-user-tag"></i> Role
+                </label>
+                <select class="form-select" name="RoleFilter">
+                    <option value="">All Roles</option>
+                    <option value="2" selected="@(filter?.RoleFilter == 2)">User</option>
+                    <option value="3" selected="@(filter?.RoleFilter == 3)">Staff</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="StatusFilter" class="form-label">
+                    <i class="fas fa-toggle-on"></i> Status
+                </label>
+                <select class="form-select" name="StatusFilter">
+                    <option value="">All Status</option>
+                    <option value="false" selected="@(filter?.StatusFilter == false)">Active</option>
+                    <option value="true" selected="@(filter?.StatusFilter == true)">Deactivated</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Page Size
+                </label>
+                <select class="form-select" name="PageSize">
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add New User
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="results-info">
+            <span class="text-muted">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalCount) 
+                of @totalCount results
+            </span>
+        </div>
+        <div class="view-options">
+            <span class="text-muted">Page @currentPage of @totalPages</span>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="admin-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-user"></i> Full Name</th>
+                    <th><i class="fas fa-envelope"></i> Email</th>
+                    <th><i class="fas fa-phone"></i> Phone</th>
+                    <th><i class="fas fa-user-tag"></i> Role</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td><strong>#@user.UserID</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2">
+                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@user.FullName</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>@user.PhoneNumber</td>
+                            <td>
+                                @switch (user.RoleName?.ToLower())
+                                {                               
+                                    case "staff":
+                                        <span class="badge bg-warning">Staff</span>
+                                        break;
+                                    case "user":
+                                        <span class="badge bg-info">User</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@(user.RoleName ?? "Unknown")</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsDeactivated)
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle"></i> Deactivated
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- ✅ NEW: View Detail Button -->
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            onclick="showUserDetail(@user.UserID)" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@user.UserID" 
+                                       class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (user.IsDeactivated)
+                                    {
+                                        <form asp-action="Activate" asp-route-id="@user.UserID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success" 
+                                                    data-confirm="Are you sure you want to activate this user?"
+                                                    title="Activate">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Deactivate" asp-route-id="@user.UserID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-warning" 
+                                                    data-confirm="Are you sure you want to deactivate this user?"
+                                                    title="Deactivate">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="no-data">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No users found</h5>
+                                <p class="text-muted">Try adjusting your search criteria or add a new user.</p>
+                                <a asp-action="Create" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Add New User
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="User pagination">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            RoleFilter = filter?.RoleFilter, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            RoleFilter = filter?.RoleFilter, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            RoleFilter = filter?.RoleFilter, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = i })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            RoleFilter = filter?.RoleFilter, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            RoleFilter = filter?.RoleFilter, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- ✅ NEW: User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userDetailModalLabel">
+                    <i class="fas fa-user-circle"></i> User Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="userDetailContent">
+                <!-- User detail content will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary" id="editUserFromModal">
+                    <i class="fas fa-edit"></i> Edit User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ✅ UPDATED: Function to show user details in modal
+        function showUserDetail(userId) {
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('userDetailModal'));
+            modal.show();
+
+            // Reset content
+            document.getElementById('userDetailContent').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Loading user details...</div>
+                </div>
+            `;
+
+            // Load user details
+            fetch(`/UserManagement/GetUserDetail/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('userDetailContent').innerHTML = html;
+                    
+                    // Update edit button
+                    document.getElementById('editUserFromModal').onclick = function() {
+                        modal.hide();
+                        window.location.href = `/UserManagement/Edit/${userId}`;
+                    };
+
+                    // ✅ Handle form submissions in modal
+                    const forms = document.querySelectorAll('#userDetailContent form');
+                    forms.forEach(form => {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            
+                            if (confirm(this.querySelector('button').onclick.toString().match(/'([^']+)'/)[1])) {
+                                // Submit form and reload page
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    headers: {
+                                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        modal.hide();
+                                        location.reload(); // Reload page to reflect changes
+                                    } else {
+                                        alert('Action failed. Please try again.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('An error occurred. Please try again.');
+                                });
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('userDetailContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Failed to load user details. Please try again.
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="showUserDetail(${userId})">
+                                <i class="fas fa-redo"></i> Retry
+                            </button>
+                        </div>
+                    `;
+                });
+        }
+
+        // Confirmation dialogs for activate/deactivate
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-confirm]').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    if (!confirm(this.getAttribute('data-confirm'))) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}

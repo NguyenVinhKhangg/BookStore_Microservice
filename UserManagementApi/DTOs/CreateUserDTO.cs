@@ -35,6 +35,7 @@ namespace BussinessObject.DTO.UserDTO
         [Display(Name = "Password")]
         public string Password { get; set; }
 
+        [Required(ErrorMessage = "Birthday cannot be empty")]
         [PastDate(ErrorMessage = "Birth date must be in the past")]
         [Display(Name = "Birth Day")]
         [DataType(DataType.Date)]

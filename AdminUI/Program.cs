@@ -1,5 +1,6 @@
 ﻿using AdminUI.Services;
 using AdminUI.Services.AuthenServices;
+using AdminUI.Services.UserServices;
 
 namespace AdminUI
 {
@@ -35,6 +36,12 @@ namespace AdminUI
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            builder.Services.AddHttpClient<IUserService, UserService>(client =>
+            {
+                client.BaseAddress = new Uri(apiGatewayUrl);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
 
             var app = builder.Build();
 

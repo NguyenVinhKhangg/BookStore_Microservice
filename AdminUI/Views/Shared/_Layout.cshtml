@@ -48,7 +48,11 @@
                                         <i class="fas fa-user"></i> @user.Fullname
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Profile</a></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                                <i class="fas fa-user"></i> My Profile
+                                            </a>
+                                        </li>                                    
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
@@ -58,14 +62,6 @@
                                             </form>
                                         </li>
                                     </ul>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Auth" asp-action="Login">
-                                        <i class="fas fa-sign-in-alt"></i> Login
-                                    </a>
                                 </li>
                             }
                         }

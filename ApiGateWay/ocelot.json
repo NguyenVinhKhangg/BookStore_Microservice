@@ -19,6 +19,19 @@
       // ✅ Không có AuthenticationOptions
     },
     {
+      "DownstreamPathTemplate": "/api/users/login-admin",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/login-admin",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
       "DownstreamPathTemplate": "/api/users/register",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -69,6 +82,22 @@
       "UpstreamPathTemplate": "/gateway/users/reset-password",
       "UpstreamHttpMethod": [ "POST" ]
       // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/profile",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/profile",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/odata/users",

@@ -16,6 +16,7 @@ namespace UserManagementApi.Repositories.Interface
         Task<bool> DeactivateUserAsync(int id);
         Task<bool> ActivateUserAsync(int id);
         Task<Users> VerifyLoginAsync(string email, string password);
+        Task<Users> VerifyLoginAdminAsync(string email, string password);
         Task<int> GetTotalUserAsync();
     }
 }

@@ -10,7 +10,9 @@ namespace UserManagementApi.Repositories.Implement
     public class UserRepository : IUserRepository
     {
         private readonly UserDbContext _context;
-        private const int DEFAULT_ROLE_ID = 2;
+        private const int USER_ROLE_ID = 2;
+        private const int ADMIN_ROLE_ID = 1;
+        private const int STAFF_ROLE_ID = 3;
 
         public UserRepository(UserDbContext context)
         {
@@ -96,6 +98,8 @@ namespace UserManagementApi.Repositories.Implement
                 }
 
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                user.CreatedAt = DateTime.Now;
+                user.UpdatedAt = DateTime.Now;
                 user.DeactivatedStatus = false;
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
@@ -118,9 +122,9 @@ namespace UserManagementApi.Repositories.Implement
                     throw new Exception("Email already exists");
                 }
 
-                if (!await _context.Roles.AnyAsync(r => r.RoleID == DEFAULT_ROLE_ID))
+                if (!await _context.Roles.AnyAsync(r => r.RoleID == USER_ROLE_ID))
                 {
-                    throw new Exception($"Default role with ID {DEFAULT_ROLE_ID} does not exist");
+                    throw new Exception($"Default role with ID {USER_ROLE_ID} does not exist");
                 }
 
                 var newUser = new Users
@@ -130,7 +134,7 @@ namespace UserManagementApi.Repositories.Implement
                     Password = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password),
                     PhoneNumber = registerDTO.Phonenumber,
                     Address = registerDTO.Address,
-                    RoleID = DEFAULT_ROLE_ID,
+                    RoleID = USER_ROLE_ID,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                     DeactivatedStatus = false,
@@ -258,6 +262,11 @@ namespace UserManagementApi.Repositories.Implement
                     .Include(u => u.Role)
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
+                if (user.RoleID != USER_ROLE_ID)
+                {
+                    throw new Exception("Access denied! Only User can access this system.");
+                }
+
                 if (user != null && user.DeactivatedStatus)
                 {
                     throw new Exception("Your account was deactivated! Please register a new account!");
@@ -272,7 +281,38 @@ namespace UserManagementApi.Repositories.Implement
             }
             catch (Exception ex)
             {
-                throw new Exception("Error: Fail to verify login", ex);
+                throw ;
+            }
+        }
+
+        public async Task<Users> VerifyLoginAdminAsync(string email, string password)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+
+                if(user.RoleID != ADMIN_ROLE_ID && user.RoleID != STAFF_ROLE_ID)
+                {
+                    throw new Exception("Access denied! Only Admin and Staff can access this system.");
+                }
+
+                if (user != null && user.DeactivatedStatus)
+                {
+                    throw new Exception("Your account was deactivated! Please register a new account!");
+                }
+
+                if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
+                {
+                    throw new Exception("Invalid email or password!");
+                }
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 
@@ -280,7 +320,7 @@ namespace UserManagementApi.Repositories.Implement
         {
             try
             {
-                return await _context.Users.CountAsync();
+                return await _context.Users.Where(x => x.RoleID != ADMIN_ROLE_ID).CountAsync();
             }
             catch (Exception ex)
             {
@@ -290,7 +330,7 @@ namespace UserManagementApi.Repositories.Implement
 
         public IQueryable<Users> GetUsersQueryable()
         {
-            return _context.Users.Include(u => u.Role);
+            return _context.Users.Include(u => u.Role).Where(u => u.RoleID != ADMIN_ROLE_ID);
         }
     }
 }
