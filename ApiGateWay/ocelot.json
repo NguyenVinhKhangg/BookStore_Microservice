@@ -170,7 +170,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/stock/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
@@ -185,7 +185,7 @@
           "Port": 7058
         }
       ],
-      "UpstreamPathTemplate": "/gateway/odata/transactions",
+      "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
       "UpstreamHttpMethod": [ "GET" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
