@@ -23,7 +23,7 @@ namespace CategoryManagementApi.Controllers
               var result = await _service.GetAllAsync();
               return Ok(result);
           }*/
-        [Authorize(Roles = "Admin,User,Staff")]
+        //[Authorize(Roles = "Admin,User,Staff")]
         [EnableQuery]
         [HttpGet]
         public IQueryable<CategoryDTO> GetAll()
