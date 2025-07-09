@@ -9,6 +9,10 @@
       {
         "Path": "AdminUI\\AdminUI.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "StockManagementAPI\\StockManagementAPI.csproj",
+        "Action": "Start"
       }
     ]
   }

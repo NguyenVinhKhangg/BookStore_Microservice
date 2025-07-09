@@ -18,7 +18,7 @@ namespace StockManagementApi.Controllers
             _stockService = stockService;
         }
         
-        //[Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [EnableQuery]
         [HttpGet("/odata/transactions")]
         public IQueryable<StockTransactionDTO> GetTransactionsOData()
@@ -45,7 +45,7 @@ namespace StockManagementApi.Controllers
             }
         }
         
-        //[Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         public async Task<IActionResult> CreateTransaction([FromBody] CreateStockTransactionDTO createDto)
         {
@@ -69,7 +69,7 @@ namespace StockManagementApi.Controllers
             }
         }
         
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateTransactionStatus(int id, [FromBody] UpdateTransactionStatusDTO updateDto)
         {
@@ -96,7 +96,7 @@ namespace StockManagementApi.Controllers
             }
         }
         
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTransaction(int id)
         {

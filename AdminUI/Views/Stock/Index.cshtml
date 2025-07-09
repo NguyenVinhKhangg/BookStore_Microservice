@@ -1,0 +1,399 @@
+@model IEnumerable<AdminUI.Models.Stock.StockTransactionViewModel>
+@{
+    ViewData["Title"] = "Stock Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as AdminUI.Models.Stock.StockSearchFilterViewModel;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 0;
+    var isAdmin = ViewBag.IsAdmin as bool? ?? false;
+}
+
+<div class="fade-in-up">
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm" 
+                       placeholder="Search by note..." />
+            </div>
+            <div class="col-md-2">
+                <label for="TransactionType" class="form-label">
+                    <i class="fas fa-exchange-alt"></i> Type
+                </label>
+                <select class="form-select" name="TransactionType">
+                    <option value="">All Types</option>
+                    <option value="StockIn" selected="@(filter?.TransactionType == "StockIn")">Stock In</option>
+                    <option value="StockOut" selected="@(filter?.TransactionType == "StockOut")">Stock Out</option>
+                    <option value="Adjustment" selected="@(filter?.TransactionType == "Adjustment")">Adjustment</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="Status" class="form-label">
+                    <i class="fas fa-flag"></i> Status
+                </label>
+                <select class="form-select" name="Status">
+                    <option value="">All Status</option>
+                    <option value="Pending" selected="@(filter?.Status == "Pending")">Pending</option>
+                    <option value="Approved" selected="@(filter?.Status == "Approved")">Approved</option>
+                    <option value="Rejected" selected="@(filter?.Status == "Rejected")">Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="FromDate" class="form-label">
+                    <i class="fas fa-calendar"></i> From Date
+                </label>
+                <input type="date" class="form-control" name="FromDate" value="@filter?.FromDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2">
+                <label for="ToDate" class="form-label">
+                    <i class="fas fa-calendar"></i> To Date
+                </label>
+                <input type="date" class="form-control" name="ToDate" value="@filter?.ToDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-1">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Size
+                </label>
+                <select class="form-select" name="PageSize">
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> New Transaction
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="results-info">
+            <span class="text-muted">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalCount) 
+                of @totalCount results
+            </span>
+        </div>
+        <div class="view-options">
+            <span class="text-muted">Page @currentPage of @totalPages</span>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="admin-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-exchange-alt"></i> Type</th>
+                    <th><i class="fas fa-flag"></i> Status</th>
+                    <th><i class="fas fa-calendar"></i> Date</th>
+                    <th><i class="fas fa-user"></i> Created By</th>
+                    <th><i class="fas fa-boxes"></i> Items</th>
+                    <th><i class="fas fa-dollar-sign"></i> Total</th>
+                    <th><i class="fas fa-sticky-note"></i> Note</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var transaction in Model)
+                    {
+                        <tr>
+                            <td><strong>#@transaction.TransactionID</strong></td>
+                            <td>
+                                @switch (transaction.TransactionType)
+                                {
+                                    case "StockIn":
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-arrow-down"></i> Stock In
+                                        </span>
+                                        break;
+                                    case "StockOut":
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-arrow-up"></i> Stock Out
+                                        </span>
+                                        break;
+                                    case "Adjustment":
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-adjust"></i> Adjustment
+                                        </span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@transaction.TransactionType</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @switch (transaction.Status)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                        break;
+                                    case "Approved":
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Approved
+                                        </span>
+                                        break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times"></i> Rejected
+                                        </span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@transaction.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <small>@transaction.TransactionDate.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                            <td>
+                                <small>
+                                    @if (!string.IsNullOrEmpty(transaction.CreatorName))
+                                    {
+                                        @transaction.CreatorName
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">User #@transaction.CreatedBy</span>
+                                    }
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">@transaction.TotalItems items</span>
+                            </td>
+                            <td>
+                                <strong class="text-success">$@transaction.TotalAmount.ToString("N2")</strong>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    @if (!string.IsNullOrEmpty(transaction.Note))
+                                    {
+                                        @(transaction.Note.Length > 30 ? transaction.Note.Substring(0, 30) + "..." : transaction.Note)
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </small>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="Details" asp-route-id="@transaction.TransactionID" 
+                                       class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (isAdmin && transaction.Status == "Pending")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" 
+                                                onclick="updateStatus(@transaction.TransactionID, 'Approved')"
+                                                title="Approve">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                onclick="updateStatus(@transaction.TransactionID, 'Rejected')"
+                                                title="Reject">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    }
+                                    @if (isAdmin && transaction.Status == "Pending")
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@transaction.TransactionID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    data-confirm="Are you sure you want to delete this transaction?"
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <div class="no-data">
+                                <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No transactions found</h5>
+                                <p class="text-muted">Try adjusting your search criteria or create a new transaction.</p>
+                                <a asp-action="Create" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> New Transaction
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Stock pagination">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm,
+                            TransactionType = filter?.TransactionType,
+                            Status = filter?.Status,
+                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
+                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
+                            PageSize = pageSize, 
+                            Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm,
+                            TransactionType = filter?.TransactionType,
+                            Status = filter?.Status,
+                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
+                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
+                            PageSize = pageSize, 
+                            Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm,
+                            TransactionType = filter?.TransactionType,
+                            Status = filter?.Status,
+                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
+                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
+                            PageSize = pageSize, 
+                            Page = i })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm,
+                            TransactionType = filter?.TransactionType,
+                            Status = filter?.Status,
+                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
+                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
+                            PageSize = pageSize, 
+                            Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm,
+                            TransactionType = filter?.TransactionType,
+                            Status = filter?.Status,
+                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
+                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
+                            PageSize = pageSize, 
+                            Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusUpdateModalLabel">Update Transaction Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="statusUpdateForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="transactionId" name="id" />
+                    <input type="hidden" id="statusValue" name="Status" />
+                    
+                    <div class="mb-3">
+                        <label for="statusNote" class="form-label">Note (Optional)</label>
+                        <textarea class="form-control" id="statusNote" name="Note" rows="3" 
+                                  placeholder="Add a note for this status change..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="statusMessage"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="confirmStatusButton">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStatus(transactionId, status) {
+            document.getElementById('transactionId').value = transactionId;
+            document.getElementById('statusValue').value = status;
+            document.getElementById('statusNote').value = '';
+            
+            const statusMessage = document.getElementById('statusMessage');
+            const confirmButton = document.getElementById('confirmStatusButton');
+            const form = document.getElementById('statusUpdateForm');
+            
+            if (status === 'Approved') {
+                statusMessage.textContent = 'This transaction will be approved and stock levels will be updated.';
+                confirmButton.className = 'btn btn-success';
+                confirmButton.innerHTML = '<i class="fas fa-check"></i> Approve';
+                form.action = '/Stock/UpdateStatus';
+            } else if (status === 'Rejected') {
+                statusMessage.textContent = 'This transaction will be rejected and no stock changes will be made.';
+                confirmButton.className = 'btn btn-danger';
+                confirmButton.innerHTML = '<i class="fas fa-times"></i> Reject';
+                form.action = '/Stock/UpdateStatus';
+            }
+            
+            new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();
+        }
+
+        // Confirmation dialogs for delete
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-confirm]').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    if (!confirm(this.getAttribute('data-confirm'))) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}

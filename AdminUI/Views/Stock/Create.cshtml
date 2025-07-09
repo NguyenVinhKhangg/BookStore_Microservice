@@ -1,0 +1,275 @@
+﻿@model AdminUI.Models.Stock.CreateStockTransactionViewModel
+@{
+    ViewData["Title"] = "Create Stock Transaction";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="fade-in-up">
+    <div class="admin-card">
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="fas fa-plus"></i> Create New Stock Transaction
+            </h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="stockTransactionForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TransactionType" class="form-label">
+                                <i class="fas fa-exchange-alt"></i> @Html.DisplayNameFor(m => m.TransactionType)
+                            </label>
+                            <select asp-for="TransactionType" class="form-select">
+                                <option value="StockIn">Stock In (Nhập kho)</option>
+                            </select>
+                            <span asp-validation-for="TransactionType" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Currently only Stock In transactions are supported
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Note" class="form-label">
+                                <i class="fas fa-sticky-note"></i> @Html.DisplayNameFor(m => m.Note)
+                            </label>
+                            <input asp-for="Note" class="form-control" placeholder="Enter transaction note (optional)" />
+                            <span asp-validation-for="Note" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list"></i> Transaction Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="detailsContainer">
+                            <!-- Details will be added here dynamically -->
+                        </div>
+                        
+                        <button type="button" class="btn btn-outline-primary" onclick="addDetail()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-boxes"></i> Total Items: <span id="totalItems">0</span></h6>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5><i class="fas fa-dollar-sign"></i> Total Amount: $<span id="totalAmount">0.00</span></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Create Transaction
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Book Selection Modal -->
+<div class="modal fade" id="bookSelectionModal" tabindex="-1" aria-labelledby="bookSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookSelectionModalLabel">Select Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="bookSearch" placeholder="Search books..." />
+                </div>
+                <div id="bookList" class="list-group">
+                    <!-- Books will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let detailIndex = 0;
+        let selectedBookIndex = -1;
+
+        function addDetail() {
+            const container = document.getElementById('detailsContainer');
+            
+            const detailHtml = `
+                <div class="detail-item border rounded p-3 mb-3" data-index="${detailIndex}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Book</label>
+                            <div class="input-group">
+                                <input type="hidden" name="Details[${detailIndex}].BookID" class="book-id" required />
+                                <input type="text" class="form-control book-title" placeholder="Select book..." readonly required />
+                                <button type="button" class="btn btn-outline-primary" onclick="selectBook(${detailIndex})">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="Details[${detailIndex}].Quantity" class="form-control quantity" 
+                                   min="1" value="1" onchange="calculateTotal(${detailIndex})" required />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Unit Price ($)</label>
+                            <input type="number" name="Details[${detailIndex}].UnitPrice" class="form-control unit-price" 
+                                   step="0.01" min="0.01" onchange="calculateTotal(${detailIndex})" required />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Total ($)</label>
+                            <input type="text" class="form-control total-price" readonly value="0.00" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeDetail(${detailIndex})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <label class="form-label">Note (Optional)</label>
+                            <input type="text" name="Details[${detailIndex}].Note" class="form-control" 
+                                   placeholder="Item note..." />
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', detailHtml);
+            detailIndex++;
+            updateSummary();
+        }
+
+        function removeDetail(index) {
+            const detailItem = document.querySelector(`[data-index="${index}"]`);
+            if (detailItem) {
+                detailItem.remove();
+                updateSummary();
+            }
+        }
+
+        function calculateTotal(index) {
+            const detailItem = document.querySelector(`[data-index="${index}"]`);
+            const quantity = parseFloat(detailItem.querySelector('.quantity').value) || 0;
+            const unitPrice = parseFloat(detailItem.querySelector('.unit-price').value) || 0;
+            const total = quantity * unitPrice;
+            
+            detailItem.querySelector('.total-price').value = total.toFixed(2);
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const details = document.querySelectorAll('.detail-item');
+            let totalItems = 0;
+            let totalAmount = 0;
+            
+            details.forEach(detail => {
+                const quantity = parseFloat(detail.querySelector('.quantity').value) || 0;
+                const total = parseFloat(detail.querySelector('.total-price').value) || 0;
+                
+                totalItems += quantity;
+                totalAmount += total;
+            });
+            
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        }
+
+        function selectBook(index) {
+            selectedBookIndex = index;
+            loadBooks();
+            new bootstrap.Modal(document.getElementById('bookSelectionModal')).show();
+        }
+
+        function loadBooks() {
+            // Simulate book loading - you should replace this with actual API call
+            const bookList = document.getElementById('bookList');
+            bookList.innerHTML = `
+                <div class="list-group-item list-group-item-action" onclick="chooseBook(1, 'Book Title 1', 'BK001')">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Book Title 1</h6>
+                        <small>BK001</small>
+                    </div>
+                    <p class="mb-1">Author: Author Name</p>
+                    <small>Category: Fiction</small>
+                </div>
+                <div class="list-group-item list-group-item-action" onclick="chooseBook(2, 'Book Title 2', 'BK002')">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Book Title 2</h6>
+                        <small>BK002</small>
+                    </div>
+                    <p class="mb-1">Author: Another Author</p>
+                    <small>Category: Science</small>
+                </div>
+            `;
+        }
+
+        function chooseBook(bookId, bookTitle, bookCode) {
+            if (selectedBookIndex >= 0) {
+                const detailItem = document.querySelector(`[data-index="${selectedBookIndex}"]`);
+                detailItem.querySelector('.book-id').value = bookId;
+                detailItem.querySelector('.book-title').value = `${bookTitle} (${bookCode})`;
+                
+                bootstrap.Modal.getInstance(document.getElementById('bookSelectionModal')).hide();
+                selectedBookIndex = -1;
+            }
+        }
+
+        // Add first detail on load
+        document.addEventListener('DOMContentLoaded', function() {
+            addDetail();
+        });
+
+        // Form validation
+        document.getElementById('stockTransactionForm').addEventListener('submit', function(e) {
+            const details = document.querySelectorAll('.detail-item');
+            if (details.length === 0) {
+                e.preventDefault();
+                alert('Please add at least one item to the transaction.');
+                return;
+            }
+            
+            let isValid = true;
+            details.forEach(detail => {
+                const bookId = detail.querySelector('.book-id').value;
+                const quantity = detail.querySelector('.quantity').value;
+                const unitPrice = detail.querySelector('.unit-price').value;
+                
+                if (!bookId || !quantity || !unitPrice) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields for each item.');
+            }
+        });
+    </script>
+}
