@@ -21,6 +21,7 @@ body {
     margin-bottom: 60px;
 }
 
+<<<<<<< HEAD
 /*Hot Deals Section*/
 #auto-scroll {
     overflow: hidden; /* Ẩn thanh cuộn */
@@ -124,4 +125,19 @@ body {
     .book-card {
         margin-bottom: 15px;
     }
+=======
+/* Thêm style cho form tạo sách */
+.create-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+    .create-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+.badge.bg-primary {
+    cursor: pointer;
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 }

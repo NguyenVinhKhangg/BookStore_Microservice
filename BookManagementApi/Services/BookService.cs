@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using BookManagementApi.ApiClients;
+using BookManagementApi.Data;
 using BookManagementApi.DTOs;
 using BookManagementApi.Models;
 using BookManagementApi.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookManagementApi.Services
 {
@@ -11,16 +13,18 @@ namespace BookManagementApi.Services
         private readonly IBookRepository _repo;
         private readonly IMapper _mapper;
         private readonly ICategoryApiClient _cateApi;
+        private readonly AppDbContext _dbContext;
 
 
         public BookService(
             IBookRepository repo,
             IMapper mapper,
-            ICategoryApiClient cateApi)
+            ICategoryApiClient cateApi, AppDbContext dbContext)
         {
             _repo = repo;
             _mapper = mapper;
             _cateApi = cateApi;
+            _dbContext = dbContext;
         }
 
         public async Task<BookDto> AddBookAsync(BookCreateDto dto)
@@ -76,6 +80,7 @@ namespace BookManagementApi.Services
             return await _repo.UnhideAsync(id);
         }
 
+<<<<<<< HEAD
         public async Task<bool> UpdateBookStockAsync(int bookId, int quantityChange)
         {
             try
@@ -106,6 +111,52 @@ namespace BookManagementApi.Services
                 // Log exception
                 return false;
             }
+=======
+        public async Task<PageList<Book>> GetBooksByTitleOrAuthorOrPrice(
+        string searchQuery,
+        int pageNumber = 1,
+        int pageSize = 8,
+        string sortBy = "Title",
+        bool ascending = true)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+                throw new ArgumentException("Search query cannot be empty", nameof(searchQuery));
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 8;
+
+            decimal? searchPrice = decimal.TryParse(searchQuery, out var p) ? p : null;
+
+            var query = _dbContext.Books
+                .Include(b => b.CategoryID)
+                .Where(b =>
+                    b.Title.Contains(searchQuery) ||
+                    b.AuthorName.Contains(searchQuery) ||
+                    (searchPrice.HasValue &&
+                     b.Price >= searchPrice.Value * 0.9m &&
+                     b.Price <= searchPrice.Value * 1.1m))
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+            if (totalCount == 0)
+                return new PageList<Book>(new List<Book>(), 0, pageNumber, pageSize);
+
+            query = sortBy.ToLower() switch
+            {
+                "title" => ascending ? query.OrderBy(b => b.Title) : query.OrderByDescending(b => b.Title),
+                "author" => ascending ? query.OrderBy(b => b.AuthorName) : query.OrderByDescending(b => b.AuthorName),
+                "price" => ascending ? query.OrderBy(b => b.Price) : query.OrderByDescending(b => b.Price),
+                "stock" => ascending ? query.OrderBy(b => b.Stock) : query.OrderByDescending(b => b.Stock),
+                _ => query.OrderBy(b => b.Title)
+            };
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PageList<Book>(items, totalCount, pageNumber, pageSize);
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
         }
     }
 }

@@ -52,7 +52,11 @@
         <span asp-validation-for="PublisherName" class="text-danger"></span>
     </div>
     <div class="col-md-12">
+<<<<<<< HEAD
         <label class="form-label">Danh mục (Chọn một)</label>
+=======
+        <label class="form-label">Danh mục (Chọn nhiều)</label>
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
         <div class="selected-categories mb-2" id="selectedCategories">
             @foreach (var id in selectedCategoryIds)
             {
@@ -69,13 +73,18 @@
             @foreach (var category in categories)
             {
                 <div class="form-check">
+<<<<<<< HEAD
                     <!-- Thay đổi checkbox thành radio -->
                     <input type="radio" class="form-check-input" name="SelectedCategoryIds" value="@category.CategoryID"
+=======
+                    <input type="checkbox" class="form-check-input" name="SelectedCategoryIds" value="@category.CategoryID"
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
                            id="cat_@category.CategoryID" @(selectedCategoryIds.Contains(category.CategoryID) ? "checked" : "") />
                     <label class="form-check-label" for="cat_@category.CategoryID">@category.Name</label>
                 </div>
             }
         </div>
+<<<<<<< HEAD
         <span class="text-danger" id="categoryValidation"></span>
     </div>
     <div class="col-md-12">
@@ -84,6 +93,25 @@
         <img class="preview-image mt-2" style="max-width: 200px; display: none;" />
         <span class="text-danger" asp-validation-for="ImageUrl"></span>
         <small class="text-muted">Dán URL của ảnh sách (jpg, png, gif).</small>
+=======
+        <input type="checkbox" id="cat_1" name="SelectedCategoryIds" value="1" checked style="display:none;" />
+        <span class="text-danger" id="categoryValidation"></span>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label">Hình ảnh sách (URL)</label>
+        <div class="form-group">
+            <label>Image URLs</label>
+            <div id="url-container">
+                <!-- 1 input mặc định -->
+                <input type="text" name="ImageUrls" class="form-control mb-2"
+                       placeholder="https://example.com/your-image.jpg" />
+            </div>
+            <button type="button" id="add-url-btn" class="btn btn-sm btn-outline-secondary">
+                + Thêm URL
+            </button>
+        </div>
+        <small class="text-muted">Dán URL để tải ảnh mẫu.</small>
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
     </div>
     <div class="col-12">
         <button type="submit" class="btn btn-primary">Tạo mới</button>
@@ -94,6 +122,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+<<<<<<< HEAD
         document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('input[name="SelectedCategoryIds"]');
             const selectedCategories = document.getElementById('selectedCategories');
@@ -125,5 +154,101 @@
                 }
             });
         });
+=======
+          document.addEventListener('DOMContentLoaded', () => {
+          const checkboxes = document.querySelectorAll('input[name="SelectedCategoryIds"]');
+          const selectedCategories = document.getElementById('selectedCategories');
+          const hiddenInput = document.getElementById('selectedCategoryIdsHidden');
+          const imageInputs = document.querySelector('.image-inputs');
+          const form = document.getElementById('bookCreateForm');
+          let imageFieldCount = 1;
+
+          checkboxes.forEach(chk => {
+            chk.addEventListener('change', () => {
+              const id = chk.value;
+              const name = chk.nextElementSibling.textContent;
+              let ids = new Set(hiddenInput.value.split(',').filter(Boolean).map(Number));
+              if (chk.checked && !ids.has(+id)) {
+                ids.add(+id);
+                if (selectedCategories) {
+                  const badge = document.createElement('span');
+                  badge.className = 'badge bg-primary text-white me-2 mb-2';
+                  badge.dataset.categoryId = id;
+                  badge.innerHTML = `${name} <a href="#" class="text-white remove-category" style="text-decoration:none;">×</a>`;
+                  selectedCategories.appendChild(badge);
+                }
+              } else {
+                ids.delete(+id);
+                selectedCategories?.querySelector(`[data-category-id="${id}"]`)?.remove();
+              }
+              hiddenInput.value = Array.from(ids).join(',');
+            });
+          });
+
+          selectedCategories?.addEventListener('click', e => {
+            if (e.target.classList.contains('remove-category')) {
+              const badge = e.target.parentElement;
+              const id = badge.dataset.categoryId;
+              badge.remove();
+              const chk = document.getElementById(`cat_${id}`);
+              if (chk) chk.checked = false;
+              let ids = new Set(hiddenInput.value.split(',').filter(Boolean).map(Number));
+              ids.delete(+id);
+              hiddenInput.value = Array.from(ids).join(',');
+            }
+          });
+
+          form?.addEventListener('submit', e => {
+            if (!hiddenInput.value) {
+              document.getElementById('categoryValidation').textContent = 'Vui lòng chọn ít nhất một danh mục.';
+              e.preventDefault();
+            } else {
+              document.getElementById('categoryValidation').textContent = '';
+            }
+          });
+
+          document.querySelectorAll('.image-url').forEach(input => {
+            input.addEventListener('input', () => {
+              const preview = input.nextElementSibling;
+              const url = input.value.trim();
+              if (url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                preview.src = url;
+                preview.style.display = 'block';
+              } else {
+                preview.style.display = 'none';
+              }
+            });
+          });
+
+          document.querySelector('.add-image-field')?.addEventListener('click', function () {
+            if (imageFieldCount < 3) {
+              imageFieldCount++;
+              const div = document.createElement('div');
+              div.className = 'image-field mb-2';
+              div.innerHTML = `
+                <input type="text" class="form-control image-url" placeholder="Dán URL ảnh..." name="ImageUrl" />
+                <img class="preview-image mt-2" style="max-width:200px;display:none;" />
+              `;
+              imageInputs.insertBefore(div, this);
+              div.querySelector('.image-url').addEventListener('input', function () {
+                const previewImg = this.nextElementSibling;
+                const val = this.value.trim();
+                if (val.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                  previewImg.src = val;
+                  previewImg.style.display = 'block';
+                } else {
+                  previewImg.style.display = 'none';
+                }
+              });
+              if (imageFieldCount === 3) this.disabled = true;
+            }
+          });
+        });
+
+
+
+
+
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
     </script>
 }

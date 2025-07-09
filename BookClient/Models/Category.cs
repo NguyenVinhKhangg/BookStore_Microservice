@@ -15,4 +15,8 @@ namespace BookClient.Models
 
 
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c

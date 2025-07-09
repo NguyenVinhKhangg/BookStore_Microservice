@@ -10,6 +10,7 @@
 }
 
 <div class="container">
+<<<<<<< HEAD
  <!-- Hot Deals Section -->
     <div>
         <div class="post-title pb-30">
@@ -91,11 +92,65 @@
 
 
 
+=======
+   
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="get" asp-action="Index" class="d-flex flex-wrap gap-2" id="category-filter-form">
+                @foreach (var category in categories)
+                {
+                    <a href="javascript:void(0)"
+                       class="btn btn-outline-primary @(selectedCategoryIds.Contains(category.CategoryID) ? "active" : "")"
+                       data-category-id="@category.CategoryID">@category.Name</a>
+                }
+            </form>
+        </div>
+    </div>
+
+    <div class="post-title pb-30">
+        <h2>Tất Cả Sách</h2>
+        <a asp-action="Create" asp-controller="Home" class="btn btn-primary ms-2">Tạo sách mới</a>
+    </div>
+    <div id="books-list" class="row g-4">
+        @if (!Model.Any())
+        {
+            <p>Không có sách nào phù hợp với bộ lọc.</p>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius:10px; transition:transform .3s;">
+                        <div class="position-relative" style="aspect-ratio:9/16;">
+                            <a asp-action="Details" asp-controller="Home" asp-route-id="@item.BookID">
+                                <img src="@(item.ImageUrl ?? "https://via.placeholder.com/150x266")"
+                                     alt="@item.Title"
+                                     class="card-img-top img-fluid"
+                                     style="aspect-ratio:9/16; object-fit:cover;"
+                                     onmouseover="this.parentElement.parentElement.style.transform='scale(1.03)'"
+                                     onmouseout="this.parentElement.parentElement.style.transform='scale(1)'" />
+                            </a>
+                        </div>
+                        <div class="card-body text-center p-3">
+                            <h5 class="card-title fw-semibold mb-1 text-truncate">@item.Title</h5>
+                            <p class="card-text text-muted small mb-1">@item.AuthorName</p>
+                            <p class="card-text text-muted small mb-1">@item.CategoryName</p>
+                            <p class="text-success fw-bold mb-1">@item.Price.ToString("C2")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 </div>
 
 @section Scripts {
     <script>
 
+<<<<<<< HEAD
                document.addEventListener('DOMContentLoaded', function () {
             const scrollContent = document.querySelector('.scroll-content');
             const allItems = scrollContent.innerHTML;  // Lưu tất cả các phần tử sách trong nội dung hiện tại
@@ -110,6 +165,8 @@
 
 
 
+=======
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 
         document.addEventListener('DOMContentLoaded', function () {
             const scrollContent = document.querySelector('.scroll-content');

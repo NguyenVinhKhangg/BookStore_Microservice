@@ -168,12 +168,46 @@ button.accept-policy {
     }
 }
 
+<<<<<<< HEAD
 @keyframes scroll-hot {
+=======
+
+<style >
+#auto-scroll {
+    overflow: hidden;
+    width: 100%;
+}
+
+.scroll-content {
+    display: flex;
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+}
+
+    .scroll-content:hover {
+        animation-play-state: paused;
+    }
+
+@keyframes scroll {
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
     0% {
         transform: translateX(0);
     }
 
     100% {
+<<<<<<< HEAD
         transform: translateX(-50%);
     }
 }
+=======
+        transform: translateX(-100%);
+    }
+}
+
+.single-product {
+    flex: 0 0 auto;
+    margin-right: 8px;
+}
+
+</style >
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c

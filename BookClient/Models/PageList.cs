@@ -22,4 +22,8 @@ namespace BookClient.Models
         public int TotalPages
             => (int)Math.Ceiling(TotalCount / (double)PageSize);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c

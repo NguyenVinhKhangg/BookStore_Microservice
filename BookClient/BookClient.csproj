@@ -5,11 +5,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+<<<<<<< HEAD
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
 		<PackageReference Include="System.Text.Json" Version="9.0.6" />
 	</ItemGroup>
+=======
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
+    <PackageReference Include="System.Text.Json" Version="9.0.6" />
+  </ItemGroup>
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 
 </Project>

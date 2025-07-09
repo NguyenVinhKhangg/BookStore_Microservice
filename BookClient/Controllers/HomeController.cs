@@ -7,22 +7,36 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using BookClient.Models;
 using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD
 using System.Net.Http.Headers; // Nếu bạn cần xác thực JWT
+=======
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 
 public class HomeController : Controller
 {
     private readonly HttpClient _client;
+<<<<<<< HEAD
 
     // Đổi URL sang Gateway
     private readonly string bookApiUrl = "https://localhost:7000/gateway/books";
     private readonly string categoryApiUrl = "https://localhost:7000/gateway/categories";
     private readonly string authorApiUrl = "https://localhost:7000/gateway/authors";
     private readonly string publisherApiUrl = "https://localhost:7000/gateway/publishers";
+=======
+    private readonly string bookApiUrl = "https://localhost:7201/api/Book";
+    private readonly string categoryApiUrl = "https://localhost:7261/api/Categories";
+    private readonly string authorApiUrl = "https://localhost:7201/api/Authors";
+    private readonly string publisherApiUrl = "https://localhost:7201/api/Publishers";
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 
     public HomeController()
     {
         _client = new HttpClient();
+<<<<<<< HEAD
         // Nếu API yêu cầu xác thực JWT, thêm dòng này:
+=======
+        // Nếu API yêu cầu xác thực, thêm token
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
         // _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "your_jwt_token_here");
     }
 
@@ -167,8 +181,33 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+<<<<<<< HEAD
     public async Task<IActionResult> Create(Book model, string[] SelectedCategoryIds, string ImageUrl)
     {
+=======
+    public async Task<IActionResult> Create(Book model, List<IFormFile> Images, string[] SelectedCategoryIds, string[] ImageUrls)
+    {
+       
+
+        //if (!ModelState.IsValid)
+        //{
+        //    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        //    List<Category>? categories = null;
+        //    try
+        //    {
+        //        categories = await _client.GetFromJsonAsync<List<Category>>(categoryApiUrl, opts) ?? new List<Category>();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.ErrorMessage = "Lỗi khi lấy danh mục: " + ex.Message;
+        //        categories = new List<Category>();
+        //    }
+        //    ViewBag.Categories = categories;
+        //    ViewBag.SelectedCategoryIds = string.Join(",", SelectedCategoryIds ?? Array.Empty<string>());
+        //    return View(model);
+        //}
+
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
         var bookCreateDto = new Book
         {
             Title = model.Title,
@@ -177,8 +216,12 @@ public class HomeController : Controller
             Price = model.Price,
             Stock = model.Stock,
             PublisherName = model.PublisherName,
+<<<<<<< HEAD
             CategoryID = SelectedCategoryIds?.Length > 0 ? int.Parse(SelectedCategoryIds[0]) : 0,
             ImageUrl = model.ImageUrl
+=======
+            CategoryID = SelectedCategoryIds?.Length > 0 ? int.Parse(SelectedCategoryIds[0]) : 0
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
         };
 
         var response = await _client.PostAsJsonAsync(bookApiUrl, bookCreateDto);
@@ -225,8 +268,12 @@ public class HomeController : Controller
 
         if (SelectedCategoryIds != null && SelectedCategoryIds.Length > 0)
         {
+<<<<<<< HEAD
             // Route mới: Đảm bảo gateway có map route này!
             var categoryApi = "https://localhost:7000/gateway/bookcategories";
+=======
+            var categoryApi = "https://localhost:7201/api/BookCategories";
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
             foreach (var catId in SelectedCategoryIds)
             {
                 var categoryDto = new { BookID = createdBookId, CategoryID = int.Parse(catId) };
@@ -234,6 +281,7 @@ public class HomeController : Controller
             }
         }
 
+<<<<<<< HEAD
         TempData["SuccessMessage"] = "Tạo sách thành công!";
         return RedirectToAction("Index");
     }
@@ -263,3 +311,49 @@ public class HomeController : Controller
         }
     }
 }
+=======
+        bool allImagesUploaded = true;
+        if (Images != null)
+        {
+            foreach (var file in Images)
+            {
+                if (file?.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await file.CopyToAsync(ms);
+                        var imgBytes = ms.ToArray();
+                        var imgContent = new MultipartFormDataContent();
+                        imgContent.Add(new ByteArrayContent(imgBytes), "ImageFile", file.FileName);
+                        imgContent.Add(new StringContent(createdBookId.ToString()), "BookID");
+
+                        var imgApiUrl = "https://localhost:7201/api/BooksImg";
+                        var imgRes = await _client.PostAsync(imgApiUrl, imgContent);
+                        if (!imgRes.IsSuccessStatusCode)
+                        {
+                            allImagesUploaded = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (ImageUrls != null)
+        {
+            var imgApiUrl = "https://localhost:7201/api/BooksImgUrl";
+            foreach (var url in ImageUrls.Where(u => !string.IsNullOrEmpty(u)))
+            {
+                var imgDto = new { BookID = createdBookId, ImageUrl = url };
+                var imgRes = await _client.PostAsJsonAsync(imgApiUrl, imgDto);
+                if (!imgRes.IsSuccessStatusCode)
+                {
+                    allImagesUploaded = false;
+                }
+            }
+        }
+
+        TempData["SuccessMessage"] = allImagesUploaded ? "Tạo sách thành công!" : "Tạo sách thành công nhưng có lỗi khi tải ảnh.";
+        return RedirectToAction("Index");
+    }
+}
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c

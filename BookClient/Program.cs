@@ -15,9 +15,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+<<<<<<< HEAD
 
 app.UseRouting();
 
+=======
+app.UseRouting();
+>>>>>>> 8df9358d803570ca8f31ae5fb65c01e83e978b5c
 app.UseAuthorization();
 
 app.MapControllerRoute(
