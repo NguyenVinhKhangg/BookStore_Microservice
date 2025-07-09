@@ -13,6 +13,14 @@
       {
         "Path": "StockManagementAPI\\StockManagementAPI.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "BookManagementApi\\BookManagementApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "CategoryManagementApi\\CategoryManagementApi.csproj",
+        "Action": "Start"
       }
     ]
   }

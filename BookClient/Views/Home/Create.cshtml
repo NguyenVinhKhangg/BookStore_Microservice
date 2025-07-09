@@ -1,0 +1,129 @@
+﻿@model BookClient.Models.Book
+@using BookClient.Models
+
+@{
+    ViewData["Title"] = "Tạo sách mới";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var selectedCategoryIds = (ViewBag.SelectedCategoryIds as string)?.Split(',')
+        .Where(id => int.TryParse(id, out _)).Select(int.Parse).Distinct().ToList() ?? new List<int>();
+}
+
+<h2 class="mb-4">Tạo sách mới</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-3 create-form" id="bookCreateForm">
+    <div class="col-md-6">
+        <label asp-for="Title" class="form-label">Tên sách</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ISBN" class="form-label">ISBN</label>
+        <input asp-for="ISBN" class="form-control" />
+        <span asp-validation-for="ISBN" class="text-danger"></span>
+    </div>
+    <div class="col-md-12">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Price" class="form-label">Giá</label>
+        <input asp-for="Price" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Discount" class="form-label">Giảm giá (%)</label>
+        <input asp-for="Discount" class="form-control" type="number" step="0.01" value="0" />
+        <span asp-validation-for="Discount" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Stock" class="form-label">Số lượng kho</label>
+        <input asp-for="Stock" class="form-control" type="number" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="AuthorName" class="form-label">Tên tác giả</label>
+        <input asp-for="AuthorName" class="form-control" />
+        <span asp-validation-for="AuthorName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="PublisherName" class="form-label">Tên nhà xuất bản</label>
+        <input asp-for="PublisherName" class="form-control" />
+        <span asp-validation-for="PublisherName" class="text-danger"></span>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label">Danh mục (Chọn một)</label>
+        <div class="selected-categories mb-2" id="selectedCategories">
+            @foreach (var id in selectedCategoryIds)
+            {
+                var category = categories.FirstOrDefault(c => c.CategoryID == id);
+                if (category != null)
+                {
+                    <span class="badge bg-primary text-white me-2 mb-2" data-category-id="@category.CategoryID">
+                        @category.Name <a href="javascript:void(0)" class="text-white remove-category" style="text-decoration: none;">×</a>
+                    </span>
+                }
+            }
+        </div>
+        <div class="category-checkboxes">
+            @foreach (var category in categories)
+            {
+                <div class="form-check">
+                    <!-- Thay đổi checkbox thành radio -->
+                    <input type="radio" class="form-check-input" name="SelectedCategoryIds" value="@category.CategoryID"
+                           id="cat_@category.CategoryID" @(selectedCategoryIds.Contains(category.CategoryID) ? "checked" : "") />
+                    <label class="form-check-label" for="cat_@category.CategoryID">@category.Name</label>
+                </div>
+            }
+        </div>
+        <span class="text-danger" id="categoryValidation"></span>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label" for="ImageUrl">Hình ảnh sách (URL)</label>
+        <input type="text" name="ImageUrl" id="ImageUrl" class="form-control image-url mb-2" placeholder="https://example.com/book-image.jpg" />
+        <img class="preview-image mt-2" style="max-width: 200px; display: none;" />
+        <span class="text-danger" asp-validation-for="ImageUrl"></span>
+        <small class="text-muted">Dán URL của ảnh sách (jpg, png, gif).</small>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Tạo mới</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('input[name="SelectedCategoryIds"]');
+            const selectedCategories = document.getElementById('selectedCategories');
+            const imageUrlInput = document.querySelector('.image-url');
+            const previewImage = document.querySelector('.preview-image');
+
+           
+
+            // Handle category removal
+            selectedCategories.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-category')) {
+                    const badge = e.target.parentElement;
+                    const categoryId = badge.getAttribute('data-category-id');
+                    badge.remove();
+                    const checkbox = document.getElementById(`cat_${categoryId}`);
+                    if (checkbox) checkbox.checked = false;
+                }
+            });
+
+            // Handle image URL preview
+            imageUrlInput.addEventListener('input', function () {
+                const url = this.value.trim();
+                if (url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                    previewImage.src = url;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,127 @@
+﻿html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+/*Hot Deals Section*/
+#auto-scroll {
+    overflow: hidden; /* Ẩn thanh cuộn */
+    width: 100%; /* Chiếm toàn bộ chiều rộng của phần chứa */
+}
+
+.scroll-content {
+    display: inline-flex; /* Các phần tử con xếp theo hàng ngang */
+    animation: scroll-hot 50s linear infinite; /* 20s là thời gian cuộn, vô hạn */
+}
+
+.single-product {
+    width: 177px; /* Đảm bảo mỗi sản phẩm có chiều rộng cố định */
+    margin-right: 10px; /* Khoảng cách giữa các phần tử */
+}
+
+@keyframes scroll-hot {
+    0% {
+        transform: translateX(0); /* Bắt đầu từ vị trí ban đầu */
+    }
+
+    100% {
+        transform: translateX(-100%); /* Cuộn hết chiều rộng nội dung */
+    }
+}
+
+
+/* Book Card Styling */
+.book-card {
+    border-radius: 10px;
+    transition: transform .3s ease-in-out;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .book-card:hover {
+        transform: scale(1.05);
+    }
+
+.book-img {
+    margin-left: 25%;
+    width: 60%;
+    height: 300px; /* Chiều cao của bìa sách */
+    background-color: white; /* Màu nền nếu không có ảnh */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .book-img img {
+        object-fit: cover;
+        height: 100%;
+        width: auto; /* Giữ tỷ lệ khung hình đúng cho ảnh */
+    }
+
+.card-body {
+    padding: 15px;
+}
+
+    .card-body .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .card-body .author-name {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .card-body .price {
+        font-size: 1rem;
+        color: #28a745;
+    }
+
+    .card-body .sales {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .card-body .rating {
+        font-size: 1rem;
+        color: #ffb300; /* Gold color for rating stars */
+    }
+
+    .card-body .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        width: 100%;
+        border: none;
+        text-align: center;
+    }
+
+        .card-body .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    .book-card {
+        margin-bottom: 15px;
+    }
+}
