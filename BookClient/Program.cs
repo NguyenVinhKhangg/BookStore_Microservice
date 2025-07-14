@@ -1,3 +1,6 @@
+﻿using BookClient.Services.AuthServices;
+using BookClient.Services.UserServices;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,15 +18,27 @@ builder.Services.AddSession(options =>
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
-string apiGatewayUrl = builder.Configuration["ApiGateway:BaseUrl"] ?? "https://localhost:7000";
+string apiGatewayUrl = "https://localhost:7000";
 
-// Configure HttpClient for API Gateway
-builder.Services.AddHttpClient<BookClient.Services.AuthServices.IAuthService, BookClient.Services.AuthServices.AuthService>(client =>
+// Configure HttpClient for AuthService
+builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 {
     client.BaseAddress = new Uri(apiGatewayUrl);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+
+// ✅ Configure HttpClient for UserService
+builder.Services.AddHttpClient<IUserService, UserService>(client =>
+{
+    client.BaseAddress = new Uri(apiGatewayUrl);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+// Register services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>(); 
 
 var app = builder.Build();
 
