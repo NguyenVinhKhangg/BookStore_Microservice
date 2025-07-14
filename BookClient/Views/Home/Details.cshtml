@@ -1,0 +1,36 @@
+﻿@model BookClient.Models.Book
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="container py-4">
+    <a asp-action="Edit" asp-route-id="@Model.BookID" class="btn btn-warning">Sửa (Edit)</a>
+
+    <div class="row">
+        <div class="col-md-4">
+            <img src="@(Model.ImageUrl ?? "https://via.placeholder.com/300x450")"
+                 alt="@Model.Title"
+                 class="img-fluid rounded shadow-sm" />
+        </div>
+
+        <div class="col-md-8">
+            <h2>@Model.Title</h2>
+            <p class="text-muted mb-2">by @Model.AuthorName</p>
+            <p><strong>Price:</strong> @Model.Price.ToString("C2")</p>
+            <p><strong>Stock:</strong> @Model.Stock</p>
+            <p><strong>Category ID:</strong> @Model.CategoryID</p>
+            <div class="mt-4">
+                <a asp-action="Index" asp-controller="Home" class="btn btn-secondary me-2">
+                    &larr; Back to list
+                </a>
+                <form method="post" asp-controller="Carts" asp-action="AddToCart" class="d-inline">
+                    <input type="hidden" name="bookId" value="@Model.BookID" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-primary" @(Model.Stock == 0 ? "disabled" : "")>
+                        Add to Cart
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

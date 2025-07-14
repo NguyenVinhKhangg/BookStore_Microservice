@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books Index - BookStoreWebsite</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BookStoreWebsite.styles.css" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/img/favicon.ico" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/ionicons.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/linearicons.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/nice-select.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/jquery.fancybox.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/jquery-ui.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/meanmenu.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/nivo-slider.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/owl.carousel.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/default.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a asp-action="Create" asp-controller="Home" class="btn btn-primary ms-2">Tạo sách mới</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center">
+                    <div class="nav-item">
+                        <a class="nav-link text-dark d-flex align-items-center" href="/Home/Index">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-door me-1" viewBox="0 0 16 16">
+                                <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z" />
+                            </svg>
+                            Home
+                        </a>
+                    </div>
+                    <form id="searchForm" class="flex-grow-1 mx-3">
+                        <div class="input-group">
+                            <input type="text" id="searchQuery" name="searchQuery" class="form-control" placeholder="Search by Title, Author, or price" value="" />
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>
+                    <div style="display: flex">
+                        <div class="nav-item">
+                            <a class="nav-link d-flex align-items-center position-relative text-dark" href="/Carts/Index">
+                                <div class="cart-icon-wrapper me-1 position-relative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" class="bi bi-cart" viewBox="0 0 16 16">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4    m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                                    </svg>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">3</span>
+                                </div>
+                                Cart
+                            </a>
+                        </div>
+                        <div class="nav-item dropdown profile-dropdown">
+                            <a class="nav-link text-dark d-flex align-items-center" href="#" id="profileDropdown">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle me-1" viewBox="0 0 16 16">
+                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                                </svg>
+                                Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="footer text-muted mt-auto py-4 bg-light border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                    <div class="footer-logo mb-2">
+                        <a href="/Books/Index">
+                            <img src="https://png.pngtree.com/png-vector/20230315/ourmid/pngtree-education-school-logo-design-smart-book-science-vector-png-image_50796588.jpg" alt="Logo" style="max-height:100px; width:auto;" />
+                        </a>
+                    </div>
+                    <p class="mb-0">© 2025 - BookStoreWebsite. All Rights Reserved.</p>
+                    <p class="small mb-0">Designed with <span style="color:#e25555;">♥</span> by xAI Team</p>
+                </div>
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <h6 class="text-uppercase fw-bold">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/Home/Index" class="text-muted text-decoration-none">Index</a></li>
+                        <li><a href="/Carts/Index" class="text-muted text-decoration-none">Cart</a></li>
+                        <li><a href="/Profile/Index" class="text-muted text-decoration-none">Profile</a></li>
+                        <li><a href="/Authentication/Login" class="text-muted text-decoration-none">Login</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <h6 class="text-uppercase fw-bold">Follow Us</h6>
+                    <div class="social-links mb-2">
+                        <a href="https://facebook.com" target="_blank" class="text-muted me-3" aria-label="Facebook"><svg ... /></a>
+                        <a href="https://twitter.com" target="_blank" class="text-muted me-3" aria-label="Twitter"><svg ... /></a>
+                        <a href="https://instagram.com" target="_blank" class="text-muted" aria-label="Instagram"><svg ... /></a>
+                    </div>
+                    <p class="small mb-0">Contact: <a href="mailto:support@bookstorewebsite.com" class="text-muted">support@bookstorewebsite.com</a></p>
+                    <p class="small mb-0">Phone: +84 123 456 789</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
