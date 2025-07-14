@@ -1,0 +1,157 @@
+﻿@model BookClient.Models.Book
+@using BookClient.Models
+
+@{
+    ViewData["Title"] = "Chỉnh sửa sách";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var selectedCategoryId = Model.CategoryID;
+}
+
+<h2 class="mb-4">Chỉnh sửa sách</h2>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-3 create-form" id="bookEditForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="BookID" />
+
+    <div class="col-md-6">
+        <label asp-for="Title" class="form-label">Tên sách</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ISBN" class="form-label">ISBN</label>
+        <input asp-for="ISBN" class="form-control" />
+        <span asp-validation-for="ISBN" class="text-danger"></span>
+    </div>
+    <div class="col-md-12">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Price" class="form-label">Giá</label>
+        <input asp-for="Price" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Discount" class="form-label">Giảm giá (%)</label>
+        <input asp-for="Discount" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Discount" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="AuthorName" class="form-label">Tên tác giả</label>
+        <input asp-for="AuthorName" class="form-control" />
+        <span asp-validation-for="AuthorName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="PublisherName" class="form-label">Tên nhà xuất bản</label>
+        <input asp-for="PublisherName" class="form-control" />
+        <span asp-validation-for="PublisherName" class="text-danger"></span>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label">Danh mục (Chọn một)</label>
+        <div class="selected-categories mb-2" id="selectedCategories">
+            @if (selectedCategoryId != 0)
+            {
+                var category = categories.FirstOrDefault(c => c.CategoryID == selectedCategoryId);
+                if (category != null)
+                {
+                    <span class="badge bg-primary text-white me-2 mb-2" data-category-id="@category.CategoryID">
+                        @category.Name <a href="javascript:void(0)" class="text-white remove-category" style="text-decoration: none;">×</a>
+                    </span>
+                }
+            }
+        </div>
+        <div class="category-checkboxes">
+            @foreach (var category in categories)
+            {
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="SelectedCategoryIds" value="@category.CategoryID"
+                           id="cat_@category.CategoryID" @(selectedCategoryId == category.CategoryID ? "checked" : "") />
+                    <label class="form-check-label" for="cat_@category.CategoryID">@category.Name</label>
+                </div>
+            }
+        </div>
+        <span class="text-danger" id="categoryValidation"></span>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label" for="ImageUrl">Hình ảnh sách (URL)</label>
+        <input asp-for="ImageUrl" type="text" id="ImageUrl" class="form-control image-url mb-2" placeholder="https://example.com/book-image.jpg" />
+        <div class="image-preview-container mt-2">
+            <img class="preview-image" style="max-width: 200px; display: none;" alt="Preview" />
+        </div>
+        <span class="text-danger" asp-validation-for="ImageUrl"></span>
+        <small class="text-muted">Dán URL của ảnh sách (jpg, png, gif).</small>
+    </div>
+    <div class="col-md-12">
+        <div class="form-check">
+            <input asp-for="IsActive" type="checkbox" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Kích hoạt</label>
+            <span asp-validation-for="IsActive" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const radioButtons = document.querySelectorAll('input[name="SelectedCategoryIds"]');
+            const selectedCategories = document.getElementById('selectedCategories');
+            const imageUrlInput = document.querySelector('.image-url');
+            const previewImage = document.querySelector('.preview-image');
+
+            // Handle category selection
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    if (this.checked) {
+                        // Clear previous selections
+                        selectedCategories.innerHTML = '';
+
+                        // Add new selection
+                        const categoryLabel = document.querySelector(`label[for="${this.id}"]`).textContent;
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-primary text-white me-2 mb-2';
+                        badge.setAttribute('data-category-id', this.value);
+                        badge.innerHTML = `${categoryLabel} <a href="javascript:void(0)" class="text-white remove-category" style="text-decoration: none;">×</a>`;
+                        selectedCategories.appendChild(badge);
+                    }
+                });
+            });
+
+            // Handle category removal
+            selectedCategories.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-category')) {
+                    const badge = e.target.parentElement;
+                    const categoryId = badge.getAttribute('data-category-id');
+                    badge.remove();
+                    const radio = document.getElementById(`cat_${categoryId}`);
+                    if (radio) radio.checked = false;
+                }
+            });
+
+            // Handle image URL preview
+            imageUrlInput.addEventListener('input', function () {
+                const url = this.value.trim();
+                if (url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                    previewImage.src = url;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                }
+            });
+
+            // Show preview for existing image on page load
+            const currentImageUrl = imageUrlInput.value.trim();
+            if (currentImageUrl && currentImageUrl.match(/\.(jpeg|jpg|png|gif)$/i)) {
+                previewImage.src = currentImageUrl;
+                previewImage.style.display = 'block';
+            }
+        });
+    </script>
+}

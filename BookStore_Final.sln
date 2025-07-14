@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateWay", "ApiGateWay\Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminUI", "AdminUI\AdminUI.csproj", "{33B4EE69-32AF-4BAC-B986-AA5B5D923139}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookClient", "BookClient\BookClient.csproj", "{6E765466-C498-1133-6E12-ECD7E01AD265}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33B4EE69-32AF-4BAC-B986-AA5B5D923139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E765466-C498-1133-6E12-ECD7E01AD265}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E765466-C498-1133-6E12-ECD7E01AD265}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E765466-C498-1133-6E12-ECD7E01AD265}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E765466-C498-1133-6E12-ECD7E01AD265}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
