@@ -17,6 +17,9 @@ namespace BookClient.Services.AuthServices
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+
+            // ✅ Log HttpClient configuration for debugging
+            _logger.LogInformation($"AuthService initialized with HttpClient BaseAddress: {_httpClient.BaseAddress}");
         }
 
         public async Task<LoginResponseModel> LoginAsync(LoginViewModel model)
@@ -24,6 +27,9 @@ namespace BookClient.Services.AuthServices
             try
             {
                 _logger.LogInformation($"Attempting login for user: {model.Email}");
+
+                // ✅ Log HttpClient BaseAddress before making request
+                _logger.LogInformation($"HttpClient BaseAddress: {_httpClient.BaseAddress}");
 
                 var loginData = new
                 {
@@ -34,11 +40,26 @@ namespace BookClient.Services.AuthServices
                 var jsonContent = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
+                // ✅ Build the full URI manually if BaseAddress is null
+                string requestUri;
+                if (_httpClient.BaseAddress != null)
+                {
+                    requestUri = "/gateway/users/login";
+                }
+                else
+                {
+                    requestUri = "https://localhost:7000/gateway/users/login";
+                    _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", requestUri);
+                }
+
+                _logger.LogInformation($"Making request to: {requestUri}");
+
                 // Gọi API qua Gateway - sử dụng endpoint cho user thông thường
-                var response = await _httpClient.PostAsync("/gateway/users/login", content);
+                var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Login API Response Status: {response.StatusCode}");
+                _logger.LogInformation($"Response content: {responseContent}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -119,7 +140,19 @@ namespace BookClient.Services.AuthServices
                 var jsonContent = JsonSerializer.Serialize(registerData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/gateway/users/register", content);
+                // ✅ Build the full URI manually if BaseAddress is null
+                string requestUri;
+                if (_httpClient.BaseAddress != null)
+                {
+                    requestUri = "/gateway/users/register";
+                }
+                else
+                {
+                    requestUri = "https://localhost:7000/gateway/users/register";
+                    _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", requestUri);
+                }
+
+                var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Register API Response Status: {response.StatusCode}");
@@ -187,7 +220,19 @@ namespace BookClient.Services.AuthServices
                 var jsonContent = JsonSerializer.Serialize(forgotPasswordData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/gateway/users/forgot-password", content);
+                // ✅ Build the full URI manually if BaseAddress is null
+                string requestUri;
+                if (_httpClient.BaseAddress != null)
+                {
+                    requestUri = "/gateway/users/forgot-password";
+                }
+                else
+                {
+                    requestUri = "https://localhost:7000/gateway/users/forgot-password";
+                    _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", requestUri);
+                }
+
+                var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Forgot password API response: {response.StatusCode}");
@@ -266,7 +311,19 @@ namespace BookClient.Services.AuthServices
                 var jsonContent = JsonSerializer.Serialize(resetPasswordData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/gateway/users/reset-password", content);
+                // ✅ Build the full URI manually if BaseAddress is null
+                string requestUri;
+                if (_httpClient.BaseAddress != null)
+                {
+                    requestUri = "/gateway/users/reset-password";
+                }
+                else
+                {
+                    requestUri = "https://localhost:7000/gateway/users/reset-password";
+                    _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", requestUri);
+                }
+
+                var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Reset password API response: {response.StatusCode}");

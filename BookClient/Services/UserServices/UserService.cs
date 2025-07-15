@@ -1,4 +1,4 @@
-using BookClient.Models.Profile;
+﻿using BookClient.Models.Profile;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -17,6 +17,9 @@ namespace BookClient.Services.UserServices
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+
+            // ✅ Log HttpClient configuration for debugging
+            _logger.LogInformation($"UserService initialized with HttpClient BaseAddress: {_httpClient.BaseAddress}");
         }
 
         private async Task<string> GetCurrentUserTokenAsync()
@@ -31,6 +34,21 @@ namespace BookClient.Services.UserServices
             if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+        }
+
+        // ✅ Helper method to build request URI with fallback
+        private string BuildRequestUri(string relativePath)
+        {
+            if (_httpClient.BaseAddress != null)
+            {
+                return relativePath;
+            }
+            else
+            {
+                var absoluteUri = $"https://localhost:7000{relativePath}";
+                _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", absoluteUri);
+                return absoluteUri;
             }
         }
 
@@ -50,10 +68,15 @@ namespace BookClient.Services.UserServices
 
                 await SetAuthorizationHeaderAsync();
 
-                var response = await _httpClient.GetAsync("/gateway/users/profile");
+                // ✅ Use helper method to build URI
+                var requestUri = BuildRequestUri("/gateway/users/profile");
+                _logger.LogInformation($"Making request to: {requestUri}");
+
+                var response = await _httpClient.GetAsync(requestUri);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Get profile API response: {response.StatusCode}");
+                _logger.LogInformation($"Response content: {responseContent}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -115,7 +138,11 @@ namespace BookClient.Services.UserServices
                 var jsonContent = JsonSerializer.Serialize(updateData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PutAsync("/gateway/users/profile", content);
+                // ✅ Use helper method to build URI
+                var requestUri = BuildRequestUri("/gateway/users/profile");
+                _logger.LogInformation($"Making request to: {requestUri}");
+
+                var response = await _httpClient.PutAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Update profile API response: {response.StatusCode}");
@@ -179,7 +206,11 @@ namespace BookClient.Services.UserServices
                 var jsonContent = JsonSerializer.Serialize(changePasswordData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/gateway/users/change-password", content);
+                // ✅ Use helper method to build URI
+                var requestUri = BuildRequestUri("/gateway/users/change-password");
+                _logger.LogInformation($"Making request to: {requestUri}");
+
+                var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Change password API response: {response.StatusCode}");
