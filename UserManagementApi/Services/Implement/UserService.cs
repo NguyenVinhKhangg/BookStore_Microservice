@@ -26,7 +26,7 @@ namespace UserManagementApi.Services.Implement
         IMapper mapper,
         IEmailService emailService,
         IJwtService jwtService,
-        IMemoryCache memoryCache) 
+        IMemoryCache memoryCache)
         {
             _configuration = configuration;
             _userRepository = userRepository;
@@ -34,7 +34,7 @@ namespace UserManagementApi.Services.Implement
             _emailService = emailService;
             _jwtService = jwtService;
             _memoryCache = memoryCache;
-            
+
         }
 
         public async Task<UserDTO> GetUserByIdAsync(int id)
@@ -57,6 +57,13 @@ namespace UserManagementApi.Services.Implement
 
         public async Task<UserDTO> CreateUserAsync(CreateUserDTO createUserDTO)
         {
+        
+            var existingUser = await _userRepository.GetUserByEmailAsync(createUserDTO.Email);
+            if (existingUser != null)
+            {
+                throw new Exception("Email already exists. Please use a different email address.");
+            }
+
             var user = _mapper.Map<Users>(createUserDTO);
             var createdUser = await _userRepository.AddUserAsync(user);
             return _mapper.Map<UserDTO>(createdUser);
@@ -64,6 +71,13 @@ namespace UserManagementApi.Services.Implement
 
         public async Task<UserDTO> RegisterUserAsync(RegisterDTO registerDTO)
         {
+
+            var existingUser = await _userRepository.GetUserByEmailAsync(registerDTO.Email);
+            if (existingUser != null)
+            {
+                throw new Exception("Email already exists. Please use a different email address.");
+            }
+
             var registeredUser = await _userRepository.RegisterUserAsync(registerDTO);
             return _mapper.Map<UserDTO>(registeredUser);
         }
@@ -71,6 +85,12 @@ namespace UserManagementApi.Services.Implement
         public async Task<UserDTO> UpdateUserAsync(int id, UpdateUserDTO updateUserDTO)
         {
             var existingUser = await _userRepository.GetUserByIdAdminAsync(id);
+
+            var emailExists = await _userRepository.GetUserByEmailAsync(updateUserDTO.Email);
+            if (emailExists != null && emailExists.UserID != id)
+            {
+                throw new Exception("Email already exists. Please use a different email address.");
+            }
 
             _mapper.Map(updateUserDTO, existingUser);
 
@@ -194,7 +214,7 @@ namespace UserManagementApi.Services.Implement
             }
 
             var otp = GenerateOTP();
-            var expiryTime = DateTime.Now.AddMinutes(5); 
+            var expiryTime = DateTime.Now.AddMinutes(5);
 
             // ✅ Lưu OTP vào MemoryCache thay vì Dictionary
             var cacheKey = $"otp_{forgotPasswordDTO.Email}";

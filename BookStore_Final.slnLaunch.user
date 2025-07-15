@@ -7,11 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "AdminUI\\AdminUI.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "StockManagementAPI\\StockManagementAPI.csproj",
+        "Path": "BookClient\\BookClient.csproj",
         "Action": "Start"
       }
     ]

@@ -1,0 +1,156 @@
+@model BookClient.Models.Authentication.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </h4>
+                <p class="mb-0">Join our bookstore community today</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FullName" class="form-label">
+                                    <i class="fas fa-user"></i> @Html.DisplayNameFor(m => m.FullName)
+                                </label>
+                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name" autofocus />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label">
+                                    <i class="fas fa-envelope"></i> @Html.DisplayNameFor(m => m.Email)
+                                </label>
+                                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label">
+                                    <i class="fas fa-lock"></i> @Html.DisplayNameFor(m => m.Password)
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="Password" class="form-control" placeholder="Enter password" />
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                                <small class="form-text text-muted">Must be 6-30 characters with at least 1 digit</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label">
+                                    <i class="fas fa-lock"></i> @Html.DisplayNameFor(m => m.ConfirmPassword)
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm password" />
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="fas fa-eye" id="toggleConfirmPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="PhoneNumber" class="form-label">
+                                    <i class="fas fa-phone"></i> @Html.DisplayNameFor(m => m.PhoneNumber)
+                                </label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                <small class="form-text text-muted">Format: 0xxxxxxxxx</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="BirthDay" class="form-label">
+                                    <i class="fas fa-calendar"></i> @Html.DisplayNameFor(m => m.BirthDay)
+                                </label>
+                                <input asp-for="BirthDay" class="form-control" type="date" />
+                                <span asp-validation-for="BirthDay" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> @Html.DisplayNameFor(m => m.Address)
+                        </label>
+                        <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter your address"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center bg-light">
+                <p class="mb-0">
+                    Already have an account? 
+                    <a asp-action="Login" class="text-decoration-none fw-bold">
+                        <i class="fas fa-sign-in-alt"></i> Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Toggle password visibility
+        $('#togglePassword').click(function() {
+            const passwordField = $('#Password');
+            const toggleIcon = $('#togglePasswordIcon');
+
+            if (passwordField.attr('type') === 'password') {
+                passwordField.attr('type', 'text');
+                toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordField.attr('type', 'password');
+                toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+        $('#toggleConfirmPassword').click(function() {
+            const passwordField = $('#ConfirmPassword');
+            const toggleIcon = $('#toggleConfirmPasswordIcon');
+
+            if (passwordField.attr('type') === 'password') {
+                passwordField.attr('type', 'text');
+                toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordField.attr('type', 'password');
+                toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}
