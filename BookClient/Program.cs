@@ -1,4 +1,4 @@
-﻿using BookClient.Services.AuthServices;
+using BookClient.Services.AuthServices;
 using BookClient.Services.UserServices;
 using Microsoft.AspNetCore.DataProtection;
 
