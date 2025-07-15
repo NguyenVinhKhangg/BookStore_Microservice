@@ -1,4 +1,4 @@
-@model BookClient.Models.Authentication.RegisterViewModel
+﻿@model BookClient.Models.Authentication.RegisterViewModel
 @{
     ViewData["Title"] = "Register";
 }
@@ -14,7 +14,22 @@
             </div>
             <div class="card-body">
                 <form asp-action="Register" method="post">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    @* Display validation errors manually *@
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <strong><i class="fas fa-exclamation-triangle"></i> Registration Error:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var modelState in ViewData.ModelState.Values)
+                                {
+                                    foreach (var error in modelState.Errors)
+                                    {
+                                        <li>Email Already existed</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    }
 
                     <div class="row">
                         <div class="col-md-6">
@@ -108,7 +123,7 @@
             </div>
             <div class="card-footer text-center bg-light">
                 <p class="mb-0">
-                    Already have an account? 
+                    Already have an account?
                     <a asp-action="Login" class="text-decoration-none fw-bold">
                         <i class="fas fa-sign-in-alt"></i> Sign in here
                     </a>
@@ -148,9 +163,30 @@
             }
         });
 
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide success alerts after 5 seconds, but keep error alerts visible longer
         setTimeout(function() {
-            $('.alert').fadeOut('slow');
+            $('.alert-success').fadeOut('slow');
         }, 5000);
+
+        // Auto-hide error alerts after 15 seconds (give more time to read)
+        setTimeout(function() {
+            $('.alert-danger').fadeOut('slow');
+        }, 15000);
+
+        // Debug: Log validation errors to console
+        $(document).ready(function() {
+            console.log('ModelState valid:', '@(ViewData.ModelState.IsValid.ToString().ToLower())');
+            @if (!ViewData.ModelState.IsValid)
+            {
+                    <text>console.log('Found validation errors:');</text>
+                    @foreach (var modelState in ViewData.ModelState)
+                    {
+                            foreach (var error in modelState.Value.Errors)
+                            {
+                                    <text>console.log('@Html.Raw(Html.Encode(error.ErrorMessage))');</text>
+                            }
+                    }
+            }
+        });
     </script>
 }
