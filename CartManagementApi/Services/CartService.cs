@@ -36,7 +36,6 @@ namespace CartManagementApi.Services
         {
             var cart = _mapper.Map<Cart>(cartDto);
             cart.CreatedAt = DateTime.UtcNow;
-            cart.UpdatedAt = DateTime.UtcNow;
             await _repository.AddAsync(cart);
             return _mapper.Map<CartReadDto>(cart);
         }
@@ -51,7 +50,6 @@ namespace CartManagementApi.Services
                 throw new KeyNotFoundException("Cart not found");
 
             cart.UserID = cartDto.UserID;
-            cart.UpdatedAt = DateTime.UtcNow;
             await _repository.UpdateAsync(cart);
         }
 
