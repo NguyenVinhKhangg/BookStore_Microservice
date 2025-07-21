@@ -1,0 +1,28 @@
+﻿@model AdminUI.Models.Order
+
+
+<h2>Chi tiết đơn hàng</h2>
+<p><strong>Mã đơn:</strong> @Model.OrderID</p>
+<p><strong>Người đặt:</strong> @Model.UserID</p>
+<p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy")</p>
+
+<h4>Sản phẩm:</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên sách</th>
+            <th>Số lượng</th>
+            <th>Giá</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.BookName</td>
+                <td>@item.Quantity</td>
+                <td>@item.Price.ToString("N0") đ</td>
+            </tr>
+        }
+    </tbody>
+</table>

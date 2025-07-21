@@ -55,6 +55,12 @@ builder.Services.AddHttpClient<IUserService, UserService>(client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+builder.Services.AddHttpClient("OrderAPI", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7284/api/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 // Register services
 builder.Services.AddScoped<IAuthService, AuthService>();

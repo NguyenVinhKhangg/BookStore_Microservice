@@ -1,0 +1,72 @@
+﻿@model dynamic
+@using BookClient.Models
+
+<h2>Orders</h2>
+
+@if (Model is List<Order>)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Product(s)</th>
+                <th>Order Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderID</td>
+                    <td>
+                        <ul class="mb-0 ps-3">
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <li>@item.BookName (x@item.Quantity)</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                    <td>@order.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (Model is Order)
+{
+    var order = (Order)Model;
+    <div>
+        <p><strong>Order ID:</strong> @order.OrderID</p>
+        <p><strong>Status:</strong> @order.Status</p>
+        <p><strong>Order Date:</strong> @order.OrderDate.ToString("dd/MM/yyyy")</p>
+
+        <h4>Order Details:</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in order.OrderItems)
+                {
+                    <tr>
+                        <td>@item.BookName</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Price.ToString("N0") đ</td>
+                        <td>@(item.Price* item.Quantity).ToString("N0") đ</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No order data available.</p>
+}

@@ -1,0 +1,149 @@
+﻿@model IEnumerable<AdminUI.Models.Order>
+@{
+    ViewData["Title"] = "Order Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var totalCount = ViewBag.TotalCount as int? ?? Model.Count();
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var filter = ViewBag.Filter as dynamic;
+}
+
+<div class="fade-in-up">
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm"
+                       placeholder="Search by Order ID or User ID..." />
+            </div>
+            <div class="col-md-3">
+                <label for="StatusFilter" class="form-label">
+                    <i class="fas fa-toggle-on"></i> Status
+                </label>
+                <select class="form-select" name="StatusFilter">
+                    <option value="">All Status</option>
+                    <option value="Pending" selected="@(filter?.StatusFilter == "Pending")">Pending</option>
+                    <option value="Completed" selected="@(filter?.StatusFilter == "Completed")">Completed</option>
+                    <option value="Cancelled" selected="@(filter?.StatusFilter == "Cancelled")">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Page Size
+                </label>
+                <select class="form-select" name="PageSize">
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <span class="text-muted">
+            Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalCount) of @totalCount orders
+        </span>
+        <span class="text-muted">Page @currentPage of @totalPages</span>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="admin-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> Order ID</th>
+                    <th><i class="fas fa-user"></i> User ID</th>
+                    <th><i class="fas fa-calendar-day"></i> Order Date</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td><strong>#@order.OrderID</strong></td>
+                            <td>@order.UserID</td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="badge bg-info">@order.Status</span>
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@order.OrderID" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No orders found</h5>
+                            <p class="text-muted">Try adjusting your search criteria or come back later.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Order pagination">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { SearchTerm = filter?.SearchTerm, StatusFilter = filter?.StatusFilter, PageSize = pageSize, Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { SearchTerm = filter?.SearchTerm, StatusFilter = filter?.StatusFilter, PageSize = pageSize, Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { SearchTerm = filter?.SearchTerm, StatusFilter = filter?.StatusFilter, PageSize = pageSize, Page = i })">@i</a>
+                    </li>
+                }
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { SearchTerm = filter?.SearchTerm, StatusFilter = filter?.StatusFilter, PageSize = pageSize, Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { SearchTerm = filter?.SearchTerm, StatusFilter = filter?.StatusFilter, PageSize = pageSize, Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

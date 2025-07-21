@@ -70,6 +70,13 @@ namespace AdminUI
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
+            // ✅ Thêm HttpClient cho OrderAPI
+            builder.Services.AddHttpClient("OrderAPI", client =>
+            {
+                client.BaseAddress = new Uri(apiGatewayUrl);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
 
             var app = builder.Build();
 

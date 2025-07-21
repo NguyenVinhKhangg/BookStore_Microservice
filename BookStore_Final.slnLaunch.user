@@ -4,14 +4,19 @@
     "Projects": [
       {
         "Path": "UserManagementApi\\UserManagementApi.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "BookClient\\BookClient.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "OrdersManagementAPI\\OrdersManagementAPI.csproj",
         "Action": "Start"
       },
       {
         "Path": "AdminUI\\AdminUI.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "CategoryManagementApi\\CategoryManagementApi.csproj",
         "Action": "Start"
       }
     ]
