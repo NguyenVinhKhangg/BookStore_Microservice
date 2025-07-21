@@ -1,0 +1,110 @@
+@model AdminUI.Models.Category.CreateCategoryViewModel
+@{
+    ViewData["Title"] = "Create Category";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="fade-in-up">
+    <div class="admin-card">
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="fas fa-plus"></i> Create New Category
+            </h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="createCategoryForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fas fa-tag"></i> @Html.DisplayNameFor(m => m.Name) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter category name" autofocus />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Empty column for symmetry -->
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fas fa-align-left"></i> @Html.DisplayNameFor(m => m.Description)
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Enter category description (optional)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Provide a brief description to help users understand this category.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-success" id="createBtn">
+                        <i class="fas fa-save"></i> Create Category
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createCategoryForm');
+            const createBtn = document.getElementById('createBtn');
+            
+            form.addEventListener('submit', function(e) {
+                // Disable button to prevent double submission
+                createBtn.disabled = true;
+                createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                
+                // Re-enable button after 3 seconds (fallback)
+                setTimeout(() => {
+                    createBtn.disabled = false;
+                    createBtn.innerHTML = '<i class="fas fa-save"></i> Create Category';
+                }, 3000);
+            });
+
+            // Real-time validation feedback
+            const nameInput = document.getElementById('Name');
+            nameInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                const feedback = this.parentElement.querySelector('.validation-feedback');
+                
+                if (feedback) {
+                    feedback.remove();
+                }
+                
+                if (value.length > 0 && value.length < 2) {
+                    this.classList.add('is-invalid');
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'invalid-feedback validation-feedback';
+                    feedbackDiv.textContent = 'Category name must be at least 2 characters long.';
+                    this.parentElement.appendChild(feedbackDiv);
+                } else if (value.length > 100) {
+                    this.classList.add('is-invalid');
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'invalid-feedback validation-feedback';
+                    feedbackDiv.textContent = 'Category name cannot exceed 100 characters.';
+                    this.parentElement.appendChild(feedbackDiv);
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    </script>
+}

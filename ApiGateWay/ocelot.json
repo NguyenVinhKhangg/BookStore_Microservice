@@ -259,7 +259,81 @@
       }
     },
 
-    // CategoryManagement Routes
+    // ✅ CategoryManagement Routes - SPECIFIC ROUTES FIRST
+    // Public endpoints (no auth required)
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for GET single category
+    },
+    {
+      "DownstreamPathTemplate": "/api/categories/total",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/total",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for total count
+    },
+    {
+      "DownstreamPathTemplate": "/odata/categories",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/odata/categories",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for OData queries
+    },
+    // Admin endpoints (auth required)
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}/activate",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}/activate",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}/deactivate",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}/deactivate",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    // Generic route for create, update, delete (auth required)
     {
       "DownstreamPathTemplate": "/api/categories/{everything}",
       "DownstreamScheme": "https",
@@ -270,7 +344,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/categories/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []

@@ -1,5 +1,6 @@
 ﻿using AdminUI.Services;
 using AdminUI.Services.AuthenServices;
+using AdminUI.Services.CategoryServices;
 using AdminUI.Services.CouponServices;
 using AdminUI.Services.ReviewServices;
 using AdminUI.Services.UserServices;
@@ -58,6 +59,12 @@ namespace AdminUI
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
             builder.Services.AddHttpClient<ICouponService, CouponService>(client =>
+            {
+                client.BaseAddress = new Uri(apiGatewayUrl);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+            builder.Services.AddHttpClient<ICategoryService, CategoryService>(client =>
             {
                 client.BaseAddress = new Uri(apiGatewayUrl);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");

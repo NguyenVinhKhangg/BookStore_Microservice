@@ -15,5 +15,7 @@ namespace CategoryManagementApi.Services.Interface
 
         Task<bool> ActivateAsync(int id);
         Task<bool> DeactivateAsync(int id);
+
+        Task<int> GetTotalAsync();
     }
 }
