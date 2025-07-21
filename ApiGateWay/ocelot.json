@@ -100,6 +100,22 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/users/admin/total",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/admin/total",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/odata/users",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [

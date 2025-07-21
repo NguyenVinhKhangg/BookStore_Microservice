@@ -56,13 +56,35 @@ namespace AdminUI.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // ✅ FIXED: Ensure filter is properly initialized
+            if (filter == null)
+            {
+                filter = new UserSearchFilterViewModel();
+            }
+
+            // ✅ FIXED: Ensure proper default values
+            if (filter.Page <= 0) filter.Page = 1;
+            if (filter.PageSize <= 0) filter.PageSize = 10;
+
+            _logger.LogInformation($"=== USER MANAGEMENT INDEX ===");
+            _logger.LogInformation($"Filter: SearchTerm='{filter.SearchTerm}', RoleFilter={filter.RoleFilter}, StatusFilter={filter.StatusFilter}");
+            _logger.LogInformation($"Pagination: Page={filter.Page}, PageSize={filter.PageSize}");
+
             var result = await _userManagementService.GetUsersAsync(filter);
 
+            _logger.LogInformation($"Service Result: Success={result.Success}, TotalCount={result.TotalCount}, DataCount={result.Data?.Count() ?? 0}");
+
+            // ✅ Calculate proper pagination values
+            var totalCount = result.TotalCount;
+            var totalPages = (int)Math.Ceiling((double)totalCount / filter.PageSize);
+
             ViewBag.Filter = filter;
-            ViewBag.TotalCount = result.TotalCount;
+            ViewBag.TotalCount = totalCount;
             ViewBag.PageSize = filter.PageSize;
             ViewBag.CurrentPage = filter.Page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)result.TotalCount / filter.PageSize);
+            ViewBag.TotalPages = totalPages;
+
+            _logger.LogInformation($"ViewBag: TotalCount={totalCount}, CurrentPage={filter.Page}, TotalPages={totalPages}, PageSize={filter.PageSize}");
 
             if (result.Success)
             {
