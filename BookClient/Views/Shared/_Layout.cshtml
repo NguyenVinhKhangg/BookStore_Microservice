@@ -22,6 +22,31 @@
     <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     @await RenderSectionAsync("Styles", required: false)
+
+    @* ✅ Add custom CSS to ensure alert text is visible *@
+    <style>
+        .alert {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: inherit !important;
+        }
+
+        .alert-success {
+            color: #0f5132 !important;
+            background-color: #d1edff !important;
+            border-color: #b6d7ff !important;
+        }
+
+        .alert-danger {
+            color: #842029 !important;
+            background-color: #f8d7da !important;
+            border-color: #f5c2c7 !important;
+        }
+
+        .alert i {
+            margin-right: 8px !important;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -72,7 +97,7 @@
                                 var user = System.Text.Json.JsonSerializer.Deserialize<BookClient.Models.Authentication.UserModel>(userInfo);
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-user"></i> @user.Fullname
+                                        <p class="fas fa-user"></p> @user.Fullname
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
@@ -117,19 +142,31 @@
 
     <div class="container">
         <main role="main" class="pb-3">
-            <!-- Alert Messages -->
+            <!-- ✅ Enhanced Alert Messages with better debugging -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px; padding: 15px; font-size: 14px; color: #0f5132 !important;">
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                    <span style="font-weight: 500;">@TempData["SuccessMessage"]</span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-bottom: 20px; padding: 15px; font-size: 14px; color: #842029 !important;">
+                    <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
+                    <span style="font-weight: 500;">@TempData["ErrorMessage"]</span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @* ✅ Add debug information (remove after testing) *@
+            @if (ViewBag.ShowDebug == true)
+            {
+                <div style="background: #f8f9fa; padding: 10px; margin-bottom: 15px; border: 1px solid #dee2e6;">
+                    <strong>Debug Info:</strong><br />
+                    SuccessMessage: @TempData["SuccessMessage"]<br />
+                    ErrorMessage: @TempData["ErrorMessage"]<br />
                 </div>
             }
 

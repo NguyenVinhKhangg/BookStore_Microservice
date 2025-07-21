@@ -68,7 +68,7 @@ namespace UserManagementApi.Repositories.Implement
             {
                 var user = await _context.Users
                     .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+                    .FirstOrDefaultAsync(u => u.Email.ToLower().Equals(email.ToLower()));
                 if (user == null || user.DeactivatedStatus)
                 {
                     return null;

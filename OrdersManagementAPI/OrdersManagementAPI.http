@@ -1,0 +1,19 @@
+GET https://localhost:5001/api/Orders HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+
+GET https://localhost:5001/api/Orders/{id} HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+
+POST https://localhost:5001/api/Orders HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+
+PUT https://localhost:5001/api/Orders/{id} HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json
+
+DELETE https://localhost:5001/api/Orders/{id} HTTP/1.1
+Host: localhost:5001
+Content-Type: application/json

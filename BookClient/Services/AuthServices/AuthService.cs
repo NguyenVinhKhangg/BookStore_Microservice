@@ -125,22 +125,34 @@ namespace BookClient.Services.AuthServices
         {
             try
             {
+                _logger.LogInformation($"=== STARTING REGISTRATION PROCESS ===");
                 _logger.LogInformation($"Attempting registration for user: {model.Email}");
+                _logger.LogInformation($"FullName: {model.FullName}");
+                _logger.LogInformation($"PhoneNumber: {model.PhoneNumber}");
+                _logger.LogInformation($"Address: {model.Address}");
+                _logger.LogInformation($"BirthDay: {model.BirthDay}");
 
+                // ✅ FIXED: Include ConfirmPassword field that API expects
                 var registerData = new
                 {
                     fullName = model.FullName,
                     email = model.Email,
                     password = model.Password,
+                    confirmPassword = model.ConfirmPassword, // ✅ Added this missing field
                     phonenumber = model.PhoneNumber,
                     address = model.Address,
                     birthDay = model.BirthDay
                 };
 
-                var jsonContent = JsonSerializer.Serialize(registerData);
+                var jsonContent = JsonSerializer.Serialize(registerData, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                // ✅ Build the full URI manually if BaseAddress is null
+                _logger.LogInformation($"Request payload: {jsonContent}");
+
+                // ✅ Fix URL consistency - use same pattern as login
                 string requestUri;
                 if (_httpClient.BaseAddress != null)
                 {
@@ -152,41 +164,94 @@ namespace BookClient.Services.AuthServices
                     _logger.LogWarning("BaseAddress is null, using absolute URI: {RequestUri}", requestUri);
                 }
 
+                _logger.LogInformation($"Making register request to: {requestUri}");
+
                 var response = await _httpClient.PostAsync(requestUri, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Register API Response Status: {response.StatusCode}");
+                _logger.LogInformation($"Register API Response Content: {responseContent}");
 
                 if (response.IsSuccessStatusCode)
                 {
+                    _logger.LogInformation("Registration response indicates success - parsing response");
+
                     var registerResponse = JsonSerializer.Deserialize<RegisterResponseModel>(responseContent, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return registerResponse ?? new RegisterResponseModel
+                    if (registerResponse != null)
                     {
-                        Success = false,
-                        Message = "Invalid response from server"
-                    };
+                        _logger.LogInformation($"Parsed response - Success: {registerResponse.Success}, Message: {registerResponse.Message}");
+                        return registerResponse;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to parse successful response");
+                        return new RegisterResponseModel
+                        {
+                            Success = false,
+                            Message = "Invalid response from server"
+                        };
+                    }
                 }
                 else
                 {
+                    _logger.LogWarning($"Registration failed with status code: {response.StatusCode}");
+                    _logger.LogWarning($"Error response content: {responseContent}");
+
                     try
                     {
+                        // ✅ Parse validation errors from API
+                        var errorDocument = JsonDocument.Parse(responseContent);
+
+                        if (errorDocument.RootElement.TryGetProperty("errors", out var errorsElement))
+                        {
+                            var errorMessages = new List<string>();
+
+                            foreach (var error in errorsElement.EnumerateObject())
+                            {
+                                if (error.Value.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var message in error.Value.EnumerateArray())
+                                    {
+                                        errorMessages.Add(message.GetString());
+                                    }
+                                }
+                            }
+
+                            return new RegisterResponseModel
+                            {
+                                Success = false,
+                                Message = string.Join("; ", errorMessages)
+                            };
+                        }
+
+                        // Try to parse as standard response
                         var errorResponse = JsonSerializer.Deserialize<RegisterResponseModel>(responseContent, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         });
 
-                        return errorResponse ?? new RegisterResponseModel
+                        if (errorResponse != null)
                         {
-                            Success = false,
-                            Message = $"Registration failed: {response.StatusCode}"
-                        };
+                            _logger.LogInformation($"Parsed error response - Success: {errorResponse.Success}, Message: {errorResponse.Message}");
+                            return errorResponse;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to parse error response");
+                            return new RegisterResponseModel
+                            {
+                                Success = false,
+                                Message = $"Registration failed: {response.StatusCode}"
+                            };
+                        }
                     }
-                    catch
+                    catch (Exception parseEx)
                     {
+                        _logger.LogError(parseEx, "Failed to parse error response");
                         return new RegisterResponseModel
                         {
                             Success = false,
