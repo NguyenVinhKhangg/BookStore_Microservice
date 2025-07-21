@@ -7,7 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "BookClient\\BookClient.csproj",
+        "Path": "AdminUI\\AdminUI.csproj",
         "Action": "Start"
       }
     ]

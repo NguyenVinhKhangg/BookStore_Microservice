@@ -226,46 +226,46 @@ namespace AdminUI.Services.UserServices
             {
                 await SetAuthorizationHeaderAsync();
 
-                // Build OData query
-                var queryParams = new List<string>();
+                _logger.LogInformation($"=== GETTING USERS WITH PAGINATION ===");
+                _logger.LogInformation($"Filter: SearchTerm={filter.SearchTerm}, RoleFilter={filter.RoleFilter}, StatusFilter={filter.StatusFilter}");
+                _logger.LogInformation($"Pagination: Page={filter.Page}, PageSize={filter.PageSize}");
 
+                // ✅ STEP 1: Get total count from dedicated endpoint
+                var totalCount = await GetTotalUsersCountAsync();
+                _logger.LogInformation($"Total users count from API: {totalCount}");
+
+                // ✅ STEP 2: Build OData query for paginated data
+                var queryParams = new List<string>();
+                var filterConditions = new List<string>();
+
+                // Add search filter
                 if (!string.IsNullOrEmpty(filter.SearchTerm))
                 {
-                    queryParams.Add($"$filter=contains(tolower(fullname),'{filter.SearchTerm.ToLower()}') or contains(tolower(email),'{filter.SearchTerm.ToLower()}')");
+                    var searchTerm = filter.SearchTerm.ToLower();
+                    filterConditions.Add($"(contains(tolower(fullname),'{searchTerm}') or contains(tolower(email),'{searchTerm}'))");
                 }
 
+                // Add role filter
                 if (filter.RoleFilter.HasValue)
                 {
-                    var roleFilter = filter.RoleFilter.HasValue ? $"roleId eq {filter.RoleFilter.Value}" : "";
-                    if (!string.IsNullOrEmpty(roleFilter))
-                    {
-                        if (queryParams.Any(q => q.StartsWith("$filter")))
-                        {
-                            queryParams[0] += $" and {roleFilter}";
-                        }
-                        else
-                        {
-                            queryParams.Add($"$filter={roleFilter}");
-                        }
-                    }
+                    filterConditions.Add($"roleId eq {filter.RoleFilter.Value}");
                 }
 
+                // Add status filter
                 if (filter.StatusFilter.HasValue)
                 {
-                    var statusFilter = $"isDeactivated eq {filter.StatusFilter.Value.ToString().ToLower()}";
-                    if (queryParams.Any(q => q.StartsWith("$filter")))
-                    {
-                        queryParams[0] += $" and {statusFilter}";
-                    }
-                    else
-                    {
-                        queryParams.Add($"$filter={statusFilter}");
-                    }
+                    filterConditions.Add($"isDeactivated eq {filter.StatusFilter.Value.ToString().ToLower()}");
                 }
 
+                // ✅ Combine all filter conditions
+                if (filterConditions.Any())
+                {
+                    queryParams.Add($"$filter={string.Join(" and ", filterConditions)}");
+                }
+
+                // ✅ Add pagination parameters
                 queryParams.Add($"$skip={((filter.Page - 1) * filter.PageSize)}");
                 queryParams.Add($"$top={filter.PageSize}");
-                queryParams.Add("$count=true");
                 queryParams.Add("$orderby=userID desc");
 
                 var queryString = string.Join("&", queryParams);
@@ -283,37 +283,44 @@ namespace AdminUI.Services.UserServices
                 {
                     try
                     {
-                        // ✅ Kiểm tra xem response có phải là OData format hay array thông thường
-                        if (responseContent.TrimStart().StartsWith("{") && responseContent.Contains("@odata"))
+                        // ✅ Parse OData response - try different formats
+                        List<UserManagementViewModel> users = null;
+
+                        // Try OData format first
+                        if (responseContent.TrimStart().StartsWith("{") && responseContent.Contains("value"))
                         {
-                            // ✅ OData response format
                             var odataResponse = JsonSerializer.Deserialize<StandardODataResponse<UserManagementViewModel>>(responseContent, new JsonSerializerOptions
                             {
                                 PropertyNameCaseInsensitive = true
                             });
-
-                            return new UsersListResponseModel
-                            {
-                                Success = true,
-                                Data = odataResponse.Value,
-                                TotalCount = odataResponse.OdataCount ?? odataResponse.Value?.Count() ?? 0
-                            };
+                            users = odataResponse?.Value ?? new List<UserManagementViewModel>();
                         }
                         else
                         {
-                            // ✅ Simple array response format
-                            var usersList = JsonSerializer.Deserialize<List<UserManagementViewModel>>(responseContent, new JsonSerializerOptions
+                            // Try simple array format
+                            users = JsonSerializer.Deserialize<List<UserManagementViewModel>>(responseContent, new JsonSerializerOptions
                             {
                                 PropertyNameCaseInsensitive = true
-                            });
-
-                            return new UsersListResponseModel
-                            {
-                                Success = true,
-                                Data = usersList,
-                                TotalCount = usersList?.Count ?? 0
-                            };
+                            }) ?? new List<UserManagementViewModel>();
                         }
+
+                        _logger.LogInformation($"Parsed {users.Count} users from response");
+
+                        // ✅ If filters are applied, we need to get filtered count
+                        var effectiveTotalCount = totalCount;
+                        if (filterConditions.Any())
+                        {
+                            // For filtered results, use the total count from a separate count query
+                            effectiveTotalCount = await GetFilteredUsersCountAsync(filter);
+                            _logger.LogInformation($"Filtered total count: {effectiveTotalCount}");
+                        }
+
+                        return new UsersListResponseModel
+                        {
+                            Success = true,
+                            Data = users,
+                            TotalCount = effectiveTotalCount
+                        };
                     }
                     catch (JsonException jsonEx)
                     {
@@ -343,6 +350,120 @@ namespace AdminUI.Services.UserServices
                     Success = false,
                     Message = "An error occurred while retrieving users."
                 };
+            }
+        }
+
+        // ✅ NEW: Get total users count from dedicated endpoint
+        private async Task<int> GetTotalUsersCountAsync()
+        {
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+
+                var response = await _httpClient.GetAsync("/gateway/users/admin/total");
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation($"Total count API response: {response.StatusCode}, Content: {responseContent}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var totalResponse = JsonSerializer.Deserialize<TotalUsersResponse>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return totalResponse?.Data?.TotalUsers ?? 0;
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to get total count: {response.StatusCode}");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting total users count");
+                return 0;
+            }
+        }
+
+        // ✅ NEW: Get filtered users count 
+        private async Task<int> GetFilteredUsersCountAsync(UserSearchFilterViewModel filter)
+        {
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+
+                // Build count query with same filters but only get count
+                var queryParams = new List<string>();
+                var filterConditions = new List<string>();
+
+                // Add search filter
+                if (!string.IsNullOrEmpty(filter.SearchTerm))
+                {
+                    var searchTerm = filter.SearchTerm.ToLower();
+                    filterConditions.Add($"(contains(tolower(fullname),'{searchTerm}') or contains(tolower(email),'{searchTerm}'))");
+                }
+
+                // Add role filter
+                if (filter.RoleFilter.HasValue)
+                {
+                    filterConditions.Add($"roleId eq {filter.RoleFilter.Value}");
+                }
+
+                // Add status filter
+                if (filter.StatusFilter.HasValue)
+                {
+                    filterConditions.Add($"isDeactivated eq {filter.StatusFilter.Value.ToString().ToLower()}");
+                }
+
+                // ✅ Only get count
+                if (filterConditions.Any())
+                {
+                    queryParams.Add($"$filter={string.Join(" and ", filterConditions)}");
+                }
+                queryParams.Add("$count=true");
+                queryParams.Add("$top=0"); // Don't return any data, just count
+
+                var queryString = string.Join("&", queryParams);
+                var url = $"/gateway/odata/users?{queryString}";
+
+                _logger.LogInformation($"Getting filtered count from: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Try to extract count from OData response
+                    if (responseContent.Contains("@odata.count"))
+                    {
+                        var odataResponse = JsonSerializer.Deserialize<StandardODataResponse<UserManagementViewModel>>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        return odataResponse?.OdataCount ?? 0;
+                    }
+                    else
+                    {
+                        // Fallback: parse as array and get length
+                        var users = JsonSerializer.Deserialize<List<UserManagementViewModel>>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        return users?.Count ?? 0;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to get filtered count: {response.StatusCode}");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting filtered users count");
+                return 0;
             }
         }
 
@@ -646,15 +767,31 @@ namespace AdminUI.Services.UserServices
     public class StandardODataResponse<T>
     {
         [JsonPropertyName("value")]
-        public List<T> Value { get; set; }
+        public List<T> Value { get; set; } = new List<T>();
 
         [JsonPropertyName("@odata.count")]
         public int? OdataCount { get; set; }
 
         [JsonPropertyName("@odata.context")]
-        public string OdataContext { get; set; }
+        public string? OdataContext { get; set; }
 
         [JsonPropertyName("@odata.nextLink")]
-        public string OdataNextLink { get; set; }
+        public string? OdataNextLink { get; set; }
+    }
+
+    // ✅ NEW: Response model for total users count
+    public class TotalUsersResponse
+    {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonPropertyName("data")]
+        public TotalUsersData? Data { get; set; }
+    }
+
+    public class TotalUsersData
+    {
+        [JsonPropertyName("totalUsers")]
+        public int TotalUsers { get; set; }
     }
 }
