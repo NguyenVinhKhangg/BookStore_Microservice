@@ -1,7 +1,9 @@
 ﻿using BookManagementApi.DTOs.Messages;
+using BookManagementApi.Options;
 using BookManagementApi.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -11,50 +13,77 @@ namespace BookManagementApi.MessageConsumers
 {
     public class StockMessageConsumer : BackgroundService
     {
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        private IConnection _connection;
+        private IModel _channel;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<StockMessageConsumer> _logger;
+        private readonly RabbitMQOptions _rabbitMQOptions;
         private const string QueueName = "book.inventory.update";
+        private bool _isConnected = false;
 
         public StockMessageConsumer(
             IServiceScopeFactory serviceScopeFactory,
-            ILogger<StockMessageConsumer> logger)
+            ILogger<StockMessageConsumer> logger,
+            IOptions<RabbitMQOptions> rabbitMQOptions)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
+            _rabbitMQOptions = rabbitMQOptions.Value;
 
+            TryConnect();
+        }
+
+        private void TryConnect()
+        {
             try
             {
-                var factory = new ConnectionFactory { HostName = "localhost" }; // Lấy từ cấu hình
+                var factory = new ConnectionFactory
+                {
+                    HostName = _rabbitMQOptions.HostName,
+                    Port = _rabbitMQOptions.Port,
+                    UserName = _rabbitMQOptions.UserName,
+                    Password = _rabbitMQOptions.Password,
+                    VirtualHost = _rabbitMQOptions.VirtualHost,
+                    RequestedConnectionTimeout = TimeSpan.FromSeconds(5)
+                };
+
+                _logger.LogInformation($"Attempting to connect to RabbitMQ at {_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
+
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
-                
+
                 _channel.QueueDeclare(
                     queue: QueueName,
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
                     arguments: null);
-                    
+
+                _isConnected = true;
                 _logger.LogInformation("RabbitMQ consumer initialized successfully");
+            }
+            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
+            {
+                _isConnected = false;
+                _logger.LogWarning(ex, "RabbitMQ server is unreachable. Consumer will run in degraded mode.");
             }
             catch (Exception ex)
             {
+                _isConnected = false;
                 _logger.LogError(ex, "Failed to initialize RabbitMQ consumer");
             }
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (_channel == null)
+            if (!_isConnected || _channel == null)
             {
-                _logger.LogError("RabbitMQ channel is not available");
+                _logger.LogWarning("RabbitMQ channel is not available. Consumer will not process messages.");
                 return Task.CompletedTask;
             }
 
             var consumer = new EventingBasicConsumer(_channel);
-            
+
             consumer.Received += async (model, ea) =>
             {
                 try
@@ -69,10 +98,10 @@ namespace BookManagementApi.MessageConsumers
                     using (var scope = _serviceScopeFactory.CreateScope())
                     {
                         var bookService = scope.ServiceProvider.GetRequiredService<IBookService>();
-                        
+
                         // Cập nhật số lượng sách
                         bool success = await bookService.UpdateBookStockAsync(
-                            inventoryUpdate.BookId, 
+                            inventoryUpdate.BookId,
                             inventoryUpdate.QuantityChange);
 
                         if (success)
@@ -91,7 +120,10 @@ namespace BookManagementApi.MessageConsumers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Lỗi xử lý message cập nhật tồn kho");
-                    _channel.BasicNack(ea.DeliveryTag, false, true);
+                    if (_channel?.IsOpen == true)
+                    {
+                        _channel.BasicNack(ea.DeliveryTag, false, true);
+                    }
                 }
             };
 
@@ -105,9 +137,19 @@ namespace BookManagementApi.MessageConsumers
 
         public override void Dispose()
         {
-            _channel?.Close();
-            _connection?.Close();
-            base.Dispose();
+            try
+            {
+                _channel?.Close();
+                _connection?.Close();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error disposing RabbitMQ connections");
+            }
+            finally
+            {
+                base.Dispose();
+            }
         }
     }
 }

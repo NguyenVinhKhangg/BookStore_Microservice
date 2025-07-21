@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using CategoryManagementApi.DTOs;
 using CategoryManagementApi.Models;
@@ -52,7 +52,7 @@ namespace CategoryManagementApi.Services.Implement
             return await _repo.DeleteAsync(id);
         }
 
-        // Th�m cho OData
+        // Thêm cho OData
         public IQueryable<CategoryDTO> GetCategoriesQueryable()
         {
             return _repo.GetCategoriesQueryable().ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider);
@@ -74,6 +74,13 @@ namespace CategoryManagementApi.Services.Implement
             category.IsActive = false;
             await _repo.UpdateAsync(category);
             return true;
+        }
+
+        // ✅ NEW: Get total categories count
+        public async Task<int> GetTotalAsync()
+        {
+            var categories = await _repo.GetAllAsync();
+            return categories.Count();
         }
     }
 }

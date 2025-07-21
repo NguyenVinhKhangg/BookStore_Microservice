@@ -1,6 +1,7 @@
 ﻿using BookManagementApi.ApiClients;
 using BookManagementApi.Data;
 using BookManagementApi.MessageConsumers;
+using BookManagementApi.Options;
 using BookManagementApi.Repositories;
 using BookManagementApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,8 @@ namespace BookManagementApi
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
             });
+            builder.Services.Configure<RabbitMQOptions>(
+             builder.Configuration.GetSection("RabbitMQ"));
 
             // Trong builder.Services.AddHostedService
             builder.Services.AddHostedService<StockMessageConsumer>();
