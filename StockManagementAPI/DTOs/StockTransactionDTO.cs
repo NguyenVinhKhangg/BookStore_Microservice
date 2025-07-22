@@ -10,6 +10,14 @@
         public int? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }
         public string? Note { get; set; }
-        public ICollection<StockTransactionDetailDTO> Details { get; set; }
+
+        // ✅ THÊM: Properties để hiển thị tổng kết
+        public int TotalItems { get; set; }
+        public decimal TotalAmount { get; set; }
+
+        public string? CreatorName { get; set; }
+        public string? ApproverName { get; set; }
+
+        public ICollection<StockTransactionDetailDTO> Details { get; set; } = new List<StockTransactionDetailDTO>();
     }
 }

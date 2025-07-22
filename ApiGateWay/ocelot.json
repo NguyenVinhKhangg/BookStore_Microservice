@@ -253,6 +253,19 @@
 
     // StockManagement Routes
     {
+      "DownstreamPathTemplate": "/odata/transactions",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7058
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ BỎ: AuthenticationOptions để development
+    },
+    {
       "DownstreamPathTemplate": "/api/stock/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -268,22 +281,22 @@
         "AllowedScopes": []
       }
     },
-    {
-      "DownstreamPathTemplate": "/odata/transactions",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7058
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
-      "UpstreamHttpMethod": [ "GET" ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
-    },
+    //{
+    //  "DownstreamPathTemplate": "/odata/transactions",
+    //  "DownstreamScheme": "https",
+    //  "DownstreamHostAndPorts": [
+    //    {
+    //      "Host": "localhost",
+    //      "Port": 7058
+    //    }
+    //  ],
+    //  "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
+    //  "UpstreamHttpMethod": [ "GET" ],
+    //  "AuthenticationOptions": {
+    //    "AuthenticationProviderKey": "Bearer",
+    //    "AllowedScopes": []
+    //  }
+    //},
 
     // CouponManagement Routes
     {

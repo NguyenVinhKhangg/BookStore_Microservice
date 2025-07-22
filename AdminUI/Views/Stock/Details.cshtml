@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var isAdmin = ViewBag.IsAdmin as bool? ?? false;
 }
-
+@using AdminUI.Extensions
 <div class="fade-in-up">
     <div class="admin-card">
         <div class="card-header">
@@ -84,36 +84,37 @@
                             <div class="col-sm-4 fw-bold">Created Date:</div>
                             <div class="col-sm-8">@Model.TransactionDate.ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
-                        
                         <div class="row mb-2">
-                            <div class="col-sm-4 fw-bold">Created By:</div>
-                            <div class="col-sm-8">
-                                @if (!string.IsNullOrEmpty(Model.CreatorName))
-                                {
-                                    @Model.CreatorName
-                                }
-                                else
-                                {
-                                    <span class="text-muted">User #@Model.CreatedBy</span>
-                                }
-                            </div>
-                        </div>
+    <div class="col-sm-4 fw-bold">Created By:</div>
+    <div class="col-sm-8">
+        @if (!string.IsNullOrEmpty(Model.CreatorName))
+        {
+            <span class="fw-semibold">@Model.CreatorName</span>
+            <small class="text-muted">(ID: @Model.CreatedBy)</small>
+        }
+        else
+        {
+            <span class="text-muted">User #@Model.CreatedBy</span>
+        }
+    </div>
+</div>
                         
                         @if (Model.ApprovedBy.HasValue)
                         {
                             <div class="row mb-2">
-                                <div class="col-sm-4 fw-bold">Approved By:</div>
-                                <div class="col-sm-8">
-                                    @if (!string.IsNullOrEmpty(Model.ApproverName))
-                                    {
-                                        @Model.ApproverName
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">User #@Model.ApprovedBy</span>
-                                    }
-                                </div>
-                            </div>
+        <div class="col-sm-4 fw-bold">Approved By:</div>
+        <div class="col-sm-8">
+            @if (!string.IsNullOrEmpty(Model.ApproverName))
+            {
+                <span class="fw-semibold">@Model.ApproverName</span>
+                <small class="text-muted">(ID: @Model.ApprovedBy)</small>
+            }
+            else
+            {
+                <span class="text-muted">User #@Model.ApprovedBy</span>
+            }
+        </div>
+    </div>
                             
                             <div class="row mb-2">
                                 <div class="col-sm-4 fw-bold">Approved Date:</div>
@@ -151,7 +152,7 @@
                                     <div class="col-6">
                                         <div class="summary-item">
                                             <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
-                                            <h4>$@Model.TotalAmount.ToString("N2")</h4>
+                                            <h4>@Model.TotalAmount.ToString("N0") VND</h4>
                                             <small class="text-muted">Total Amount</small>
                                         </div>
                                     </div>
@@ -193,8 +194,8 @@
                             <tr>
                                 <th>Book</th>
                                 <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
+                                <th>Unit Price (VND)</th>
+                                <th>Total (VND)</th>
                                 <th>Note</th>
                             </tr>
                         </thead>
@@ -214,9 +215,9 @@
                                     <td>
                                         <span class="badge bg-primary">@detail.Quantity</span>
                                     </td>
-                                    <td>
-                                        <strong>$@detail.UnitPrice.ToString("N2")</strong>
-                                    </td>
+                                   <td>
+    <strong>@detail.UnitPrice.ToString("N0") VND</strong>
+</td>
                                     <td>
                                         <strong class="text-success">$@detail.Total.ToString("N2")</strong>
                                     </td>
@@ -238,8 +239,8 @@
                                 <th>Total</th>
                                 <th><span class="badge bg-light text-dark">@Model.TotalItems items</span></th>
                                 <th></th>
-                                <th><strong>$@Model.TotalAmount.ToString("N2")</strong></th>
-                                <th></th>
+                                 <th><strong>@Model.TotalAmount.ToString("N0") VND</strong></th>
+        <th></th>
                             </tr>
                         </tfoot>
                     </table>

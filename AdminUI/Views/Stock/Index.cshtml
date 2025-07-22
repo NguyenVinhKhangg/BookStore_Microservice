@@ -9,6 +9,7 @@
     var totalPages = ViewBag.TotalPages as int? ?? 0;
     var isAdmin = ViewBag.IsAdmin as bool? ?? false;
 }
+@using AdminUI.Extensions
 
 <div class="fade-in-up">
     <!-- Search and Filter Section -->
@@ -103,7 +104,7 @@
                     <th><i class="fas fa-calendar"></i> Date</th>
                     <th><i class="fas fa-user"></i> Created By</th>
                     <th><i class="fas fa-boxes"></i> Items</th>
-                    <th><i class="fas fa-dollar-sign"></i> Total</th>
+                    <th><i class="fas fa-dong-sign"></i> Total (VND)</th>
                     <th><i class="fas fa-sticky-note"></i> Note</th>
                     <th><i class="fas fa-cogs"></i> Actions</th>
                 </tr>
@@ -180,7 +181,7 @@
                                 <span class="badge bg-light text-dark">@transaction.TotalItems items</span>
                             </td>
                             <td>
-                                <strong class="text-success">$@transaction.TotalAmount.ToString("N2")</strong>
+                                <strong class="text-success">@transaction.TotalAmount.ToString("N0") VND</strong>
                             </td>
                             <td>
                                 <small class="text-muted">
