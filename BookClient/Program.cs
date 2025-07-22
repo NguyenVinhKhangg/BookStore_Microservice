@@ -1,5 +1,8 @@
 using BookClient.Services;
 using BookClient.Services.AuthServices;
+using BookClient.Services.BookServices;
+using BookClient.Services.CartServices;
+using BookClient.Services.CategoryServices;
 using BookClient.Services.UserServices;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -67,7 +70,9 @@ builder.Services.AddHttpClient("OrderAPI", client =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICartService, CartService>();
 var app = builder.Build();
 
 // ✅ Ensure DataProtectionKeys directory exists

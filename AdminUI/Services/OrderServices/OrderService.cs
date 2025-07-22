@@ -23,7 +23,6 @@ namespace AdminUI.Services
             {
                 return (new List<Order>(), 0);
             }
-
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<(List<Order> Orders, int TotalCount)>(content);
             return result;
@@ -36,9 +35,15 @@ namespace AdminUI.Services
             {
                 return null;
             }
-
             var content = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Order>(content);
+        }
+
+        public async Task<bool> UpdateOrderAsync(Order order)
+        {
+            var content = new StringContent(JsonConvert.SerializeObject(order), System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"Orders/{order.OrderID}", content);
+            return response.IsSuccessStatusCode;
         }
     }
 }

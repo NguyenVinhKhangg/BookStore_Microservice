@@ -2,8 +2,6 @@
 using AdminUI.Models;
 using AdminUI.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace AdminUI.Controllers
@@ -42,6 +40,32 @@ namespace AdminUI.Controllers
                 return NotFound();
             }
             return View(order);
+        }
+
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return View(order);
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update(Order order)
+        {
+            if (ModelState.IsValid)
+            {
+                var success = await _orderService.UpdateOrderAsync(order);
+                if (success)
+                {
+                    return RedirectToAction("Details", new { id = order.OrderID });
+                }
+                ModelState.AddModelError("", "Cập nhật đơn hàng thất bại.");
+            }
+            return View("Edit", order);
         }
     }
 }
