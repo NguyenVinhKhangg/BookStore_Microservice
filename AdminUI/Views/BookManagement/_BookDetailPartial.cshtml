@@ -1,0 +1,129 @@
+﻿@model AdminUI.Models.Book.BookViewModel
+@{
+    var categoryOptions = ViewBag.CategoryOptions as List<SelectListItem> ?? new List<SelectListItem>();
+    var categoryName = categoryOptions.FirstOrDefault(c => c.Value == Model.CategoryID.ToString())?.Text ?? "Unknown";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="text-center mb-3">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+            }
+            else
+            {
+                <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <i class="fas fa-book fa-3x text-muted"></i>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="book-details">
+            <h4 class="mb-3">@Model.Title</h4>
+
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <label class="text-muted small">Book ID</label>
+                    <div class="fw-bold">#@Model.BookID</div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">ISBN</label>
+                    <div class="fw-bold"><code>@Model.ISBN</code></div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Author</label>
+                    <div class="fw-bold">@Model.AuthorName</div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Publisher</label>
+                    <div class="fw-bold">@Model.PublisherName</div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Category</label>
+                    <div><span class="badge bg-light text-dark">@categoryName</span></div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Status</label>
+                    <div>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-eye"></i> Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-eye-slash"></i> Hidden
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Price</label>
+                    <div class="fw-bold text-success">@Model.Price.ToString("C")</div>
+                    @if (Model.Discount > 0)
+                    {
+                        <small class="text-success">
+                            <i class="fas fa-percent"></i> @Model.Discount% discount
+                        </small>
+                    }
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Stock</label>
+                    <div>
+                        @if (Model.Stock > 0)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> @Model.Stock items
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                <i class="fas fa-times"></i> Out of Stock
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="text-muted small">Created Date</label>
+                    <div class="fw-bold">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <h6 class="text-muted small">DESCRIPTION</h6>
+            <div class="border-start border-3 border-primary ps-3">
+                <p class="mb-0">@Model.Description</p>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex gap-2">
+            @if (Model.IsActive)
+            {
+                <button type="button" class="btn btn-warning btn-sm" onclick="hideBook(@Model.BookID)">
+                    <i class="fas fa-eye-slash"></i> Hide Book
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-success btn-sm" onclick="unhideBook(@Model.BookID)">
+                    <i class="fas fa-eye"></i> Show Book
+                </button>
+            }
+        </div>
+    </div>
+</div>

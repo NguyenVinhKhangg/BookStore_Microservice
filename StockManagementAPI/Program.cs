@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.OData;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.ModelBuilder;
 using StockManagementApi.Data;
-using StockManagementAPI.DTOs;
 using StockManagementApi.Profiles;
 using StockManagementApi.Repositories.Implementations;
 using StockManagementApi.Repositories.Interfaces;
 using StockManagementApi.Services.Interfaces;
+using StockManagementAPI.DTOs;
 using StockManagementAPI.Services.Implementations;
 using StockManagementAPI.Services.Interfaces;
+using System.Text;
 
 namespace StockManagementAPI
 {
@@ -19,8 +22,30 @@ namespace StockManagementAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
+
+            // ✅ SỬA: Cấu hình Authentication với đúng key từ appsettings
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"], // ✅ SỬA: Jwt không phải JWT
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            builder.Services.AddAuthorization();
 
             // Add OData
             var modelBuilder = new ODataConventionModelBuilder();
@@ -71,6 +96,8 @@ namespace StockManagementAPI
 
             app.UseHttpsRedirection();
 
+            // ✅ THÊM: UseAuthentication() phải được gọi trước UseAuthorization()
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

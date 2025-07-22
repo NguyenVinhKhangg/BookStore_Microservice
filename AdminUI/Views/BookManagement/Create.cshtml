@@ -1,0 +1,201 @@
+﻿@model AdminUI.Models.Book.CreateBookViewModel
+@{
+    ViewData["Title"] = "Thêm sách mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var categoryOptions = ViewBag.CategoryOptions as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Thêm sách mới</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a asp-action="Index">Quản lý sách</a></li>
+                        <li class="breadcrumb-item active">Thêm mới</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- ✅ THÊM: Debug validation errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <h5>Validation Errors:</h5>
+                    <ul>
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- ✅ THÊM: Debug category options -->
+            @if (!categoryOptions.Any())
+            {
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> Không có danh mục nào được tải. Categories count: @categoryOptions.Count
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus"></i>
+                        Thông tin sách mới
+                    </h3>
+                </div>
+
+                <form asp-action="Create" method="post" id="createBookForm">
+                    @Html.AntiForgeryToken()
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Title" class="required">Tiêu đề sách</label>
+                                    <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề sách">
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ISBN" class="required">ISBN</label>
+                                    <input asp-for="ISBN" class="form-control" placeholder="Nhập mã ISBN">
+                                    <span asp-validation-for="ISBN" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AuthorName" class="required">Tác giả</label>
+                                    <input asp-for="AuthorName" class="form-control" placeholder="Nhập tên tác giả">
+                                    <span asp-validation-for="AuthorName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PublisherName" class="required">Nhà xuất bản</label>
+                                    <input asp-for="PublisherName" class="form-control" placeholder="Nhập tên nhà xuất bản">
+                                    <span asp-validation-for="PublisherName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="CategoryID" class="required">Danh mục</label>
+                                    <select asp-for="CategoryID" class="form-control" id="categorySelect">
+                                        <option value="">Chọn danh mục</option>
+                                        @foreach (var option in categoryOptions)
+                                        {
+                                            <option value="@option.Value">@option.Text</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CategoryID" class="text-danger"></span>
+                                    <!-- ✅ THÊM: Debug info -->
+                                    <small class="text-muted">Categories loaded: @categoryOptions.Count</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Price" class="required">Giá (VND)</label>
+                                    <input asp-for="Price" class="form-control" type="number" step="1000" min="0" placeholder="0">
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Discount">Giảm giá (%)</label>
+                                    <input asp-for="Discount" class="form-control" type="number" step="0.1" min="0" max="100" placeholder="0">
+                                    <span asp-validation-for="Discount" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="ImageUrl">URL hình ảnh</label>
+                                    <input asp-for="ImageUrl" class="form-control" placeholder="Nhập URL hình ảnh">
+                                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Description">Mô tả</label>
+                                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả sách"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Lưu ý:</strong> Số lượng tồn kho sẽ được đặt mặc định là 0. Để cập nhật tồn kho, vui lòng sử dụng chức năng quản lý kho.
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success" id="submitBtn">
+                            <i class="fas fa-save"></i> Lưu
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // ✅ THÊM: Debug JavaScript
+        $(document).ready(function() {
+            console.log('Create form loaded');
+            console.log('Categories count:', @categoryOptions.Count);
+
+            $('#submitBtn').click(function(e) {
+                console.log('Submit button clicked');
+                console.log('Form data:', $('#createBookForm').serialize());
+            });
+
+            $('#createBookForm').submit(function(e) {
+                console.log('Form submitted');
+                var isValid = $(this).valid();
+                console.log('Form valid:', isValid);
+                if (!isValid) {
+                    e.preventDefault();
+                    console.log('Form validation failed');
+                }
+            });
+        });
+    </script>
+}

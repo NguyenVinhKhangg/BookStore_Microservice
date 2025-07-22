@@ -13,6 +13,7 @@
         </div>
         <div class="card-body">
             <form asp-action="Create" method="post" id="stockTransactionForm">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                 <div class="row">
@@ -52,7 +53,7 @@
                         <div id="detailsContainer">
                             <!-- Details will be added here dynamically -->
                         </div>
-                        
+
                         <button type="button" class="btn btn-outline-primary" onclick="addDetail()">
                             <i class="fas fa-plus"></i> Add Item
                         </button>
@@ -96,11 +97,23 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="bookSearch" placeholder="Search books..." />
+                    <input type="text" class="form-control" id="bookSearch" placeholder="Search books by title, ISBN, author..." />
                 </div>
-                <div id="bookList" class="list-group">
+                <div id="bookList" class="list-group" style="max-height: 400px; overflow-y: auto;">
                     <!-- Books will be loaded here -->
+                    <div class="text-center py-3">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Loading books...</div>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="refreshBookList()">
+                    <i class="fas fa-redo"></i> Refresh
+                </button>
             </div>
         </div>
     </div>
@@ -111,15 +124,17 @@
     <script>
         let detailIndex = 0;
         let selectedBookIndex = -1;
+        let allBooks = [];
+        let currentSearchTerm = '';
 
         function addDetail() {
             const container = document.getElementById('detailsContainer');
-            
+
             const detailHtml = `
                 <div class="detail-item border rounded p-3 mb-3" data-index="${detailIndex}">
                     <div class="row">
                         <div class="col-md-4">
-                            <label class="form-label">Book</label>
+                            <label class="form-label">Book *</label>
                             <div class="input-group">
                                 <input type="hidden" name="Details[${detailIndex}].BookID" class="book-id" required />
                                 <input type="text" class="form-control book-title" placeholder="Select book..." readonly required />
@@ -129,13 +144,13 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" name="Details[${detailIndex}].Quantity" class="form-control quantity" 
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" name="Details[${detailIndex}].Quantity" class="form-control quantity"
                                    min="1" value="1" onchange="calculateTotal(${detailIndex})" required />
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Unit Price ($)</label>
-                            <input type="number" name="Details[${detailIndex}].UnitPrice" class="form-control unit-price" 
+                            <label class="form-label">Unit Price ($) *</label>
+                            <input type="number" name="Details[${detailIndex}].UnitPrice" class="form-control unit-price"
                                    step="0.01" min="0.01" onchange="calculateTotal(${detailIndex})" required />
                         </div>
                         <div class="col-md-2">
@@ -154,13 +169,13 @@
                     <div class="row mt-2">
                         <div class="col-12">
                             <label class="form-label">Note (Optional)</label>
-                            <input type="text" name="Details[${detailIndex}].Note" class="form-control" 
+                            <input type="text" name="Details[${detailIndex}].Note" class="form-control"
                                    placeholder="Item note..." />
                         </div>
                     </div>
                 </div>
             `;
-            
+
             container.insertAdjacentHTML('beforeend', detailHtml);
             detailIndex++;
             updateSummary();
@@ -179,7 +194,7 @@
             const quantity = parseFloat(detailItem.querySelector('.quantity').value) || 0;
             const unitPrice = parseFloat(detailItem.querySelector('.unit-price').value) || 0;
             const total = quantity * unitPrice;
-            
+
             detailItem.querySelector('.total-price').value = total.toFixed(2);
             updateSummary();
         }
@@ -188,15 +203,15 @@
             const details = document.querySelectorAll('.detail-item');
             let totalItems = 0;
             let totalAmount = 0;
-            
+
             details.forEach(detail => {
                 const quantity = parseFloat(detail.querySelector('.quantity').value) || 0;
                 const total = parseFloat(detail.querySelector('.total-price').value) || 0;
-                
+
                 totalItems += quantity;
                 totalAmount += total;
             });
-            
+
             document.getElementById('totalItems').textContent = totalItems;
             document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
         }
@@ -207,39 +222,122 @@
             new bootstrap.Modal(document.getElementById('bookSelectionModal')).show();
         }
 
-        function loadBooks() {
-            // Simulate book loading - you should replace this with actual API call
+        // ✅ SỬA: Load books thực sự từ API
+        function loadBooks(searchTerm = '') {
             const bookList = document.getElementById('bookList');
+
+            // Show loading
             bookList.innerHTML = `
-                <div class="list-group-item list-group-item-action" onclick="chooseBook(1, 'Book Title 1', 'BK001')">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">Book Title 1</h6>
-                        <small>BK001</small>
+                <div class="text-center py-3">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mb-1">Author: Author Name</p>
-                    <small>Category: Fiction</small>
-                </div>
-                <div class="list-group-item list-group-item-action" onclick="chooseBook(2, 'Book Title 2', 'BK002')">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">Book Title 2</h6>
-                        <small>BK002</small>
-                    </div>
-                    <p class="mb-1">Author: Another Author</p>
-                    <small>Category: Science</small>
+                    <div class="mt-2">Loading books...</div>
                 </div>
             `;
+
+            // Call API để lấy books
+            fetch(`/Stock/GetBooks?searchTerm=${encodeURIComponent(searchTerm)}&pageSize=100`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allBooks = data.data || [];
+                        displayBooks(allBooks);
+                    } else {
+                        bookList.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Failed to load books: ${data.message || 'Unknown error'}
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="refreshBookList()">
+                                    <i class="fas fa-redo"></i> Retry
+                                </button>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading books:', error);
+                    bookList.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading books. Please try again.
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="refreshBookList()">
+                                <i class="fas fa-redo"></i> Retry
+                            </button>
+                        </div>
+                    `;
+                });
         }
 
-        function chooseBook(bookId, bookTitle, bookCode) {
+        function displayBooks(books) {
+            const bookList = document.getElementById('bookList');
+
+            if (books.length === 0) {
+                bookList.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-book fa-3x mb-3"></i>
+                        <h6>No books found</h6>
+                        <p>Try adjusting your search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const booksHtml = books.map(book => `
+                <div class="list-group-item list-group-item-action" onclick="chooseBook(${book.bookID}, '${book.title.replace(/'/g, "\\'")}', '${book.isbn}', ${book.price})">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${book.title}</h6>
+                        <small class="text-muted">${book.isbn}</small>
+                    </div>
+                    <div class="d-flex w-100 justify-content-between">
+                        <p class="mb-1">
+                            <small><strong>Author:</strong> ${book.authorName}</small>
+                        </p>
+                        <span class="badge ${book.stock > 0 ? 'bg-success' : 'bg-danger'}">
+                            Stock: ${book.stock}
+                        </span>
+                    </div>
+                    <small class="text-success"><strong>Price: $${book.price.toFixed(2)}</strong></small>
+                </div>
+            `).join('');
+
+            bookList.innerHTML = booksHtml;
+        }
+
+        function chooseBook(bookId, bookTitle, bookISBN, bookPrice) {
             if (selectedBookIndex >= 0) {
                 const detailItem = document.querySelector(`[data-index="${selectedBookIndex}"]`);
                 detailItem.querySelector('.book-id').value = bookId;
-                detailItem.querySelector('.book-title').value = `${bookTitle} (${bookCode})`;
-                
+                detailItem.querySelector('.book-title').value = `${bookTitle} (${bookISBN})`;
+
+                // Auto-fill price if unit price is empty
+                const unitPriceInput = detailItem.querySelector('.unit-price');
+                if (!unitPriceInput.value || unitPriceInput.value === '0') {
+                    unitPriceInput.value = bookPrice.toFixed(2);
+                    calculateTotal(selectedBookIndex);
+                }
+
                 bootstrap.Modal.getInstance(document.getElementById('bookSelectionModal')).hide();
                 selectedBookIndex = -1;
             }
         }
+
+        function refreshBookList() {
+            const searchTerm = document.getElementById('bookSearch').value;
+            loadBooks(searchTerm);
+        }
+
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('bookSearch').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const searchTerm = e.target.value;
+
+            // Debounce search
+            searchTimeout = setTimeout(() => {
+                loadBooks(searchTerm);
+            }, 300);
+        });
 
         // Add first detail on load
         document.addEventListener('DOMContentLoaded', function() {
@@ -254,21 +352,21 @@
                 alert('Please add at least one item to the transaction.');
                 return;
             }
-            
+
             let isValid = true;
             details.forEach(detail => {
                 const bookId = detail.querySelector('.book-id').value;
                 const quantity = detail.querySelector('.quantity').value;
                 const unitPrice = detail.querySelector('.unit-price').value;
-                
-                if (!bookId || !quantity || !unitPrice) {
+
+                if (!bookId || !quantity || !unitPrice || unitPrice <= 0) {
                     isValid = false;
                 }
             });
-            
+
             if (!isValid) {
                 e.preventDefault();
-                alert('Please fill in all required fields for each item.');
+                alert('Please fill in all required fields for each item and ensure unit price is greater than 0.');
             }
         });
     </script>

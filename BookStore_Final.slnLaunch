@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "UserManagementApi\\UserManagementApi.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "OrdersManagementAPI\\OrdersManagementAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "AdminUI\\AdminUI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BookManagementApi\\BookManagementApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "CategoryManagementApi\\CategoryManagementApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "StockManagementAPI\\StockManagementAPI.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
