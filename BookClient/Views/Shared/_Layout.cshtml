@@ -82,14 +82,13 @@
                     <!-- User Menu -->
                     <div class="navbar-nav ms-auto">
                         <!-- Shopping Cart -->
-                        <a class="nav-link position-relative" asp-controller="Carts" asp-action="Index">
+                        <!-- Trong navbar -->
+                        <!-- Shopping Cart -->
+                        <a class="nav-link" href="/Cart">
                             <i class="fas fa-shopping-cart"></i>
-                            Cart
-                            <span class="cart-count badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" id="cartCount">
-                                0
-                            </span>
+                            Giỏ hàng
+                            <span id="cart-count" class="badge bg-danger" style="display: none;">0</span>
                         </a>
-
                         <!-- User Authentication -->
                         @{
                             var userInfo = Context.Session.GetString("UserInfo");

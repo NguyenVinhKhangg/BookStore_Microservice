@@ -1,8 +1,6 @@
 ﻿using BookClient.Models.Cart;
-using BookClient.Services.CartServices;
-using System.Net.Http.Headers;
+using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json;
 
 namespace BookClient.Services.CartServices
 {
@@ -10,410 +8,204 @@ namespace BookClient.Services.CartServices
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<CartService> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly string _cartApiUrl;
-        private const string TokenKey = "auth_token";
-        private const string UserIdKey = "user_id";
 
-        public CartService(
-            HttpClient httpClient,
-            ILogger<CartService> logger,
-            IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor)
+        public CartService(IHttpClientFactory httpClientFactory, ILogger<CartService> logger)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("CartAPI");
             _logger = logger;
-            _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
-
-            var gatewayBaseUrl = _configuration["ApiGateway:BaseUrl"] ?? "https://localhost:7000";
-            _cartApiUrl = $"{gatewayBaseUrl}/gateway/carts";
-
-            _logger.LogInformation($"🛒 CartService initialized with Gateway: {gatewayBaseUrl}");
         }
 
-        private async Task<string?> GetCurrentUserTokenAsync()
-        {
-            var session = _httpContextAccessor.HttpContext?.Session;
-            return session?.GetString(TokenKey);
-        }
-
-        private async Task<int?> GetCurrentUserIdAsync()
-        {
-            var session = _httpContextAccessor.HttpContext?.Session;
-            var userIdStr = session?.GetString(UserIdKey);
-            return int.TryParse(userIdStr, out var userId) ? userId : null;
-        }
-
-        private async Task SetAuthorizationHeaderAsync()
-        {
-            var token = await GetCurrentUserTokenAsync();
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-
-        public async Task<CartListResponseModel> GetUserCartAsync()
+        public async Task<CartViewModel> GetCartByUserIdAsync(int userId)
         {
             try
             {
-                var userId = await GetCurrentUserIdAsync();
-                if (!userId.HasValue)
+                var response = await _httpClient.GetAsync($"api/Carts/user/{userId}");
+                if (response.IsSuccessStatusCode)
                 {
-                    return new CartListResponseModel
-                    {
-                        Success = false,
-                        Message = "User not logged in"
-                    };
+                    var content = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<CartViewModel>(content) ?? new CartViewModel { UserID = userId };
                 }
 
-                await SetAuthorizationHeaderAsync();
+                _logger.LogWarning($"Failed to get cart for user {userId}: {response.StatusCode}");
+                return new CartViewModel { UserID = userId };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting cart for user {userId}");
+                return new CartViewModel { UserID = userId };
+            }
+        }
 
-                _logger.LogInformation($"🛒 Getting cart for user: {userId.Value}");
+        public async Task<CartItemViewModel> AddToCartAsync(int userId, AddToCartRequest request)
+        {
+            try
+            {
+                // ✅ FIX: Đầu tiên get hoặc tạo cart cho user
+                var cart = await GetCartByUserIdAsync(userId);
 
-                // Get user's cart items via OData filter
-                var url = $"{_cartApiUrl}?$filter=userID eq {userId.Value}";
-                var response = await _httpClient.GetAsync(url);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                if (cart.CartID == 0)
+                {
+                    // Tạo cart mới nếu chưa có
+                    cart = await CreateCartForUserAsync(userId);
+                }
 
-                _logger.LogInformation($"📡 Cart API Response Status: {response.StatusCode}");
+                // ✅ FIX: Tạo correct DTO structure for CartAPI
+                var cartItemDto = new
+                {
+                    CartID = cart.CartID,  // ✅ Sử dụng CartID không phải UserId
+                    BookID = request.BookID,
+                    Quantity = request.Quantity,
+                    Price = request.Price
+                };
+
+                var json = JsonConvert.SerializeObject(cartItemDto);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogInformation($"Adding item to cart. CartID: {cart.CartID}, BookID: {request.BookID}, Quantity: {request.Quantity}, Price: {request.Price}");
+
+                var response = await _httpClient.PostAsync("api/Carts/items", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonOptions = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    // Parse cart items from API
-                    var cartItems = JsonSerializer.Deserialize<List<CartApiResponse>>(responseContent, jsonOptions) ?? new List<CartApiResponse>();
-
-                    // Enrich with book information
-                    var cartViewModels = new List<CartViewModel>();
-                    foreach (var item in cartItems)
-                    {
-                        var bookInfo = await GetBookInfoAsync(item.BookID);
-                        if (bookInfo != null)
-                        {
-                            cartViewModels.Add(new CartViewModel
-                            {
-                                CartID = item.CartID,
-                                UserID = item.UserID,
-                                BookID = item.BookID,
-                                BookTitle = bookInfo.Title,
-                                AuthorName = bookInfo.AuthorName,
-                                ImageUrl = bookInfo.ImageUrl,
-                                CategoryName = bookInfo.CategoryName,
-                                UnitPrice = bookInfo.Price,
-                                Discount = bookInfo.Discount,
-                                Quantity = item.Quantity,
-                                Stock = bookInfo.Stock,
-                                CreatedAt = item.CreatedAt
-                            });
-                        }
-                    }
-
-                    _logger.LogInformation($"✅ Retrieved {cartViewModels.Count} cart items successfully");
-
-                    return new CartListResponseModel
-                    {
-                        Success = true,
-                        Data = cartViewModels,
-                        TotalCount = cartViewModels.Count
-                    };
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<CartItemViewModel>(responseContent) ?? new CartItemViewModel();
                 }
-                else
-                {
-                    _logger.LogError($"❌ Cart API failed: {response.StatusCode} - {responseContent}");
-                    return new CartListResponseModel
-                    {
-                        Success = false,
-                        Message = $"Failed to get cart: {response.StatusCode}"
-                    };
-                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to add item to cart: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Failed to add item to cart: {response.ReasonPhrase}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "💥 Exception getting user cart");
-                return new CartListResponseModel
-                {
-                    Success = false,
-                    Message = "An error occurred while retrieving cart."
-                };
+                _logger.LogError(ex, $"Error adding item to cart for user {userId}");
+                throw;
             }
         }
 
-        public async Task<CartActionResponseModel> AddToCartAsync(AddToCartViewModel model)
+        private async Task<CartViewModel> CreateCartForUserAsync(int userId)
         {
             try
             {
-                var userId = await GetCurrentUserIdAsync();
-                if (!userId.HasValue)
-                {
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = "User not logged in"
-                    };
-                }
+                var createCartDto = new { UserID = userId };
+                var json = JsonConvert.SerializeObject(createCartDto);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                await SetAuthorizationHeaderAsync();
-
-                _logger.LogInformation($"🛒 Adding book {model.BookID} to cart for user: {userId.Value}");
-
-                var cartData = new
-                {
-                    userID = userId.Value,
-                    bookID = model.BookID,
-                    quantity = model.Quantity
-                };
-
-                var jsonContent = JsonSerializer.Serialize(cartData);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync(_cartApiUrl, content);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                var response = await _httpClient.PostAsync("api/Carts", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var totalItems = await GetCartItemCountAsync();
-
-                    _logger.LogInformation($"✅ Successfully added book {model.BookID} to cart");
-
-                    return new CartActionResponseModel
-                    {
-                        Success = true,
-                        Message = "Item added to cart successfully",
-                        TotalItems = totalItems
-                    };
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<CartViewModel>(responseContent) ?? new CartViewModel { UserID = userId };
                 }
-                else
-                {
-                    _logger.LogError($"❌ Add to cart failed: {response.StatusCode} - {responseContent}");
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = $"Failed to add item to cart: {response.StatusCode}"
-                    };
-                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to create cart: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Failed to create cart: {response.ReasonPhrase}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "💥 Exception adding to cart");
-                return new CartActionResponseModel
-                {
-                    Success = false,
-                    Message = "An error occurred while adding item to cart."
-                };
+                _logger.LogError(ex, $"Error creating cart for user {userId}");
+                throw;
             }
         }
 
-        public async Task<CartActionResponseModel> UpdateCartItemAsync(UpdateCartItemViewModel model)
+        public async Task<CartItemViewModel> UpdateCartItemAsync(UpdateCartItemRequest request)
         {
             try
             {
-                var userId = await GetCurrentUserIdAsync();
-                if (!userId.HasValue)
+                var updateDto = new
                 {
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = "User not logged in"
-                    };
-                }
-
-                await SetAuthorizationHeaderAsync();
-
-                _logger.LogInformation($"🛒 Updating cart item {model.CartID} quantity to {model.Quantity}");
-
-                var updateData = new
-                {
-                    cartID = model.CartID,
-                    quantity = model.Quantity
+                    CartItemID = request.CartItemID,
+                    Quantity = request.Quantity,
+                    Price = request.Price // ✅ Include price if provided
                 };
 
-                var jsonContent = JsonSerializer.Serialize(updateData);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                var json = JsonConvert.SerializeObject(updateDto);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PutAsync($"{_cartApiUrl}/{model.CartID}", content);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                var response = await _httpClient.PutAsync($"api/Carts/items/{request.CartItemID}", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation($"✅ Successfully updated cart item {model.CartID}");
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<CartItemViewModel>(responseContent) ?? new CartItemViewModel();
+                }
 
-                    return new CartActionResponseModel
-                    {
-                        Success = true,
-                        Message = "Cart item updated successfully"
-                    };
-                }
-                else
-                {
-                    _logger.LogError($"❌ Update cart failed: {response.StatusCode} - {responseContent}");
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = $"Failed to update cart item: {response.StatusCode}"
-                    };
-                }
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to update cart item {request.CartItemID}: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Failed to update cart item: {response.ReasonPhrase}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "💥 Exception updating cart item");
-                return new CartActionResponseModel
-                {
-                    Success = false,
-                    Message = "An error occurred while updating cart item."
-                };
+                _logger.LogError(ex, $"Error updating cart item {request.CartItemID}");
+                throw;
             }
         }
 
-        public async Task<CartActionResponseModel> RemoveFromCartAsync(int cartId)
+        public async Task<bool> RemoveFromCartAsync(int cartItemId)
         {
             try
             {
-                await SetAuthorizationHeaderAsync();
+                var response = await _httpClient.DeleteAsync($"api/Carts/items/{cartItemId}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error removing cart item {cartItemId}");
+                return false;
+            }
+        }
 
-                _logger.LogInformation($"🛒 Removing cart item {cartId}");
+        public async Task<bool> ClearCartAsync(int userId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/Carts/user/{userId}/clear");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error clearing cart for user {userId}");
+                return false;
+            }
+        }
 
-                var response = await _httpClient.DeleteAsync($"{_cartApiUrl}/{cartId}");
-                var responseContent = await response.Content.ReadAsStringAsync();
-
+        public async Task<int> GetCartItemCountAsync(int userId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/Carts/user/{userId}/count");
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation($"✅ Successfully removed cart item {cartId}");
-
-                    return new CartActionResponseModel
-                    {
-                        Success = true,
-                        Message = "Item removed from cart successfully"
-                    };
+                    var content = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<int>(content);
                 }
-                else
-                {
-                    _logger.LogError($"❌ Remove from cart failed: {response.StatusCode} - {responseContent}");
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = $"Failed to remove item from cart: {response.StatusCode}"
-                    };
-                }
+                return 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "💥 Exception removing from cart");
-                return new CartActionResponseModel
-                {
-                    Success = false,
-                    Message = "An error occurred while removing item from cart."
-                };
-            }
-        }
-
-        public async Task<CartActionResponseModel> ClearCartAsync()
-        {
-            try
-            {
-                var userId = await GetCurrentUserIdAsync();
-                if (!userId.HasValue)
-                {
-                    return new CartActionResponseModel
-                    {
-                        Success = false,
-                        Message = "User not logged in"
-                    };
-                }
-
-                // Get all cart items and delete them
-                var cartItems = await GetUserCartAsync();
-                if (cartItems.Success && cartItems.Data != null)
-                {
-                    foreach (var item in cartItems.Data)
-                    {
-                        await RemoveFromCartAsync(item.CartID);
-                    }
-                }
-
-                return new CartActionResponseModel
-                {
-                    Success = true,
-                    Message = "Cart cleared successfully"
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "💥 Exception clearing cart");
-                return new CartActionResponseModel
-                {
-                    Success = false,
-                    Message = "An error occurred while clearing cart."
-                };
-            }
-        }
-
-        public async Task<int> GetCartItemCountAsync()
-        {
-            try
-            {
-                var cart = await GetUserCartAsync();
-                return cart.Success && cart.Data != null ? cart.Data.Sum(i => i.Quantity) : 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "💥 Exception getting cart item count");
+                _logger.LogError(ex, $"Error getting cart count for user {userId}");
                 return 0;
             }
         }
 
-        private async Task<BookInfo?> GetBookInfoAsync(int bookId)
+        public async Task<bool> IsBookInCartAsync(int userId, int bookId)
         {
             try
             {
-                var gatewayBaseUrl = _configuration["ApiGateway:BaseUrl"] ?? "https://localhost:7000";
-                var bookApiUrl = $"{gatewayBaseUrl}/gateway/books/{bookId}/detailBook";
-
-                var response = await _httpClient.GetAsync(bookApiUrl);
+                var response = await _httpClient.GetAsync($"api/Carts/user/{userId}/book/{bookId}/exists");
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var jsonOptions = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    return JsonSerializer.Deserialize<BookInfo>(responseContent, jsonOptions);
+                    var content = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<bool>(content);
                 }
-                return null;
+                return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"💥 Exception getting book info for {bookId}");
-                return null;
+                _logger.LogError(ex, $"Error checking if book {bookId} is in cart for user {userId}");
+                return false;
             }
-        }
-
-        // Helper classes
-        private class CartApiResponse
-        {
-            public int CartID { get; set; }
-            public int UserID { get; set; }
-            public int BookID { get; set; }
-            public int Quantity { get; set; }
-            public DateTime CreatedAt { get; set; }
-        }
-
-        private class BookInfo
-        {
-            public string Title { get; set; } = "";
-            public string AuthorName { get; set; } = "";
-            public string? ImageUrl { get; set; }
-            public string CategoryName { get; set; } = "";
-            public decimal Price { get; set; }
-            public decimal Discount { get; set; }
-            public int Stock { get; set; }
         }
     }
 }

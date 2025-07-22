@@ -1,5 +1,6 @@
 using CartManagementApi.Data;
 using CartManagementApi.Models;
+using CartManagementApi.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,18 +18,28 @@ namespace CartManagementApi.Repositories
 
         public async Task<IEnumerable<Cart>> GetAllAsync()
         {
-            return await _context.Carts.ToListAsync();
+            return await _context.Carts.Include(c => c.CartItems).ToListAsync();
         }
 
         public async Task<Cart?> GetByIdAsync(int cartId)
         {
-            return await _context.Carts.FirstOrDefaultAsync(c => c.CartID == cartId);
+            return await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.CartID == cartId);
         }
 
-        public async Task AddAsync(Cart cart)
+        public async Task<Cart?> GetByUserIdAsync(int userId)
+        {
+            return await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserID == userId);
+        }
+
+        public async Task<Cart> AddAsync(Cart cart)
         {
             _context.Carts.Add(cart);
             await _context.SaveChangesAsync();
+            return cart;
         }
 
         public async Task UpdateAsync(Cart cart)

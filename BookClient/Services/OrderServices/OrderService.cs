@@ -65,7 +65,7 @@ namespace BookClient.Services
                 var cartResponse = await _httpClient.GetAsync($"Carts/{cartId}");
                 cartResponse.EnsureSuccessStatusCode();
                 var cartContent = await cartResponse.Content.ReadAsStringAsync();
-                var cartData = JsonConvert.DeserializeObject<CartViewModel>(cartContent);
+                var cartData = Newtonsoft.Json.JsonConvert.DeserializeObject<CartViewModel>(cartContent);
 
                 if (cartData == null) return new Order();
 
