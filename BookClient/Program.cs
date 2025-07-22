@@ -1,3 +1,4 @@
+using BookClient.Services;
 using BookClient.Services.AuthServices;
 using BookClient.Services.UserServices;
 using Microsoft.AspNetCore.DataProtection;
@@ -65,6 +66,7 @@ builder.Services.AddHttpClient("OrderAPI", client =>
 // Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 

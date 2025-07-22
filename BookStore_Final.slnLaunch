@@ -26,6 +26,10 @@
       {
         "Path": "StockManagementAPI\\StockManagementAPI.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "BookClient\\BookClient.csproj",
+        "Action": "Start"
       }
     ]
   }

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
-using AdminUI.Models; // Nếu bạn đã copy model vào đây
+using AdminUI.Models;
+using AdminUI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -7,41 +8,39 @@ using System.Threading.Tasks;
 
 namespace AdminUI.Controllers
 {
-    [Route("Orders")] // Thêm route gốc cho controller
+    [Route("Orders")]
     public class OrderManagementController : Controller
     {
-        private readonly HttpClient _httpClient;
+        private readonly IOrderService _orderService;
 
-        public OrderManagementController(IHttpClientFactory factory)
+        public OrderManagementController(IOrderService orderService)
         {
-            _httpClient = factory.CreateClient("OrderAPI");
+            _orderService = orderService;
         }
 
-        [HttpGet("Index")] // Định nghĩa rõ route cho action
-        public async Task<IActionResult> Index()
+        [HttpGet("Index")]
+        public async Task<IActionResult> Index(string searchTerm = "", string statusFilter = "", int page = 1, int pageSize = 10)
         {
-            var response = await _httpClient.GetAsync("Orders");
-            if (!response.IsSuccessStatusCode)
-            {
-                return View(new List<Order>());
-            }
+            var filter = new { SearchTerm = searchTerm, StatusFilter = statusFilter };
+            var result = await _orderService.GetOrdersAsync(searchTerm, statusFilter, page, pageSize);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var orders = JsonConvert.DeserializeObject<List<Order>>(content);
-            return View(orders ?? new List<Order>());
+            ViewBag.TotalCount = result.TotalCount;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)result.TotalCount / pageSize);
+            ViewBag.Filter = filter;
+
+            return View(result.Orders);
         }
 
-        [HttpGet("Details/{id}")] // Định nghĩa route cho xem chi tiết đơn hàng
+        [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(int id)
         {
-            var response = await _httpClient.GetAsync($"Orders/{id}");
-            if (!response.IsSuccessStatusCode)
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if (order == null)
             {
                 return NotFound();
             }
-
-            var content = await response.Content.ReadAsStringAsync();
-            var order = JsonConvert.DeserializeObject<Order>(content);
             return View(order);
         }
     }
