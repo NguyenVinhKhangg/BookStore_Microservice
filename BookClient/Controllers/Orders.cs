@@ -40,6 +40,32 @@ namespace BookClient.Controllers
             ViewBag.CurrentPage = page;
             return View("~/Views/Orders/Order.cshtml", orders);
         }
+
+        // ✅ View xác nhận đơn hàng
+        public async Task<IActionResult> ConfirmPage(int id)
+        {
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if (order == null || order.OrderID == 0)
+            {
+                return NotFound();
+            }
+            return View("~/Views/Orders/Confirm.cshtml", order);
+        }
+
+        // ✅ Gửi xác nhận đơn hàng
+        [HttpPost]
+        public async Task<IActionResult> Confirm(int id)
+        {
+            var success = await _orderService.ConfirmOrderAsync(id);
+            if (success)
+            {
+                TempData["Success"] = "Xác nhận đơn hàng thành công!";
+                return RedirectToAction("Details", new { id });
+            }
+
+            TempData["Error"] = "Lỗi khi xác nhận đơn hàng!";
+            return RedirectToAction("ConfirmPage", new { id });
+        }
     }
 
     public class CartViewModel

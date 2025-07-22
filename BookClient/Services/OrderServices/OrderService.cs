@@ -109,6 +109,20 @@ namespace BookClient.Services
                 return new List<OrderItem>();
             }
         }
+
+        public async Task<bool> ConfirmOrderAsync(int orderId)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsync($"Orders/{orderId}/confirm", null);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi xác nhận đơn hàng ID {orderId}");
+                return false;
+            }
+        }
     }
 
     // Model để xử lý kết quả phân trang từ API

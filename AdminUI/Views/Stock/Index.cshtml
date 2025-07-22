@@ -1,4 +1,4 @@
-@model IEnumerable<AdminUI.Models.Stock.StockTransactionViewModel>
+﻿@model IEnumerable<AdminUI.Models.Stock.StockTransactionViewModel>
 @{
     ViewData["Title"] = "Stock Management";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -249,81 +249,114 @@
     </div>
 
     <!-- Pagination -->
-    @if (totalPages > 1)
+    @if (ViewBag.TotalCount > ViewBag.PageSize)
     {
-        <nav aria-label="Stock pagination">
-            <ul class="pagination">
-                @if (currentPage > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { 
-                            SearchTerm = filter?.SearchTerm,
-                            TransactionType = filter?.TransactionType,
-                            Status = filter?.Status,
-                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
-                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
-                            PageSize = pageSize, 
-                            Page = 1 })">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { 
-                            SearchTerm = filter?.SearchTerm,
-                            TransactionType = filter?.TransactionType,
-                            Status = filter?.Status,
-                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
-                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
-                            PageSize = pageSize, 
-                            Page = currentPage - 1 })">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                    </li>
-                }
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Stock transactions pagination">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">
+                                Hiển thị @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1)
+                                đến @Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalCount)
+                                của @ViewBag.TotalCount giao dịch
+                            </small>
+                        </div>
 
-                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                {
-                    <li class="page-item @(i == currentPage ? "active" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { 
-                            SearchTerm = filter?.SearchTerm,
-                            TransactionType = filter?.TransactionType,
-                            Status = filter?.Status,
-                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
-                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
-                            PageSize = pageSize, 
-                            Page = i })">@i</a>
-                    </li>
-                }
+                        <ul class="pagination pagination-sm mb-0">
+                            <!-- Previous Button -->
+                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@GetPageUrl(ViewBag.CurrentPage - 1)" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
 
-                @if (currentPage < totalPages)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { 
-                            SearchTerm = filter?.SearchTerm,
-                            TransactionType = filter?.TransactionType,
-                            Status = filter?.Status,
-                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
-                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
-                            PageSize = pageSize, 
-                            Page = currentPage + 1 })">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { 
-                            SearchTerm = filter?.SearchTerm,
-                            TransactionType = filter?.TransactionType,
-                            Status = filter?.Status,
-                            FromDate = filter?.FromDate?.ToString("yyyy-MM-dd"),
-                            ToDate = filter?.ToDate?.ToString("yyyy-MM-dd"),
-                            PageSize = pageSize, 
-                            Page = totalPages })">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                }
-            </ul>
-        </nav>
+                            <!-- Page Numbers -->
+                            @{
+                                int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                                int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(1)">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < ViewBag.TotalPages)
+                            {
+                                @if (endPage < ViewBag.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(ViewBag.TotalPages)">@ViewBag.TotalPages</a>
+                                </li>
+                            }
+
+                            <!-- Next Button -->
+                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@GetPageUrl(ViewBag.CurrentPage + 1)" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    }
+    @{
+        string GetPageUrl(int page)
+        {
+            var filter = ViewBag.Filter as AdminUI.Models.Stock.StockSearchFilterViewModel;
+            var queryParams = new List<string>();
+
+            queryParams.Add($"page={page}");
+            queryParams.Add($"pageSize={filter?.PageSize ?? 10}");
+
+            if (!string.IsNullOrEmpty(filter?.SearchTerm))
+                queryParams.Add($"searchTerm={Uri.EscapeDataString(filter.SearchTerm)}");
+
+            if (!string.IsNullOrEmpty(filter?.TransactionType))
+                queryParams.Add($"transactionType={filter.TransactionType}");
+
+            if (!string.IsNullOrEmpty(filter?.Status))
+                queryParams.Add($"status={filter.Status}");
+
+            if (filter?.CreatedBy.HasValue == true)
+                queryParams.Add($"createdBy={filter.CreatedBy}");
+
+            if (filter?.FromDate.HasValue == true)
+                queryParams.Add($"fromDate={filter.FromDate.Value:yyyy-MM-dd}");
+
+            if (filter?.ToDate.HasValue == true)
+                queryParams.Add($"toDate={filter.ToDate.Value:yyyy-MM-dd}");
+
+            if (!string.IsNullOrEmpty(filter?.SortBy))
+                queryParams.Add($"sortBy={filter.SortBy}");
+
+            if (!string.IsNullOrEmpty(filter?.SortOrder))
+                queryParams.Add($"sortOrder={filter.SortOrder}");
+
+            return Url.Action("Index", "Stock") + "?" + string.Join("&", queryParams);
+        }
     }
 </div>
 

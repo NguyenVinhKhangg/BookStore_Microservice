@@ -253,6 +253,26 @@
 
     // StockManagement Routes
     {
+      "DownstreamPathTemplate": "/api/stock/count",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7058
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/stock/count",
+      "UpstreamHttpMethod": [ "GET" ],
+      
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      }
+    },
+    {
       "DownstreamPathTemplate": "/odata/transactions",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [

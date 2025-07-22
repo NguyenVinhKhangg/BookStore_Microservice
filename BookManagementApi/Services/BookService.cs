@@ -86,7 +86,12 @@ namespace BookManagementApi.Services
         {
             var book = await _repo.GetByIdAsync(bookId);
             if (book == null) return false;
+
+            // ✅ SỬA: Lưu stock hiện tại trước khi mapping
+            var currentStock = book.Stock;
+
             _mapper.Map(dto, book);
+            book.Stock = currentStock;
             return await _repo.UpdateAsync(book);
         }
 
