@@ -58,16 +58,18 @@
 
                 <!-- Pricing -->
                 <div class="book-pricing mb-4">
+                    @{
+                        var currentPrice = Model.Discount > 0 ? Model.Price * (1 - Model.Discount / 100) : Model.Price;
+                    }
                     @if (Model.Discount > 0)
                     {
-                        var discountedPrice = Model.Price * (1 - Model.Discount / 100);
                         <div class="price-container">
-                            <span class="current-price">@discountedPrice.ToString("N0") VND</span>
+                            <span class="current-price">@currentPrice.ToString("N0") VND</span>
                             <span class="original-price">@Model.Price.ToString("N0") VND</span>
                             <span class="discount-percent">@Model.Discount.ToString("0")% OFF</span>
                         </div>
                         <div class="savings">
-                            You save: <strong>@((Model.Price - discountedPrice).ToString("N0")) VND</strong>
+                            You save: <strong>@((Model.Price - currentPrice).ToString("N0")) VND</strong>
                         </div>
                     }
                     else
@@ -144,7 +146,8 @@
                         <div class="col-md-8">
                             @if (Model.Stock > 0 && Model.IsActive)
                             {
-                                <form method="post" asp-controller="Carts" asp-action="AddToCart" class="add-to-cart-form">
+                                <!-- Form-based Add to Cart -->
+                                <form method="post" asp-controller="Cart" asp-action="AddToCartForm" class="add-to-cart-form mb-3">
                                     <div class="quantity-selector mb-3">
                                         <label for="quantity">Quantity:</label>
                                         <div class="input-group quantity-input">
@@ -155,11 +158,13 @@
                                     </div>
 
                                     <input type="hidden" name="bookId" value="@Model.BookID" />
+                                    <input type="hidden" name="price" value="@currentPrice" />
 
                                     <div class="action-buttons">
                                         <button type="submit" class="btn btn-primary btn-lg add-to-cart-btn">
                                             <i class="fas fa-shopping-cart"></i> Add to Cart
                                         </button>
+                                        
                                         <button type="button" class="btn btn-success btn-lg buy-now-btn">
                                             <i class="fas fa-bolt"></i> Buy Now
                                         </button>
@@ -410,7 +415,6 @@
 
             // Wishlist button
             $('.wishlist-btn').click(function() {
-                // Add to wishlist functionality
                 alert('Added to wishlist!');
             });
 
@@ -423,7 +427,6 @@
                         url: window.location.href
                     });
                 } else {
-                    // Fallback: copy to clipboard
                     navigator.clipboard.writeText(window.location.href);
                     alert('Link copied to clipboard!');
                 }
@@ -449,6 +452,73 @@
                     $('#related-books-container').html('<p class="text-muted">Unable to load related books.</p>');
                 }
             });
+        }
+
+        // AJAX Add to Cart function
+         function addToCartAjax(bookId, price) {
+            var quantity = parseInt($('#quantity').val()) || 1;
+
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    bookID: bookId,
+                    quantity: quantity,
+                    price: price
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartCount(data.totalItems);
+                    showToast('success', data.message);
+                } else if (data.requiresLogin) {
+                    // ✅ Handle authentication required
+                    showLoginRequiredModal(data.redirectUrl, data.message);
+                } else {
+                    showToast('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('error', 'Có lỗi xảy ra khi thêm sách vào giỏ hàng.');
+            });
+        }
+
+        // ✅ Add the same modal functions as in Index.cshtml
+        function showLoginRequiredModal(redirectUrl, message) {
+            // Same implementation as above
+        }
+
+        function closeLoginModal() {
+            // Same implementation as above
+        }
+
+        function updateCartCount(count) {
+            // Same implementation as above
+        }
+
+        function showToast(type, message) {
+            // Same implementation as above
+        }
+
+        function updateCartCount() {
+            fetch('/Cart/GetCartCount')
+                .then(response => response.json())
+                .then(data => {
+                    var cartCountElement = document.querySelector('#cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = data.count;
+                    }
+                });
+        }
+
+        function showToast(type, message) {
+            // Simple alert fallback
+            alert(message);
         }
     </script>
 }

@@ -326,7 +326,7 @@
                 });
             });
 
-            // ✅ ENHANCED: Add to cart AJAX with authentication check
+            // ✅ ENHANCED: Add to cart with authentication check
             $('.add-to-cart-form').submit(function(e) {
                 e.preventDefault();
 
@@ -334,16 +334,31 @@
                 const button = form.find('.add-to-cart-btn');
                 const originalText = button.html();
 
+                // Get form data
+                const bookId = form.find('input[name="BookID"]').val();
+                const quantity = parseInt(form.find('input[name="Quantity"]').val()) || 1;
+
+                // Calculate price (including discount)
+                const priceElement = form.closest('.book-card').find('.current-price');
+                const priceText = priceElement.text().replace(/[^\d]/g, ''); // Remove non-digit characters
+                const price = parseInt(priceText) || 0;
+
                 // Show loading state
                 button.prop('disabled', true);
                 button.html('<i class="fas fa-spinner fa-spin"></i> Adding...');
 
+                // ✅ Send AJAX request with proper data structure
                 $.ajax({
-                    url: form.attr('action'),
+                    url: '/Cart/AddToCart',
                     type: 'POST',
-                    data: form.serialize(),
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        bookID: parseInt(bookId),
+                        quantity: quantity,
+                        price: price
+                    }),
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                     },
                     success: function(response) {
                         if (response.success) {
@@ -351,10 +366,8 @@
                             button.removeClass('btn-success').addClass('btn-success');
                             button.html('<i class="fas fa-check"></i> Added!');
 
-                            // Update cart count if available
-                            if (response.totalItems) {
-                                updateCartCount(response.totalItems);
-                            }
+                            // Update cart count
+                            updateCartCount(response.totalItems);
 
                             // Reset button after 2 seconds
                             setTimeout(function() {
@@ -377,33 +390,37 @@
                             button.html(originalText);
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
                         button.prop('disabled', false);
                         button.html(originalText);
                         showToast('error', 'An error occurred while adding item to cart');
                     }
                 });
             });
+
+            // Load cart count on page load
+            loadCartCount();
         });
 
-        // ✅ NEW: Show login required modal
+        // ✅ ENHANCED: Show login required modal
         function showLoginRequiredModal(redirectUrl, message) {
             const modal = $(`
-                <div class="login-required-modal" id="loginModal">
+                <div class="login-required-modal" id="loginModal" style="display: flex;">
                     <div class="login-modal-content">
                         <div class="mb-3">
                             <i class="fas fa-lock fa-3x text-primary mb-3"></i>
-                            <h4>Login Required</h4>
-                            <p class="text-muted">${message || 'Please login to add items to your cart.'}</p>
+                            <h4>Yêu cầu đăng nhập</h4>
+                            <p class="text-muted">${message || 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.'}</p>
                         </div>
                         <div class="modal-actions">
                             <a href="${redirectUrl}" class="btn btn-primary me-2">
                                 <i class="fas fa-sign-in-alt me-1"></i>
-                                Login Now
+                                Đăng nhập ngay
                             </a>
                             <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">
                                 <i class="fas fa-times me-1"></i>
-                                Continue Shopping
+                                Tiếp tục mua sắm
                             </button>
                         </div>
                     </div>
@@ -414,32 +431,36 @@
             modal.fadeIn(300);
         }
 
-        // ✅ NEW: Close login modal
+        // ✅ Close login modal
         function closeLoginModal() {
             $('#loginModal').fadeOut(300, function() {
                 $(this).remove();
             });
         }
 
-        // ✅ ENHANCED: Update cart count
+        // ✅ Update cart count in header
         function updateCartCount(count) {
-            $('#cartCount').text(count || 0);
+            const cartCountElement = $('#cart-count');
             if (count > 0) {
-                $('#cartCount').show().addClass('animate__animated animate__pulse');
-                setTimeout(() => $('#cartCount').removeClass('animate__animated animate__pulse'), 1000);
+                cartCountElement.text(count).show();
+                cartCountElement.addClass('animate__animated animate__pulse');
+                setTimeout(() => cartCountElement.removeClass('animate__animated animate__pulse'), 1000);
             } else {
-                $('#cartCount').hide();
+                cartCountElement.hide();
             }
         }
 
-        // ✅ ENHANCED: Toast notification function
+        // ✅ Enhanced toast notification
         function showToast(type, message) {
             const toastId = 'toast_' + Date.now();
+            const iconClass = type === 'success' ? 'check' : 'exclamation-triangle';
+            const bgClass = type === 'success' ? 'success' : 'danger';
+
             const toast = $(`
-                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+                <div class="toast align-items-center text-white bg-${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
                     <div class="d-flex">
                         <div class="toast-body">
-                            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+                            <i class="fas fa-${iconClass} me-2"></i>
                             ${message}
                         </div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -447,7 +468,7 @@
                 </div>
             `);
 
-            // Add to page
+            // Add toast container if not exists
             if (!$('.toast-container').length) {
                 $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>');
             }
@@ -466,14 +487,10 @@
             });
         }
 
-        // ✅ NEW: Load cart count on page load
-        $(document).ready(function() {
-            loadCartCount();
-        });
-
+        // ✅ Load cart count on page load
         function loadCartCount() {
             $.ajax({
-                url: '@Url.Action("GetCartCount", "Carts")',
+                url: '/Cart/GetCartCount',
                 type: 'GET',
                 success: function(response) {
                     updateCartCount(response.count);

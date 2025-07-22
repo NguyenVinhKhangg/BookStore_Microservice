@@ -2,12 +2,15 @@
 
 namespace CartManagementApi.DTOs
 {
-    public class CartCreateDto
+    public class CartUpdateDto
     {
+        [Required]
+        public int CartID { get; set; }
+
         [Required(ErrorMessage = "UserID là bắt buộc")]
         public int UserID { get; set; }
 
-        // Optional: Cho phép tạo cart với items ngay lập tức
-        public List<CartItemCreateDto>? CartItems { get; set; }
+        // Có thể cập nhật thời gian modified
+        public DateTime? ModifiedAt { get; set; }
     }
 }

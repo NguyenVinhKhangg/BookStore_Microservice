@@ -1,0 +1,235 @@
+﻿@model BookClient.Models.Cart.CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+}
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</h2>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.CartItems != null && Model.CartItems.Any())
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Cart Items -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Sách trong giỏ hàng (@Model.TotalItems sản phẩm)</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="cart-item border-bottom py-3" data-cart-item-id="@item.CartItemID">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="@(!string.IsNullOrEmpty(item.BookImageUrl) ? item.BookImageUrl : "/images/no-image.png")"
+                                             alt="@item.BookTitle" class="img-fluid rounded">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">@item.BookTitle</h6>
+                                        <small class="text-muted">Tác giả: @item.AuthorName</small><br>
+                                        <small class="text-muted">ISBN: @item.BookISBN</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="price-info">
+                                            @if (item.BookDiscount.HasValue && item.BookDiscount > 0)
+                                            {
+                                                <span class="text-danger fw-bold">@item.DiscountedPrice.ToString("C0")</span>
+                                    
+                                                <br>
+                                                <small class="text-muted"><s>@item.Price.ToString("C0")</s></small>
+
+                                                <br>
+                                                <small class="badge bg-danger">-@item.BookDiscount%</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold">@item.Price.ToString("C0")</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="quantity-controls">
+                                            <div class="input-group">
+                                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                        onclick="updateQuantity(@item.CartItemID, @(item.Quantity - 1))">
+                                                    -
+                                                </button>
+                                                <input type="number" class="form-control text-center"
+                                                       value="@item.Quantity" min="1" max="99"
+                                                       onchange="updateQuantity(@item.CartItemID, this.value)">
+                                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                        onclick="updateQuantity(@item.CartItemID, @(item.Quantity + 1))">
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold total-price">
+                                                @(item.BookDiscount.HasValue? item.TotalDiscountedPrice.ToString("C0") : item.TotalPrice.ToString("C0"))
+                                            </span>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="removeItem(@item.CartItemID)" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline-danger" onclick="clearCart()">
+                            <i class="fas fa-trash"></i> Xóa tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Cart Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính:</span>
+                            <span id="subtotal">@Model.TotalAmount.ToString("C0")</span>
+                        </div>
+                        @if (Model.TotalDiscount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 text-success">
+                                <span>Giảm giá:</span>
+                                <span id="discount">-@Model.TotalDiscount.ToString("C0")</span>
+                            </div>
+                        }
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Tổng cộng:</strong>
+                            <strong id="total" class="text-primary">@Model.FinalAmount.ToString("C0")</strong>
+                        </div>
+
+                        <a href="/Order/Checkout" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-credit-card"></i> Thanh toán
+                        </a>
+                        <a href="/Books" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Giỏ hàng của bạn đang trống</h4>
+                    <p class="text-muted">Hãy thêm một số sách vào giỏ hàng của bạn!</p>
+                    <a href="/Books" class="btn btn-primary">
+                        <i class="fas fa-book"></i> Khám phá sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function updateQuantity(cartItemId, newQuantity) {
+            if (newQuantity < 1) return;
+
+            fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    cartItemId: cartItemId,
+                    quantity: parseInt(newQuantity)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Reload to update totals
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật số lượng.');
+            });
+        }
+
+        function removeItem(cartItemId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa sách này khỏi giỏ hàng?')) return;
+
+            fetch('/Cart/RemoveItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `cartItemId=${cartItemId}&__RequestVerificationToken=${$('input[name="__RequestVerificationToken"]').val()}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa sách.');
+            });
+        }
+
+        function clearCart() {
+            if (!confirm('Bạn có chắc chắn muốn xóa tất cả sách trong giỏ hàng?')) return;
+
+            fetch('/Cart/Clear', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa giỏ hàng.');
+            });
+        }
+    </script>
+}

@@ -65,7 +65,11 @@ builder.Services.AddHttpClient("OrderAPI", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
-
+builder.Services.AddHttpClient("CartAPI", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7106/"); // CartAPI URL
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+}); 
 // Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -98,6 +102,11 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+// Configure routes - QUAN TRỌNG: Đảm bảo routing đúng
+app.MapControllerRoute(
+    name: "cart",
+    pattern: "Cart/{action=Index}/{id?}",
+    defaults: new { controller = "Cart" });
 
 app.MapControllerRoute(
     name: "default",

@@ -1,52 +1,56 @@
 using CartManagementApi.Data;
-using CartManagementApi.DTOs;
+using CartManagementApi.Repository;
 using CartManagementApi.Repositories;
 using CartManagementApi.Services;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.OData;
+using CartManagementApi.Mappings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OData.ModelBuilder;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-// OData EDM model
-var odataBuilder = new ODataConventionModelBuilder();
-odataBuilder.EntitySet<CartReadDto>("Carts");
-
-builder.Services.AddControllers()
-    .AddOData(opt => opt
-        .AddRouteComponents("odata", odataBuilder.GetEdmModel())
-        .Select()
-        .Filter()
-        .OrderBy()
-        .Expand()
-        .SetMaxTop(100)
-        .Count()
-    );
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Database
 builder.Services.AddDbContext<CartDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Repository pattern
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+
+// Services
 builder.Services.AddScoped<ICartService, CartService>();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

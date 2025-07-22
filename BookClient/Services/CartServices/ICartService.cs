@@ -4,11 +4,12 @@ namespace BookClient.Services.CartServices
 {
     public interface ICartService
     {
-        Task<CartListResponseModel> GetUserCartAsync();
-        Task<CartActionResponseModel> AddToCartAsync(AddToCartViewModel model);
-        Task<CartActionResponseModel> UpdateCartItemAsync(UpdateCartItemViewModel model);
-        Task<CartActionResponseModel> RemoveFromCartAsync(int cartId);
-        Task<CartActionResponseModel> ClearCartAsync();
-        Task<int> GetCartItemCountAsync();
+        Task<CartViewModel> GetCartByUserIdAsync(int userId);
+        Task<CartItemViewModel> AddToCartAsync(int userId, AddToCartRequest request);
+        Task<CartItemViewModel> UpdateCartItemAsync(UpdateCartItemRequest request);
+        Task<bool> RemoveFromCartAsync(int cartItemId);
+        Task<bool> ClearCartAsync(int userId);
+        Task<int> GetCartItemCountAsync(int userId);
+        Task<bool> IsBookInCartAsync(int userId, int bookId);
     }
 }
