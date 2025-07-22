@@ -1,0 +1,481 @@
+﻿/* Admin Layout with Sidebar */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.sidebar-header h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.sidebar-content {
+    padding: 1rem 0;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.8rem 1.5rem;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid white;
+    padding-left: calc(1.5rem - 4px);
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.8rem;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.sidebar.collapsed .nav-link span {
+    display: none;
+}
+
+.sidebar.collapsed .nav-link {
+    padding: 0.8rem;
+    text-align: center;
+}
+
+.sidebar.collapsed .nav-link i {
+    margin-right: 0;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top Bar */
+.topbar {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-right: 1rem;
+    padding: 0.5rem;
+}
+
+.sidebar-toggle:hover {
+    color: #495057;
+}
+
+.page-title {
+    color: #495057;
+    font-weight: 600;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu {
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.user-menu:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.user-menu i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+/* Content Area */
+.content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+/* Cards */
+.admin-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.admin-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem 1.5rem;
+    border: none;
+    font-weight: 600;
+}
+
+.admin-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Tables */
+.admin-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.admin-table table {
+    margin: 0;
+}
+
+.admin-table thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.admin-table tbody td {
+    padding: 1rem;
+    border-color: #f1f3f4;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+/* Form Controls */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.6rem 1rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Search and Filter */
+.search-filter-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.page-link {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    color: #667eea;
+    margin: 0 2px;
+    font-weight: 500;
+}
+
+.page-link:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+/* Badges */
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+    color: #22543d;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+    color: #742a2a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        z-index: 1000;
+        height: 100vh;
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .topbar {
+        padding: 1rem;
+    }
+    
+    .content {
+        padding: 1rem;
+    }
+    
+    .admin-card .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Action Buttons */
+.action-buttons {
+    white-space: nowrap;
+}
+
+.action-buttons .btn {
+    margin: 0 2px;
+}
+
+/* Status Indicators */
+.status-active {
+    color: #38a169;
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #e53e3e;
+    font-weight: 600;
+}
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* ✅ ADD: User Detail Modal Styles */
+.user-detail-container {
+    padding: 1rem;
+}
+
+.user-avatar-large {
+    margin-bottom: 1rem;
+}
+
+.user-details .row {
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.user-details .fw-bold {
+    color: #495057;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Action buttons improvements */
+.action-buttons .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.action-buttons .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Table responsive improvements */
+.admin-table {
+    overflow-x: auto;
+}
+
+    .admin-table table {
+        min-width: 800px;
+    }
+
+/* User avatar in table */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

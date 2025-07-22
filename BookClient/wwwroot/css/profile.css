@@ -1,0 +1,206 @@
+/* Profile Page Styles */
+.profile-container {
+    padding: 2rem 0;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.profile-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: white;
+    overflow: hidden;
+}
+
+.profile-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0;
+    padding: 1.5rem;
+    border: none;
+}
+
+.profile-card .card-body {
+    padding: 2rem;
+}
+
+.profile-card .card-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem;
+}
+
+/* Profile Avatar */
+.profile-avatar {
+    margin-bottom: 2rem;
+}
+
+.profile-avatar i {
+    color: #667eea;
+}
+
+.profile-avatar h5 {
+    color: #495057;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+/* Profile Details */
+.profile-details .row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.profile-details .row:last-child {
+    border-bottom: none;
+}
+
+.profile-details strong {
+    color: #495057;
+}
+
+/* Form Controls */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.5);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(237, 137, 54, 0.5);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(113, 128, 150, 0.5);
+    color: white;
+}
+
+/* Input Groups */
+.input-group .btn-outline-secondary {
+    border-color: #e9ecef;
+    color: #6c757d;
+    border-radius: 0 10px 10px 0;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+/* Badges */
+.badge {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+    color: #22543d;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+    color: #742a2a;
+}
+
+/* Icons */
+.fas {
+    margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+    }
+    
+    .d-flex.justify-content-between > div,
+    .d-flex.justify-content-between > a {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Animation */
+.profile-card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

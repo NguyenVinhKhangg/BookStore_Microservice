@@ -1,0 +1,403 @@
+﻿html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+/*Hot Deals Section*/
+#auto-scroll {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+.scroll-content {
+    display: inline-flex;
+    animation: scroll-infinite 30s linear infinite;
+    width: max-content;
+}
+
+.single-product {
+    width: 177px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+@keyframes scroll-infinite {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Hover pause effect */
+.scroll-content:hover {
+    animation-play-state: paused;
+}
+
+/* Book Item Styling with Out of Stock Badge */
+.book-item {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.out-of-stock-badge {
+    position: absolute;
+    top: 0px;
+    left: -70px;
+    background-color: #dc3545b5;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.book-content {
+    margin-top: 10px;
+}
+
+.book-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.book-author {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.book-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2196F3;
+    margin-bottom: 8px;
+}
+
+.book-rating {
+    color: #ffa500;
+    margin-bottom: 10px;
+}
+
+.buy-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .buy-button:hover {
+        background-color: #45a049;
+    }
+
+.no-books-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Original Book Card Styling */
+.book-card {
+    border-radius: 10px;
+    transition: transform .3s ease-in-out;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .book-card:hover {
+        transform: scale(1.05);
+    }
+
+.book-img {
+    margin-left: 25%;
+    width: 60%;
+    height: 300px; /* Chiều cao của bìa sách */
+    background-color: white; /* Màu nền nếu không có ảnh */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .book-img img {
+        object-fit: cover;
+        height: 100%;
+        width: auto; /* Giữ tỷ lệ khung hình đúng cho ảnh */
+    }
+
+.card-body {
+    padding: 15px;
+}
+
+    .card-body .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .card-body .author-name {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .card-body .price {
+        font-size: 1rem;
+        color: #28a745;
+    }
+
+    .card-body .sales {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .card-body .rating {
+        font-size: 1rem;
+        color: #ffb300; /* Gold color for rating stars */
+    }
+
+    .card-body .btn-danger {
+        background-color: #0d6efd;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        width: 100%;
+        border: none;
+        text-align: center;
+    }
+
+        .card-body .btn-danger:hover {
+            background-color: #0d6efd;
+        }
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    .book-card {
+        margin-bottom: 15px;
+    }
+}
+
+/* Thêm vào cuối file */
+
+/* Book Details Enhancements */
+.breadcrumb {
+    background: none;
+    padding: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #6c757d;
+}
+
+.book-details {
+    padding: 20px 0;
+}
+
+/* Responsive Image Gallery */
+.book-image-container img {
+    transition: transform 0.3s ease;
+}
+
+.book-image-container:hover img {
+    transform: scale(1.05);
+}
+
+/* Enhanced Typography */
+.book-title {
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+/* Interactive Elements */
+.quantity-input input {
+    border-left: none;
+    border-right: none;
+}
+
+.quantity-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Button Enhancements */
+.add-to-cart-btn {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+    transition: all 0.3s ease;
+}
+
+    .add-to-cart-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+    }
+
+.buy-now-btn {
+    background: linear-gradient(45deg, #28a745, #1e7e34);
+    border: none;
+    box-shadow: 0 2px 4px rgba(40,167,69,0.3);
+    transition: all 0.3s ease;
+}
+
+    .buy-now-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(40,167,69,0.4);
+    }
+
+/* Loading States */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 576px) {
+    .book-title {
+        font-size: 1.5rem;
+    }
+
+    .current-price {
+        font-size: 1.3rem;
+    }
+
+    .book-specifications {
+        padding: 15px;
+    }
+
+    .quantity-input {
+        max-width: 120px;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Success/Error Messages */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Enhanced Cards */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 2px solid #f8f9fa;
+    font-weight: 600;
+}
+
+/* Improved Form Elements */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* ✅ Enhanced login modal styles */
+.login-required-modal {
+    background: rgba(0,0,0,0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-modal-content {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.login-modal-content h4 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.login-modal-content .text-primary {
+    color: #007bff !important;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+    .modal-actions .btn {
+        min-width: 140px;
+    }

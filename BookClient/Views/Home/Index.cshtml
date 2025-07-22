@@ -1,0 +1,504 @@
+﻿@model IEnumerable<Book>
+@using System.Text.Json
+@using BookClient.Models
+@using BookClient.Models.Book
+@{
+    ViewData["Title"] = "Books Index";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var allBooks = ViewBag.AllBooks as List<Book> ?? new List<Book>();
+    var selectedCategoryIds = (ViewBag.SelectedCategoryIds as string)?.Split(',')
+        .Where(id => int.TryParse(id, out _)).Select(int.Parse).ToList() ?? new List<int>();
+}
+
+<div class="container">
+    <!-- Hot Deals Section -->
+    <div>
+        <div class="post-title pb-30">
+            <h2>Hot Deals</h2>
+        </div>
+        <div id="auto-scroll">
+            <div class="scroll-content" id="scrollContent">
+                @foreach (var item in ViewBag.AllBooks as List<Book>)
+                {
+                    <div class="single-product border rounded overflow-hidden d-inline-block me-2" style="width:177px;">
+                        <div class="pro-img position-relative" style="height:305px; overflow:hidden; background-color:lightgray;">
+                            <a asp-action="Details" asp-controller="Home" asp-route-id="@item.BookID">
+                                <img class="w-100 h-100" src="@(item.ImageUrl ?? "https://via.placeholder.com/150")" alt="@item.Title" style="object-fit:cover;" />
+                            </a>
+                            @if (item.Discount > 0)
+                            {
+                                <div class="discount-badge-small">
+                                    -@item.Discount.ToString("0")%
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="post-title pb-30">
+            <h2>Tất Cả Sách</h2>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <form method="get" asp-action="Index" class="d-flex flex-wrap gap-2" id="category-filter-form">
+                    @foreach (var category in categories)
+                    {
+                        <a href="javascript:void(0)"
+                           class="btn btn-outline-primary @(selectedCategoryIds.Contains(category.CategoryID) ? "active" : "")"
+                           data-category-id="@category.CategoryID">@category.Name</a>
+                    }
+                </form>
+            </div>
+        </div>
+        <div id="books-list" class="row g-4">
+            @if (!Model.Any())
+            {
+                <p>Không có sách nào phù hợp với bộ lọc.</p>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-3 col-sm-6">
+                        <div class="book-card card border-0 shadow-sm h-100 overflow-hidden">
+                            <div class="book-img position-relative">
+                                <a asp-action="Details" asp-controller="Home" asp-route-id="@item.BookID">
+                                    <img src="@(item.ImageUrl ?? "https://via.placeholder.com/150x266")" alt="@item.Title" class="img-fluid" />
+                                    @if (item.Stock == 0)
+                                    {
+                                        <div class="out-of-stock-badge">
+                                            Out of stock
+                                        </div>
+                                    }
+                                    @if (item.Discount > 0)
+                                    {
+                                        <div class="discount-badge">
+                                            -@item.Discount.ToString("0")%
+                                        </div>
+                                    }
+                                </a>
+                            </div>
+                            <div class="card-body text-center p-3">
+                                <h5 class="card-title fw-semibold mb-1">@item.Title</h5>
+                                <p class="author-name text-muted small mb-1">@item.AuthorName</p>
+
+                                <!-- Price Display -->
+                                <div class="price-section mb-2">
+                                    @if (item.Discount > 0)
+                                    {
+                                        var discountedPrice = item.Price * (1 - item.Discount / 100);
+                                        <p class="current-price text-success fw-bold mb-0">@discountedPrice.ToString("N0") VND</p>
+                                        <p class="original-price text-muted small text-decoration-line-through mb-1">@item.Price.ToString("N0") VND</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="current-price text-success fw-bold mb-1">@item.Price.ToString("N0") VND</p>
+                                    }
+                                </div>
+
+                                <div class="rating mb-2">
+                                    <span>★★★★☆</span>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="book-actions">
+                                    @if (item.Stock > 0)
+                                    {
+                                        <form asp-controller="Carts" asp-action="AddToCart" method="post" class="add-to-cart-form d-inline">
+                                            <input type="hidden" name="BookID" value="@item.BookID" />
+                                            <input type="hidden" name="Quantity" value="1" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm add-to-cart-btn">
+                                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                                            </button>
+                                        </form>
+                                        <a asp-action="Details" asp-route-id="@item.BookID" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> Details
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-times"></i> Out of Stock
+                                        </button>
+                                        <a asp-action="Details" asp-route-id="@item.BookID" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> Details
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+    .discount-badge-small, .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        z-index: 2;
+    }
+
+    .out-of-stock-badge {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        z-index: 2;
+    }
+
+    .book-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+    .book-img img {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .current-price {
+        font-size: 1.1rem;
+    }
+
+    .original-price {
+        font-size: 0.9rem;
+    }
+
+    .book-actions {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+        .book-actions .btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+
+    .add-to-cart-btn {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+    /* Auto-scroll styles */
+    #auto-scroll {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .scroll-content {
+        display: inline-block;
+        animation: scroll 20s linear infinite;
+    }
+
+    @@keyframes scroll {
+        0%
+
+    {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+
+    }
+
+    .scroll-content:hover {
+        animation-play-state: paused;
+    }
+
+    /* ✅ THÊM: Login modal styles */
+    .login-required-modal {
+        background: rgba(0,0,0,0.8);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1050;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-modal-content {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        max-width: 400px;
+        text-align: center;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    @@keyframes modalFadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Auto-scroll functionality
+            const scrollContent = document.getElementById('scrollContent');
+
+            if (scrollContent) {
+                // Clone the content to create seamless infinite scroll
+                const originalContent = scrollContent.innerHTML;
+                scrollContent.innerHTML = originalContent + originalContent;
+
+                // Add hover pause/resume functionality
+                scrollContent.addEventListener('mouseover', () => {
+                    scrollContent.style.animationPlayState = 'paused';
+                });
+
+                scrollContent.addEventListener('mouseout', () => {
+                    scrollContent.style.animationPlayState = 'running';
+                });
+            }
+
+            // Category filter functionality
+            const form = document.getElementById('category-filter-form');
+            const buttons = form.querySelectorAll('a.btn');
+            let selectedCategories = new Set(@Html.Raw(JsonSerializer.Serialize(selectedCategoryIds.Select(id => id.ToString()))));
+
+            function updateFilterUrl() {
+                const categoryIds = Array.from(selectedCategories).join(',');
+                const url = '@Url.Action("Index", "Home")' + (categoryIds ? `?categoryIds=${categoryIds}` : '');
+                window.location.href = url;
+            }
+
+            buttons.forEach(button => {
+                const categoryId = button.getAttribute('data-category-id');
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (selectedCategories.has(categoryId)) {
+                        selectedCategories.delete(categoryId);
+                        button.classList.remove('active');
+                    } else {
+                        selectedCategories.add(categoryId);
+                        button.classList.add('active');
+                    }
+                    updateFilterUrl();
+                });
+            });
+
+            // ✅ ENHANCED: Add to cart with authentication check
+            $('.add-to-cart-form').submit(function(e) {
+                e.preventDefault();
+
+                const form = $(this);
+                const button = form.find('.add-to-cart-btn');
+                const originalText = button.html();
+
+                // Get form data
+                const bookId = form.find('input[name="BookID"]').val();
+                const quantity = parseInt(form.find('input[name="Quantity"]').val()) || 1;
+
+                // Calculate price (including discount)
+                const priceElement = form.closest('.book-card').find('.current-price');
+                const priceText = priceElement.text().replace(/[^\d]/g, ''); // Remove non-digit characters
+                const price = parseInt(priceText) || 0;
+
+                // Show loading state
+                button.prop('disabled', true);
+                button.html('<i class="fas fa-spinner fa-spin"></i> Adding...');
+
+                // ✅ Send AJAX request with proper data structure
+                $.ajax({
+                    url: '/Cart/AddToCart',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        bookID: parseInt(bookId),
+                        quantity: quantity,
+                        price: price
+                    }),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success feedback
+                            button.removeClass('btn-success').addClass('btn-success');
+                            button.html('<i class="fas fa-check"></i> Added!');
+
+                            // Update cart count
+                            updateCartCount(response.totalItems);
+
+                            // Reset button after 2 seconds
+                            setTimeout(function() {
+                                button.prop('disabled', false);
+                                button.html(originalText);
+                            }, 2000);
+
+                            // Show success message
+                            showToast('success', response.message || 'Item added to cart successfully!');
+                        } else {
+                            // ✅ Handle authentication required
+                            if (response.requiresLogin) {
+                                showLoginRequiredModal(response.redirectUrl, response.message);
+                            } else {
+                                // Show error
+                                showToast('error', response.message || 'Failed to add item to cart');
+                            }
+
+                            button.prop('disabled', false);
+                            button.html(originalText);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        button.prop('disabled', false);
+                        button.html(originalText);
+                        showToast('error', 'An error occurred while adding item to cart');
+                    }
+                });
+            });
+
+            // Load cart count on page load
+            loadCartCount();
+        });
+
+        // ✅ ENHANCED: Show login required modal
+        function showLoginRequiredModal(redirectUrl, message) {
+            const modal = $(`
+                <div class="login-required-modal" id="loginModal" style="display: flex;">
+                    <div class="login-modal-content">
+                        <div class="mb-3">
+                            <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                            <h4>Yêu cầu đăng nhập</h4>
+                            <p class="text-muted">${message || 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.'}</p>
+                        </div>
+                        <div class="modal-actions">
+                            <a href="${redirectUrl}" class="btn btn-primary me-2">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                Đăng nhập ngay
+                            </a>
+                            <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">
+                                <i class="fas fa-times me-1"></i>
+                                Tiếp tục mua sắm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            $('body').append(modal);
+            modal.fadeIn(300);
+        }
+
+        // ✅ Close login modal
+        function closeLoginModal() {
+            $('#loginModal').fadeOut(300, function() {
+                $(this).remove();
+            });
+        }
+
+        // ✅ Update cart count in header
+        function updateCartCount(count) {
+            const cartCountElement = $('#cart-count');
+            if (count > 0) {
+                cartCountElement.text(count).show();
+                cartCountElement.addClass('animate__animated animate__pulse');
+                setTimeout(() => cartCountElement.removeClass('animate__animated animate__pulse'), 1000);
+            } else {
+                cartCountElement.hide();
+            }
+        }
+
+        // ✅ Enhanced toast notification
+        function showToast(type, message) {
+            const toastId = 'toast_' + Date.now();
+            const iconClass = type === 'success' ? 'check' : 'exclamation-triangle';
+            const bgClass = type === 'success' ? 'success' : 'danger';
+
+            const toast = $(`
+                <div class="toast align-items-center text-white bg-${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${iconClass} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `);
+
+            // Add toast container if not exists
+            if (!$('.toast-container').length) {
+                $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>');
+            }
+            $('.toast-container').append(toast);
+
+            // Show toast
+            const bsToast = new bootstrap.Toast(toast[0], {
+                autohide: true,
+                delay: 5000
+            });
+            bsToast.show();
+
+            // Remove after hidden
+            toast.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
+
+        // ✅ Load cart count on page load
+        function loadCartCount() {
+            $.ajax({
+                url: '/Cart/GetCartCount',
+                type: 'GET',
+                success: function(response) {
+                    updateCartCount(response.count);
+                },
+                error: function() {
+                    console.log('Failed to get cart count');
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BookStore</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BookStoreWebsite.styles.css" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/img/favicon.ico" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/ionicons.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/linearicons.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/nice-select.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/jquery.fancybox.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/jquery-ui.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/meanmenu.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/nivo-slider.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/owl.carousel.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/default.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
+
+    @* ✅ Add custom CSS to ensure alert text is visible *@
+    <style>
+        .alert {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: inherit !important;
+        }
+
+        .alert-success {
+            color: #0f5132 !important;
+            background-color: #d1edff !important;
+            border-color: #b6d7ff !important;
+        }
+
+        .alert-danger {
+            color: #842029 !important;
+            background-color: #f8d7da !important;
+            border-color: #f5c2c7 !important;
+        }
+
+        .alert i {
+            margin-right: 8px !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-book"></i> BookStore
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Home
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Search Form -->
+                    <form id="searchForm" class="d-flex me-3" style="min-width: 300px;">
+                        <div class="input-group">
+                            <input type="text" id="searchQuery" name="searchQuery" class="form-control"
+                                   placeholder="Search books..." value="" />
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- User Menu -->
+                    <div class="navbar-nav ms-auto">
+                        <!-- Shopping Cart -->
+                        <!-- Trong navbar -->
+                        <!-- Shopping Cart -->
+                        <a class="nav-link" href="/Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            Giỏ hàng
+                            <span id="cart-count" class="badge bg-danger" style="display: none;">0</span>
+                        </a>
+                        <!-- User Authentication -->
+                        @{
+                            var userInfo = Context.Session.GetString("UserInfo");
+                            if (!string.IsNullOrEmpty(userInfo))
+                            {
+                                var user = System.Text.Json.JsonSerializer.Deserialize<BookClient.Models.Authentication.UserModel>(userInfo);
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <p class="fas fa-user"></p> @user.Fullname
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                                <i class="fas fa-user"></i> My Profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="ChangePassword">
+                                                <i class="fas fa-key"></i> Change Password
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Order" asp-action="MyOrders">
+                                                <i class="fas fa-list-alt me-2"></i> My Orders
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <!-- Not logged in - show login/register links -->
+                                <div class="d-flex">
+                                    <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">
+                                        <i class="fas fa-sign-in-alt"></i> Login
+                                    </a>
+                                    <a class="nav-link text-dark" asp-controller="Auth" asp-action="Register">
+                                        <i class="fas fa-user-plus"></i> Register
+                                    </a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            <!-- ✅ Enhanced Alert Messages with better debugging -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px; padding: 15px; font-size: 14px; color: #0f5132 !important;">
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                    <span style="font-weight: 500;">@TempData["SuccessMessage"]</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-bottom: 20px; padding: 15px; font-size: 14px; color: #842029 !important;">
+                    <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
+                    <span style="font-weight: 500;">@TempData["ErrorMessage"]</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @* ✅ Add debug information (remove after testing) *@
+            @if (ViewBag.ShowDebug == true)
+            {
+                <div style="background: #f8f9fa; padding: 10px; margin-bottom: 15px; border: 1px solid #dee2e6;">
+                    <strong>Debug Info:</strong><br />
+                    SuccessMessage: @TempData["SuccessMessage"]<br />
+                    ErrorMessage: @TempData["ErrorMessage"]<br />
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer text-muted mt-auto py-4 bg-light border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                    <div class="footer-logo mb-2">
+                        <a asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-book fa-3x text-primary"></i>
+                        </a>
+                    </div>
+                    <p class="mb-0">© 2025 - BookStore. All Rights Reserved.</p>
+                    <p class="small mb-0">Your trusted online bookstore</p>
+                </div>
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <h6 class="text-uppercase fw-bold">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none">Home</a></li>
+                        <li><a href="/Cart/Index" class="text-muted text-decoration-none">Shopping Cart</a></li>
+                        <li><a asp-controller="Auth" asp-action="Login" class="text-muted text-decoration-none">Login</a></li>
+                        <li><a asp-controller="Auth" asp-action="Register" class="text-muted text-decoration-none">Register</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <h6 class="text-uppercase fw-bold">Contact Us</h6>
+                    <p class="small mb-0">Email: <a href="mailto:support@bookstore.com" class="text-muted">support@bookstore.com</a></p>
+                    <p class="small mb-0">Phone: +84 123 456 789</p>
+                    <div class="social-links mt-2">
+                        <a href="#" class="text-muted me-2"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

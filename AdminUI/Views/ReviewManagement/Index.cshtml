@@ -1,0 +1,368 @@
+﻿@model IEnumerable<AdminUI.Models.Review.ReviewViewModel>
+@{
+    ViewData["Title"] = "Review Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as AdminUI.Models.Review.ReviewSearchFilterViewModel;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 0;
+    var bookOptions = ViewBag.BookOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+    bookOptions ??= new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+}
+
+<div class="fade-in-up">
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm"
+                       placeholder="Search by comment..." />
+            </div>
+            <div class="col-md-3">
+                <label for="BookFilter" class="form-label">
+                    <i class="fas fa-book"></i> Book
+                </label>
+                <select class="form-select" name="BookFilter">
+                    <option value="">All Books</option>
+                    @foreach (var book in bookOptions)
+                    {
+                        <option value="@book.Value" selected="@(filter?.BookFilter?.ToString() == book.Value)">@book.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="StatusFilter" class="form-label">
+                    <i class="fas fa-toggle-on"></i> Status
+                </label>
+                <select class="form-select" name="StatusFilter">
+                    <option value="">All Status</option>
+                    <option value="true" selected="@(filter?.StatusFilter == true)">Active</option>
+                    <option value="false" selected="@(filter?.StatusFilter == false)">Deactivated</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Page Size
+                </label>
+                <select class="form-select" name="PageSize">
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add New Review
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="results-info">
+            <span class="text-muted">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalCount)
+                of @totalCount results
+            </span>
+        </div>
+        <div class="view-options">
+            <span class="text-muted">Page @currentPage of @totalPages</span>
+        </div>
+    </div>
+
+    <!-- Reviews Table -->
+    <div class="admin-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-book"></i> Book</th>
+                    <th><i class="fas fa-user"></i> User</th>
+                    <th><i class="fas fa-star"></i> Rating</th>
+                    <th><i class="fas fa-comment"></i> Comment</th>
+                    <th><i class="fas fa-calendar"></i> Review Date</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var review in Model)
+                    {
+                        <tr>
+                            <td><strong>#@review.ReviewID</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="book-icon me-2">
+                                        <i class="fas fa-book fa-2x text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@(bookOptions?.FirstOrDefault(b => b.Value == review.BookID.ToString())?.Text ?? review.BookID.ToString())</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@(ViewBag.UserOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)?.FirstOrDefault(u => u.Value == review.UserID.ToString())?.Text ?? review.UserID.ToString())</td>
+                            <td>@review.Rating</td>
+                            <td>@(review.Comment?.Length > 50 ? review.Comment.Substring(0, 50) + "..." : review.Comment)</td>
+                            <td>@review.ReviewDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (review.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle"></i> Deactivated
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-sm btn-info"
+                                            onclick="showReviewDetail(@review.ReviewID)" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@review.ReviewID"
+                                       class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (review.IsActive)
+                                    {
+                                        <form asp-action="Deactivate" asp-route-id="@review.ReviewID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                    data-confirm="Are you sure you want to deactivate this review?"
+                                                    title="Deactivate">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Activate" asp-route-id="@review.ReviewID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                    data-confirm="Are you sure you want to activate this review?"
+                                                    title="Activate">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="no-data">
+                                <i class="fas fa-comment-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No reviews found</h5>
+                                <p class="text-muted">Try adjusting your search criteria or add a new review.</p>
+                                <a asp-action="Create" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Add New Review
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1 && currentPage <= totalPages)
+    {
+        <nav aria-label="Review pagination">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            BookFilter = filter?.BookFilter,
+                            PageSize = pageSize,
+                            Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            BookFilter = filter?.BookFilter,
+                            PageSize = pageSize,
+                            Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            BookFilter = filter?.BookFilter,
+                            PageSize = pageSize,
+                            Page = i })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            BookFilter = filter?.BookFilter,
+                            PageSize = pageSize,
+                            Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            BookFilter = filter?.BookFilter,
+                            PageSize = pageSize,
+                            Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Review Detail Modal -->
+<div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-labelledby="reviewDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewDetailModalLabel">
+                    <i class="fas fa-comment-alt"></i> Review Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="reviewDetailContent">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary" id="editReviewFromModal">
+                    <i class="fas fa-edit"></i> Edit Review
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showReviewDetail(reviewId) {
+            var modal = new bootstrap.Modal(document.getElementById('reviewDetailModal'));
+            modal.show();
+
+            document.getElementById('reviewDetailContent').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Loading review details...</div>
+                </div>
+            `;
+
+            fetch(`/ReviewManagement/GetReviewDetail/${reviewId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('reviewDetailContent').innerHTML = html;
+
+                    document.getElementById('editReviewFromModal').onclick = function() {
+                        modal.hide();
+                        window.location.href = `/ReviewManagement/Edit/${reviewId}`;
+                    };
+
+                    const forms = document.querySelectorAll('#reviewDetailContent form');
+                    forms.forEach(form => {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+
+                            if (confirm(this.querySelector('button').onclick.toString().match(/'([^']+)'/)[1])) {
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    headers: {
+                                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        modal.hide();
+                                        location.reload();
+                                    } else {
+                                        alert('Action failed. Please try again.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('An error occurred. Please try again.');
+                                });
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('reviewDetailContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Failed to load review details. Please try again.
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="showReviewDetail(${reviewId})">
+                                <i class="fas fa-redo"></i> Retry
+                            </button>
+                        </div>
+                    `;
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-confirm]').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    if (!confirm(this.getAttribute('data-confirm'))) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}

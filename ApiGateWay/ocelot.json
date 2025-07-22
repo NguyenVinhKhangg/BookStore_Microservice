@@ -1,0 +1,461 @@
+{
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7000"
+  },
+
+  "Routes": [
+    // UserManagement Routes
+    {
+      "DownstreamPathTemplate": "/api/users/login",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/login",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/login-admin",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/login-admin",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/register",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/register",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/refresh-token",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/refresh-token",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/forgot-password",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/forgot-password",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/reset-password",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/reset-password",
+      "UpstreamHttpMethod": [ "POST" ]
+      // ✅ Không có AuthenticationOptions
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/profile",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/profile",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/admin/total",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/admin/total",
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/odata/users",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/odata/users",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    // ✅ GENERIC ROUTE ĐẶT SAU CÙNG
+    {
+      "DownstreamPathTemplate": "/api/users/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7073
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/users/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+
+
+    // ✅ BookManagement Routes - CẬP NHẬT
+    // Public endpoints (chỉ sách active)
+    {
+      "DownstreamPathTemplate": "/api/Book",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/detailBook",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/detailBook",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    // ✅ THÊM: Admin endpoints (tất cả sách)
+    {
+      "DownstreamPathTemplate": "/api/Book/admin/all",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/admin/all",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/admin/{id}/detail",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/admin/{id}/detail",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/update",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/update",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/hideBook",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/hideBook",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/unhide",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/unhide",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // Generic route cho các actions khác
+    {
+      "DownstreamPathTemplate": "/api/Book{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{everything}",
+      "UpstreamHttpMethod": [ "PUT", "DELETE" ]
+    },
+
+    // StockManagement Routes
+    {
+      "DownstreamPathTemplate": "/odata/transactions",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7058
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ BỎ: AuthenticationOptions để development
+    },
+    {
+      "DownstreamPathTemplate": "/api/stock/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7058
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/stock/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    //{
+    //  "DownstreamPathTemplate": "/odata/transactions",
+    //  "DownstreamScheme": "https",
+    //  "DownstreamHostAndPorts": [
+    //    {
+    //      "Host": "localhost",
+    //      "Port": 7058
+    //    }
+    //  ],
+    //  "UpstreamPathTemplate": "/gateway/stock/odata/transactions",
+    //  "UpstreamHttpMethod": [ "GET" ],
+    //  "AuthenticationOptions": {
+    //    "AuthenticationProviderKey": "Bearer",
+    //    "AllowedScopes": []
+    //  }
+    //},
+
+    // CouponManagement Routes
+    {
+      "DownstreamPathTemplate": "/api/coupons/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7226
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/coupons/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+
+    // CartManagement Routes
+    {
+      "DownstreamPathTemplate": "/api/carts/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7106
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/carts/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+
+    // CartItemManagement Routes
+    {
+      "DownstreamPathTemplate": "/api/cartitems/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7095
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/cartitems/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+
+    // ✅ CategoryManagement Routes - SPECIFIC ROUTES FIRST
+    // Public endpoints (no auth required)
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for GET single category
+    },
+    {
+      "DownstreamPathTemplate": "/api/categories/total",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/total",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for total count
+    },
+    {
+      "DownstreamPathTemplate": "/odata/categories",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/odata/categories",
+      "UpstreamHttpMethod": [ "GET" ]
+      // ✅ No AuthenticationOptions for OData queries
+    },
+    // Admin endpoints (auth required)
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}/activate",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}/activate",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/categories/{id}/deactivate",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{id}/deactivate",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    // Generic route for create, update, delete (auth required)
+    {
+      "DownstreamPathTemplate": "/api/categories/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7261
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/categories/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+
+    // ReviewsApi Routes 
+    {
+      "DownstreamPathTemplate": "/api/reviews/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7068
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/reviews/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    }
+  ]
+}

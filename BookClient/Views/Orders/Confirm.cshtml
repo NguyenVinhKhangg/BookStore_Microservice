@@ -1,0 +1,58 @@
+﻿@model BookClient.Models.Order
+
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-success mb-4"><i class="fas fa-check-circle"></i> Xác nhận đơn hàng</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Đơn hàng #@Model.OrderID</h5>
+            <p><strong>Người đặt:</strong> @Model.UserID</p>
+            <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy")</p>
+            <p><strong>Trạng thái:</strong> <span class="badge bg-info">@Model.Status</span></p>
+
+            <h5 class="mt-4">Danh sách sản phẩm</h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên sách</th>
+                        <th>Số lượng</th>
+                        <th>Giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.BookName</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.Price.ToString("N0") đ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <form method="post" asp-action="Confirm" asp-controller="Order" asp-route-id="@Model.OrderID">
+                <button type="submit" class="btn btn-success mt-3">
+                    <i class="fas fa-check"></i> Xác nhận đơn hàng
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.OrderID" class="btn btn-secondary mt-3 ms-2">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </form>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success mt-3">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger mt-3">@TempData["Error"]</div>
+            }
+        </div>
+    </div>
+</div>

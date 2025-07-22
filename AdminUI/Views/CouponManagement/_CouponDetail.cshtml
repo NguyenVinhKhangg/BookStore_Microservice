@@ -1,0 +1,368 @@
+﻿```cshtml
+@model IEnumerable<AdminUI.Models.Coupon.CouponViewModel>
+@{
+    ViewData["Title"] = "Coupon Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as AdminUI.Models.Coupon.CouponSearchFilterViewModel;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 0;
+}
+
+<div class="fade-in-up">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container mb-4">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm"
+                       placeholder="Search by code ..." />
+            </div>
+            <div class="col-md-3">
+                <label for="StatusFilter" class="form-label">
+                    <i class="fas fa-toggle-on"></i> Status
+                </label>
+                <select class="form-select" name="StatusFilter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true" selected="@(filter?.StatusFilter == true)">Kích hoạt</option>
+                    <option value="false" selected="@(filter?.StatusFilter == false)">Đã hủy</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="DiscountFilter" class="form-label">
+                    <i class="fas fa-percentage"></i> % Discount
+                </label>
+                <input type="number" step="0.01" class="form-control" name="DiscountFilter" value="@filter?.DiscountFilter" />
+            </div>
+            <div class="col-md-2">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Number per page
+                </label>
+                <select class="form-select" name="PageSize">
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Coupon
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="results-info">
+            <span class="text-muted">
+                Display @((currentPage - 1) * pageSize + 1) to  @Math.Min(currentPage * pageSize, totalCount)
+                in @totalCount result
+            </span>
+        </div>
+        <div class="view-options">
+            <span class="text-muted">Page @currentPage / @totalPages</span>
+        </div>
+    </div>
+
+    <!-- Coupons Table -->
+    <div class="admin-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-ticket-alt"></i> Code</th>
+                    <th><i class="fas fa-percentage"></i> % Discount</th>
+                    <th><i class="fas fa-calendar"></i> Begin</th>
+                    <th><i class="fas fa-calendar"></i> End</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var coupon in Model)
+                    {
+                        <tr>
+                            <td><strong>#@coupon.CouponID</strong></td>
+                            <td>@coupon.Code</td>
+                            <td>@coupon.DiscountPercent%</td>
+                            <td>@coupon.ValidFrom.ToString("dd/MM/yyyy")</td>
+                            <td>@coupon.ValidTo.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (coupon.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> ON
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle"></i> OFF
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-sm btn-info"
+                                            onclick="showCouponDetail(@coupon.CouponID)" title="Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@coupon.CouponID"
+                                       class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (coupon.IsActive)
+                                    {
+                                        <form asp-action="Deactivate" asp-route-id="@coupon.CouponID" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                    data-confirm="Bạn có chắc chắn muốn hủy kích hoạt mã giảm giá này?"
+                                                    title="Hủy kích hoạt">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Activate" asp-route-id="@coupon.CouponID" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                    data-confirm="Bạn có chắc chắn muốn kích hoạt mã giảm giá này?"
+                                                    title="Kích hoạt">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="no-data">
+                                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Không tìm thấy mã giảm giá</h5>
+                                <p class="text-muted">Hãy thử điều chỉnh tiêu chí tìm kiếm hoặc thêm mã giảm giá mới.</p>
+                                <a asp-action="Create" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Thêm mã giảm giá
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Phân trang mã giảm giá">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            DiscountFilter = filter?.DiscountFilter,
+                            PageSize = pageSize,
+                            Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            DiscountFilter = filter?.DiscountFilter,
+                            PageSize = pageSize,
+                            Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            DiscountFilter = filter?.DiscountFilter,
+                            PageSize = pageSize,
+                            Page = i })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            DiscountFilter = filter?.DiscountFilter,
+                            PageSize = pageSize,
+                            Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            SearchTerm = filter?.SearchTerm,
+                            StatusFilter = filter?.StatusFilter,
+                            DiscountFilter = filter?.DiscountFilter,
+                            PageSize = pageSize,
+                            Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Coupon Detail Modal -->
+<div class="modal fade" id="couponDetailModal" tabindex="-1" aria-labelledby="couponDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="couponDetailModalLabel">
+                    <i class="fas fa-ticket-alt"></i> Chi tiết mã giảm giá
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="couponDetailContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Đang tải chi tiết mã giảm giá...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+                <button type="button" class="btn btn-primary" id="editCouponFromModal">
+                    <i class="fas fa-edit"></i> Sửa mã giảm giá
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showCouponDetail(couponId) {
+            const modal = new bootstrap.Modal(document.getElementById('couponDetailModal'));
+            modal.show();
+
+            document.getElementById('couponDetailContent').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Đang tải chi tiết mã giảm giá...</div>
+                </div>
+            `;
+
+            fetch(`/CouponManagement/GetDetail/${couponId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Lỗi khi tải dữ liệu');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('couponDetailContent').innerHTML = html;
+
+                    document.getElementById('editCouponFromModal').onclick = () => {
+                        modal.hide();
+                        window.location.href = `/CouponManagement/Edit/${couponId}`;
+                    };
+
+                    document.querySelectorAll('#couponDetailContent form').forEach(form => {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            if (confirm(this.querySelector('button').dataset.confirm)) {
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    headers: {
+                                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        modal.hide();
+                                        location.reload();
+                                    } else {
+                                        alert('Hành động thất bại. Vui lòng thử lại.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Lỗi:', error);
+                                    alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+                                });
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    document.getElementById('couponDetailContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Không thể tải chi tiết mã giảm giá. Vui lòng thử lại.
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="showCouponDetail(${couponId})">
+                                <i class="fas fa-redo"></i> Thử lại
+                            </button>
+                        </div>
+                    `;
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-confirm]').forEach(element => {
+                element.addEventListener('click', e => {
+                    if (!confirm(element.getAttribute('data-confirm'))) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}
+```

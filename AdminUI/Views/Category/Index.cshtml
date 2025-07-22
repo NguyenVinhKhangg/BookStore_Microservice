@@ -1,0 +1,464 @@
+﻿@model IEnumerable<AdminUI.Models.Category.CategoryViewModel>
+@{
+    ViewData["Title"] = "Category Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as AdminUI.Models.Category.CategorySearchFilterViewModel;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalPages = ViewBag.TotalPages as int? ?? 0;
+}
+
+<div class="fade-in-up">
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+        <form asp-action="Index" method="get" class="row g-3" id="categoryFilterForm">
+            <div class="col-md-6">
+                <label for="SearchTerm" class="form-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" class="form-control" name="SearchTerm" value="@filter?.SearchTerm" 
+                       placeholder="Search by name or description..." id="searchInput" />
+            </div>
+            <div class="col-md-3">
+                <label for="StatusFilter" class="form-label">
+                    <i class="fas fa-toggle-on"></i> Status
+                </label>
+                <select class="form-select" name="StatusFilter" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="true" selected="@(filter?.StatusFilter == true)">Active</option>
+                    <option value="false" selected="@(filter?.StatusFilter == false)">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="PageSize" class="form-label">
+                    <i class="fas fa-list"></i> Page Size
+                </label>
+                <select class="form-select" name="PageSize" id="pageSizeSelect">
+                    <option value="5" selected="@(pageSize == 5)">5</option>
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="25" selected="@(pageSize == 25)">25</option>
+                    <option value="50" selected="@(pageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add New Category
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="results-info">
+            <span class="text-muted">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalCount) 
+                of @totalCount results
+            </span>
+        </div>
+        <div class="view-options">
+            <span class="text-muted">Page @currentPage of @totalPages</span>
+        </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="admin-table" id="categoriesTableContainer">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-tag"></i> Category Name</th>
+                    <th><i class="fas fa-align-left"></i> Description</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var category in Model)
+                    {
+                        <tr data-category-id="@category.CategoryID">
+                            <td><strong>#@category.CategoryID</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="category-icon me-2">
+                                        <i class="fas fa-tag fa-lg text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@category.Name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-muted">
+                                    @if (!string.IsNullOrEmpty(category.Description))
+                                    {
+                                        @(category.Description.Length > 50 ? category.Description.Substring(0, 50) + "..." : category.Description)
+                                    }
+                                    else
+                                    {
+                                        <em>No description</em>
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                @if (category.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle"></i> Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- View Detail Button with AJAX -->
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            onclick="showCategoryDetail(@category.CategoryID)" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@category.CategoryID" 
+                                       class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (category.IsActive)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-warning" 
+                                                onclick="toggleCategoryStatus(@category.CategoryID, false)" 
+                                                title="Deactivate">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" 
+                                                onclick="toggleCategoryStatus(@category.CategoryID, true)" 
+                                                title="Activate">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="no-data">
+                                <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No categories found</h5>
+                                <p class="text-muted">Try adjusting your search criteria or add a new category.</p>
+                                <a asp-action="Create" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Add New Category
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Category pagination" id="paginationContainer">
+            <ul class="pagination">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = 1 })">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = currentPage - 1 })">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = i })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = currentPage + 1 })">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { 
+                            SearchTerm = filter?.SearchTerm, 
+                            StatusFilter = filter?.StatusFilter, 
+                            PageSize = pageSize, 
+                            Page = totalPages })">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Category Detail Modal -->
+<div class="modal fade" id="categoryDetailModal" tabindex="-1" aria-labelledby="categoryDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryDetailModalLabel">
+                    <i class="fas fa-tag"></i> Category Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="categoryDetailContent">
+                <!-- Category detail content will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary" id="editCategoryFromModal">
+                    <i class="fas fa-edit"></i> Edit Category
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@Html.AntiForgeryToken()
+@section Scripts {
+    <script>
+
+         // ✅ Get anti-forgery token
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        // ✅ Updated AJAX functions with proper token handling
+        async function toggleCategoryStatus(categoryId, activate) {
+            const action = activate ? 'activate' : 'deactivate';
+            const actionText = activate ? 'activate' : 'deactivate';
+            
+            if (!confirm(`Are you sure you want to ${actionText} this category?`)) {
+                return;
+            }
+
+            try {
+                showLoadingSpinner(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)}ing category...`);
+
+                const response = await fetch(`/Category/${activate ? 'Activate' : 'Deactivate'}/${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': getAntiForgeryToken(),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `__RequestVerificationToken=${encodeURIComponent(getAntiForgeryToken())}`
+                });
+
+                hideLoadingSpinner();
+
+                if (response.ok) {
+                    showToast(`Category ${actionText}d successfully!`, 'success');
+                    // Reload current page to reflect changes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`Failed to ${actionText} category`);
+                }
+            } catch (error) {
+                hideLoadingSpinner();
+                console.error('Error:', error);
+                showToast(`Failed to ${actionText} category. Please try again.`, 'error');
+            }
+        }
+
+        // ✅ AJAX function to show category details in modal
+        async function showCategoryDetail(categoryId) {
+            const modal = new bootstrap.Modal(document.getElementById('categoryDetailModal'));
+            modal.show();
+
+            // Reset content
+            document.getElementById('categoryDetailContent').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2 text-muted">Loading category details...</div>
+                </div>
+            `;
+
+            try {
+                // Load category details via AJAX
+                const response = await fetch(`/Category/GetCategoryDetail/${categoryId}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const html = await response.text();
+                document.getElementById('categoryDetailContent').innerHTML = html;
+                
+                // Update edit button
+                document.getElementById('editCategoryFromModal').onclick = function() {
+                    modal.hide();
+                    window.location.href = `/Category/Edit/${categoryId}`;
+                };
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('categoryDetailContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Failed to load category details. Please try again.
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="showCategoryDetail(${categoryId})">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // ✅ Utility functions for loading and notifications
+        function showLoadingSpinner(message = 'Loading...') {
+            const spinner = document.createElement('div');
+            spinner.id = 'globalSpinner';
+            spinner.className = 'position-fixed top-50 start-50 translate-middle';
+            spinner.style.zIndex = '9999';
+            spinner.innerHTML = `
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div>${message}</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(spinner);
+        }
+
+        function hideLoadingSpinner() {
+            const spinner = document.getElementById('globalSpinner');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast element after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // ✅ Auto-submit form on filter changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('categoryFilterForm');
+            const statusFilter = document.getElementById('statusFilter');
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            
+            // Auto-submit on status change
+            statusFilter.addEventListener('change', function() {
+                form.submit();
+            });
+            
+            // Auto-submit on page size change
+            pageSizeSelect.addEventListener('change', function() {
+                form.submit();
+            });
+            
+            // Debounced search
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    form.submit();
+                }, 500); // 500ms debounce
+            });
+        });
+
+        // ✅ Add anti-forgery token to page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.querySelector('input[name="__RequestVerificationToken"]')) {
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = '@Html.AntiForgeryToken()'.replace(/.*value="([^"]*)".*/, '$1');
+                document.body.appendChild(token);
+            }
+        });
+    </script>
+}

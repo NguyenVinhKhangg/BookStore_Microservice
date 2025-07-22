@@ -1,0 +1,69 @@
+﻿@model AdminUI.Models.Review.ReviewViewModel
+@{
+    var bookOptions = ViewBag.BookOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+    var userOptions = ViewBag.UserOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+    var bookTitle = bookOptions.FirstOrDefault(b => b.Value == Model.BookID.ToString())?.Text ?? Model.BookID.ToString();
+    var userName = userOptions.FirstOrDefault(u => u.Value == Model.UserID.ToString())?.Text ?? Model.UserID.ToString();
+}
+
+<div class="user-detail-content">
+    <div class="row">
+        <div class="col-md-3 text-center">
+            <i class="fas fa-comment-alt fa-4x text-muted mb-3"></i>
+            <h5 class="fw-bold">Review #@Model.ReviewID</h5>
+        </div>
+        <div class="col-md-9">
+            <dl class="row">
+                <dt class="col-sm-4"><i class="fas fa-book"></i> Book</dt>
+                <dd class="col-sm-8">@bookTitle</dd>
+                <dt class="col-sm-4"><i class="fas fa-user"></i> User</dt>
+                <dd class="col-sm-8">@userName</dd>
+                <dt class="col-sm-4"><i class="fas fa-star"></i> Rating</dt>
+                <dd class="col-sm-8">@Model.Rating</dd>
+                <dt class="col-sm-4"><i class="fas fa-comment"></i> Comment</dt>
+                <dd class="col-sm-8">@(Model.Comment ?? "No comment")</dd>
+                <dt class="col-sm-4"><i class="fas fa-calendar"></i> Review Date</dt>
+                <dd class="col-sm-8">@Model.ReviewDate.ToString("dd/MM/yyyy")</dd>
+                <dt class="col-sm-4"><i class="fas fa-toggle-on"></i> Status</dt>
+                <dd class="col-sm-8">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle"></i> Active
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times-circle"></i> Deactivated
+                        </span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12 text-end">
+            @if (Model.IsActive)
+            {
+                <form asp-action="Deactivate" asp-route-id="@Model.ReviewID" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-warning"
+                            data-confirm="Are you sure you want to deactivate this review?"
+                            title="Deactivate">
+                        <i class="fas fa-ban"></i> Deactivate
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="Activate" asp-route-id="@Model.ReviewID" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-success"
+                            data-confirm="Are you sure you want to activate this review?"
+                            title="Activate">
+                        <i class="fas fa-check"></i> Activate
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
