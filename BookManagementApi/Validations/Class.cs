@@ -14,9 +14,7 @@ namespace BookManagementApi.Validations
             RuleFor(x => x.Price).GreaterThan(0);
             RuleFor(x => x.Stock).GreaterThanOrEqualTo(0);
             RuleFor(x => x.CategoryID).NotEmpty();
-            RuleFor(x => x.AuthorID).NotEmpty();
             RuleFor(x => x.AuthorName).NotEmpty().MaximumLength(100);
-            RuleFor(x => x.PublisherID).NotEmpty();
             RuleFor(x => x.PublisherName).NotEmpty().MaximumLength(100);
         }
     }

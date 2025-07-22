@@ -28,9 +28,6 @@ namespace BookManagementApi
 
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            builder.Services.AddScoped<IBooksImgRepository, BooksImgRepository>();
-            builder.Services.AddScoped<IBooksImgService, BooksImgService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
             builder.Services.AddScoped<IBookService, BookService>();
 

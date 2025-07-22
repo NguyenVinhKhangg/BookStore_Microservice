@@ -30,9 +30,6 @@ namespace BookManagementApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookID"));
 
-                    b.Property<int>("AuthorID")
-                        .HasColumnType("int");
-
                     b.Property<string>("AuthorName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -65,9 +62,6 @@ namespace BookManagementApi.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("PublisherID")
-                        .HasColumnType("int");
-
                     b.Property<string>("PublisherName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -84,38 +78,6 @@ namespace BookManagementApi.Migrations
                     b.HasKey("BookID");
 
                     b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("BooksImg", b =>
-                {
-                    b.Property<int>("ImageID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImageID"));
-
-                    b.Property<int>("BookID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsCover")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ImageID");
-
-                    b.ToTable("BooksImgs");
                 });
 #pragma warning restore 612, 618
         }

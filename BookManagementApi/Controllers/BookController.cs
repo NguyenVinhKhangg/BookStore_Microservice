@@ -28,7 +28,7 @@ namespace BookManagementApi.Controllers
             return CreatedAtAction(nameof(GetBook), new { id = created.BookID }, new { message = "Book has been added successfully.", data = created });
         }
 
-        // Get all books
+        // ✅ Get all books for public (chỉ sách active)
         [HttpGet]
         public async Task<IActionResult> GetBooks()
         {
@@ -36,11 +36,29 @@ namespace BookManagementApi.Controllers
             return Ok(books);
         }
 
-        // Get book detail by id
-        [HttpGet("{id}/detailBook")]
-        public async Task<IActionResult> GetBook(int id)
+        // ✅ THÊM: Get all books for admin (bao gồm cả sách bị ẩn)
+        [HttpGet("admin/all")]
+        public async Task<IActionResult> GetAllBooksForAdmin()
         {
-            var book = await _bookService.GetBookDetailAsync(id);
+            var books = await _bookService.GetAllBooksForAdminAsync();
+            return Ok(books);
+        }
+
+        // ✅ Get book detail by id - có phân quyền
+        [HttpGet("{id}/detailBook")]
+        public async Task<IActionResult> GetBook(int id, [FromQuery] bool isAdmin = false)
+        {
+            var book = await _bookService.GetBookDetailAsync(id, isAdmin);
+            if (book == null)
+                return NotFound(new { message = "Book not found." });
+            return Ok(book);
+        }
+
+        // ✅ THÊM: Get book detail for admin (luôn hiển thị kể cả bị ẩn)
+        [HttpGet("admin/{id}/detail")]
+        public async Task<IActionResult> GetBookForAdmin(int id)
+        {
+            var book = await _bookService.GetBookDetailForAdminAsync(id);
             if (book == null)
                 return NotFound(new { message = "Book not found." });
             return Ok(book);
@@ -85,9 +103,3 @@ namespace BookManagementApi.Controllers
         }
     }
 }
-
-
-
-
-
-

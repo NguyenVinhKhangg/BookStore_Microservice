@@ -30,16 +30,22 @@ namespace CartManagementApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartID"));
 
+                    b.Property<int>("BookID")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("CartID");
+
+                    b.HasIndex("UserID", "BookID")
+                        .IsUnique();
 
                     b.ToTable("Carts");
                 });

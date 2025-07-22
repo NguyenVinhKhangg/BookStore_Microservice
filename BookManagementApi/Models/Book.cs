@@ -34,14 +34,8 @@ namespace BookManagementApi.Models
         public int CategoryID { get; set; }
 
         [Required]
-        public int AuthorID { get; set; }
-
-        [Required]
         [MaxLength(100)]
         public string AuthorName { get; set; }
-
-        [Required]
-        public int PublisherID { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -52,6 +46,6 @@ namespace BookManagementApi.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

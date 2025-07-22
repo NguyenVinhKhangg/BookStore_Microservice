@@ -1,6 +1,7 @@
-using AdminUI.Models.Stock;
+﻿using AdminUI.Models.Stock;
 using AdminUI.Services.AuthenServices;
 using AdminUI.Services;
+using AdminUI.Services.BookServices; // ✅ THÊM
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -9,20 +10,23 @@ namespace AdminUI.Controllers
     public class StockController : Controller
     {
         private readonly IStockService _stockService;
+        private readonly IBookService _bookService; // ✅ THÊM
         private readonly IAuthService _authService;
         private readonly ILogger<StockController> _logger;
 
         public StockController(
             IStockService stockService,
+            IBookService bookService, // ✅ THÊM
             IAuthService authService,
             ILogger<StockController> logger)
         {
             _stockService = stockService;
+            _bookService = bookService; // ✅ THÊM
             _authService = authService;
             _logger = logger;
         }
 
-        // Helper method to check if user has access to stock management
+        // Helper methods remain the same...
         private bool HasStockAccess()
         {
             var userInfo = HttpContext.Session.GetString("UserInfo");
@@ -32,8 +36,7 @@ namespace AdminUI.Controllers
             try
             {
                 var user = JsonSerializer.Deserialize<AdminUI.Models.Authentication.UserModel>(userInfo);
-                // Both Admin (RoleId = 1) and Staff (RoleId = 3) can access Stock Management
-                return user != null && (user.RoleId == 1 || user.RoleId == 3 || 
+                return user != null && (user.RoleId == 1 || user.RoleId == 3 ||
                                        user.RoleName?.ToLower() == "admin" || user.RoleName?.ToLower() == "staff");
             }
             catch
@@ -42,7 +45,6 @@ namespace AdminUI.Controllers
             }
         }
 
-        // Helper method to check if user is admin
         private bool IsAdmin()
         {
             var userInfo = HttpContext.Session.GetString("UserInfo");
@@ -60,6 +62,64 @@ namespace AdminUI.Controllers
             }
         }
 
+        // ✅ SỬA: Sử dụng BookService đã có thay vì tạo duplicate
+        [HttpGet]
+        public async Task<IActionResult> GetBooks(string? searchTerm = null, int page = 1, int pageSize = 50)
+        {
+            if (!await _authService.IsAuthenticatedAsync())
+            {
+                return Json(new { success = false, message = "Not authenticated" });
+            }
+
+            if (!HasStockAccess())
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+
+            try
+            {
+                // ✅ Tái sử dụng BookService.GetAllAsync() đã có
+                var (books, totalCount) = await _bookService.GetAllAsync(
+                    searchTerm: searchTerm,
+                    categoryFilter: null,
+                    isActiveFilter: true, // Chỉ lấy sách active cho stock management
+                    sortBy: "Title",
+                    sortOrder: "asc",
+                    page: page,
+                    pageSize: pageSize
+                );
+
+                // Transform sang format phù hợp cho stock management
+                var bookOptions = books.Select(b => new
+                {
+                    bookID = b.BookID,
+                    title = b.Title,
+                    isbn = b.ISBN,
+                    authorName = b.AuthorName,
+                    price = b.Price,
+                    stock = b.Stock,
+                    isActive = b.IsActive
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    data = bookOptions,
+                    totalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting books for stock management");
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while loading books"
+                });
+            }
+        }
+
+        // Tất cả methods khác giữ nguyên...
         [HttpGet]
         public async Task<IActionResult> Index(StockSearchFilterViewModel filter)
         {

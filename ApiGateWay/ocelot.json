@@ -149,9 +149,97 @@
       }
     },
 
-    // BookManagement Routes
+
+    // ✅ BookManagement Routes - CẬP NHẬT
+    // Public endpoints (chỉ sách active)
     {
-      "DownstreamPathTemplate": "/api/books/{everything}",
+      "DownstreamPathTemplate": "/api/Book",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/detailBook",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/detailBook",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    // ✅ THÊM: Admin endpoints (tất cả sách)
+    {
+      "DownstreamPathTemplate": "/api/Book/admin/all",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/admin/all",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/admin/{id}/detail",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/admin/{id}/detail",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/update",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/update",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/hideBook",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/hideBook",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Book/{id}/unhide",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/{id}/unhide",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // Generic route cho các actions khác
+    {
+      "DownstreamPathTemplate": "/api/Book{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -160,19 +248,7 @@
         }
       ],
       "UpstreamPathTemplate": "/gateway/books/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/booksimg/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7201
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/booksimg/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": [ "PUT", "DELETE" ]
     },
 
     // StockManagement Routes
