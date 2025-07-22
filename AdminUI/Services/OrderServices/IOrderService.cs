@@ -1,5 +1,4 @@
 ﻿using AdminUI.Models;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AdminUI.Services
@@ -8,5 +7,6 @@ namespace AdminUI.Services
     {
         Task<(List<Order> Orders, int TotalCount)> GetOrdersAsync(string searchTerm, string statusFilter, int page, int pageSize);
         Task<Order> GetOrderByIdAsync(int id);
+        Task<bool> UpdateOrderAsync(Order order);
     }
 }

@@ -8,14 +8,6 @@
         "DebugTarget": "https"
       },
       {
-        "Path": "OrdersManagementAPI\\OrdersManagementAPI.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "AdminUI\\AdminUI.csproj",
-        "Action": "Start"
-      },
-      {
         "Path": "BookManagementApi\\BookManagementApi.csproj",
         "Action": "Start"
       },
@@ -24,11 +16,11 @@
         "Action": "Start"
       },
       {
-        "Path": "StockManagementAPI\\StockManagementAPI.csproj",
+        "Path": "BookClient\\BookClient.csproj",
         "Action": "Start"
       },
       {
-        "Path": "BookClient\\BookClient.csproj",
+        "Path": "CartManagementApi\\CartManagementApi.csproj",
         "Action": "Start"
       }
     ]

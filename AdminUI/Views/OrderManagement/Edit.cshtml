@@ -1,0 +1,38 @@
+﻿@model AdminUI.Models.Order
+
+@{
+    ViewData["Title"] = "Edit Order";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Edit Order</h2>
+
+<form asp-action="Update" method="post">
+    <div class="form-group">
+        <label asp-for="OrderID" class="control-label"></label>
+        <input asp-for="OrderID" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label asp-for="UserID" class="control-label"></label>
+        <input asp-for="UserID" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderDate" class="control-label"></label>
+        <input asp-for="OrderDate" class="form-control" type="datetime-local" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Status" class="control-label"></label>
+        <select asp-for="Status" class="form-control">
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Update" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

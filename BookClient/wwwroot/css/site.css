@@ -207,3 +207,141 @@ body {
         margin-bottom: 15px;
     }
 }
+
+/* Thêm vào cuối file */
+
+/* Book Details Enhancements */
+.breadcrumb {
+    background: none;
+    padding: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #6c757d;
+}
+
+.book-details {
+    padding: 20px 0;
+}
+
+/* Responsive Image Gallery */
+.book-image-container img {
+    transition: transform 0.3s ease;
+}
+
+.book-image-container:hover img {
+    transform: scale(1.05);
+}
+
+/* Enhanced Typography */
+.book-title {
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+/* Interactive Elements */
+.quantity-input input {
+    border-left: none;
+    border-right: none;
+}
+
+.quantity-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Button Enhancements */
+.add-to-cart-btn {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+    transition: all 0.3s ease;
+}
+
+    .add-to-cart-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+    }
+
+.buy-now-btn {
+    background: linear-gradient(45deg, #28a745, #1e7e34);
+    border: none;
+    box-shadow: 0 2px 4px rgba(40,167,69,0.3);
+    transition: all 0.3s ease;
+}
+
+    .buy-now-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(40,167,69,0.4);
+    }
+
+/* Loading States */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 576px) {
+    .book-title {
+        font-size: 1.5rem;
+    }
+
+    .current-price {
+        font-size: 1.3rem;
+    }
+
+    .book-specifications {
+        padding: 15px;
+    }
+
+    .quantity-input {
+        max-width: 120px;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Success/Error Messages */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Enhanced Cards */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 2px solid #f8f9fa;
+    font-weight: 600;
+}
+
+/* Improved Form Elements */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
