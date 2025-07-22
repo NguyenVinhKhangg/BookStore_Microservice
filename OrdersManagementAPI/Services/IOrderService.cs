@@ -11,6 +11,7 @@ namespace OrdersManagementApi.Services
         Task<OrderReadDto> AddAsync(OrderCreateDto orderDto);
         Task UpdateAsync(int id, OrderUpdateDto orderDto);
         Task DeleteAsync(int id);
+        Task ConfirmAsync(int id);
         Task<(IEnumerable<OrderReadDto> Orders, int TotalCount)> GetOrdersAsync(string searchTerm, string statusFilter, int page, int pageSize);
     }
 }

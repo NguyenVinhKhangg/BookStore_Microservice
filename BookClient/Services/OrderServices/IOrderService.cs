@@ -10,5 +10,8 @@ namespace BookClient.Services
         Task<Order> GetOrderByIdAsync(int id);
         Task<Order> CreateOrderFromCartAsync(int cartId);
         Task<List<OrderItem>> GetOrderItemsFromCartAsync(int cartId);
+
+        // ✅ Thêm
+        Task<bool> ConfirmOrderAsync(int orderId);
     }
 }

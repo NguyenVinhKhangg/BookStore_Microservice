@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using StockManagementAPI.DTOs;
@@ -117,7 +117,29 @@ namespace StockManagementApi.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
-        
+
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetTransactionCount(
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? transactionType = null,
+            [FromQuery] string? status = null,
+            [FromQuery] int? createdBy = null,
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var count = await _stockService.GetTransactionCountAsync(
+                    searchTerm, transactionType, status, createdBy, fromDate, toDate);
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+              // _logger.LogError(ex, "Error getting transaction count");
+                return StatusCode(500, "Internal server error");
+            }
+        }
         #region Helper Methods
         private int GetCurrentUserId()
         {

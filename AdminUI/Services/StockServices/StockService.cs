@@ -41,7 +41,13 @@ namespace AdminUI.Services
             {
                 await SetAuthorizationHeaderAsync();
 
-                // Build OData query
+                // ✅ BƯỚC 1: Gọi count endpoint để lấy tổng số
+                var countResult = await GetTransactionCountAsync(filter);
+                var totalCount = countResult.Success ? countResult.TotalCount : 0;
+
+                _logger.LogInformation($"📊 Total transaction count: {totalCount}");
+
+                // ✅ BƯỚC 2: Build OData query để lấy data với pagination
                 var queryParams = new List<string>();
 
                 if (!string.IsNullOrEmpty(filter.SearchTerm))
@@ -116,7 +122,6 @@ namespace AdminUI.Services
 
                 queryParams.Add($"$skip={((filter.Page - 1) * filter.PageSize)}");
                 queryParams.Add($"$top={filter.PageSize}");
-                queryParams.Add("$count=true");
                 queryParams.Add($"$orderby={filter.SortBy} {filter.SortOrder}");
 
                 var queryString = string.Join("&", queryParams);
@@ -144,8 +149,8 @@ namespace AdminUI.Services
                             return new StockTransactionsListResponseModel
                             {
                                 Success = true,
-                                Data = odataResponse.Value,
-                                TotalCount = odataResponse.OdataCount ?? odataResponse.Value?.Count() ?? 0
+                                Data = odataResponse.Value ?? new List<StockTransactionViewModel>(),
+                                TotalCount = totalCount // ✅ Sử dụng count từ endpoint riêng
                             };
                         }
                         else
@@ -158,8 +163,8 @@ namespace AdminUI.Services
                             return new StockTransactionsListResponseModel
                             {
                                 Success = true,
-                                Data = transactionsList,
-                                TotalCount = transactionsList?.Count ?? 0
+                                Data = transactionsList ?? new List<StockTransactionViewModel>(),
+                                TotalCount = totalCount // ✅ Sử dụng count từ endpoint riêng
                             };
                         }
                     }
@@ -189,6 +194,81 @@ namespace AdminUI.Services
                 {
                     Success = false,
                     Message = "An error occurred while retrieving transactions."
+                };
+            }
+        }
+
+        // ✅ THÊM: Method để gọi count endpoint
+        private async Task<StockTransactionsListResponseModel> GetTransactionCountAsync(StockSearchFilterViewModel filter)
+        {
+            try
+            {
+                var countParams = new List<string>();
+
+                if (!string.IsNullOrEmpty(filter.SearchTerm))
+                {
+                    countParams.Add($"searchTerm={Uri.EscapeDataString(filter.SearchTerm)}");
+                }
+
+                if (!string.IsNullOrEmpty(filter.TransactionType))
+                {
+                    countParams.Add($"transactionType={filter.TransactionType}");
+                }
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                {
+                    countParams.Add($"status={filter.Status}");
+                }
+
+                if (filter.CreatedBy.HasValue)
+                {
+                    countParams.Add($"createdBy={filter.CreatedBy.Value}");
+                }
+
+                if (filter.FromDate.HasValue)
+                {
+                    countParams.Add($"fromDate={filter.FromDate.Value:yyyy-MM-ddTHH:mm:ssZ}");
+                }
+
+                if (filter.ToDate.HasValue)
+                {
+                    countParams.Add($"toDate={filter.ToDate.Value:yyyy-MM-ddTHH:mm:ssZ}");
+                }
+
+                var countQueryString = string.Join("&", countParams);
+                var countUrl = $"/gateway/stock/count?{countQueryString}";
+
+                _logger.LogInformation($"Calling Stock Count URL: {countUrl}");
+
+                var countResponse = await _httpClient.GetAsync(countUrl);
+
+                if (countResponse.IsSuccessStatusCode)
+                {
+                    var countContent = await countResponse.Content.ReadAsStringAsync();
+                    if (int.TryParse(countContent, out var count))
+                    {
+                        return new StockTransactionsListResponseModel
+                        {
+                            Success = true,
+                            TotalCount = count
+                        };
+                    }
+                }
+
+                _logger.LogWarning($"Failed to get count: {countResponse.StatusCode}");
+                return new StockTransactionsListResponseModel
+                {
+                    Success = false,
+                    TotalCount = 0
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting transaction count");
+                return new StockTransactionsListResponseModel
+                {
+                    Success = false,
+                    TotalCount = 0
                 };
             }
         }

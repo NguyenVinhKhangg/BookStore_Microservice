@@ -84,5 +84,19 @@ namespace OrdersManagementApi.Controllers
                 return NotFound("Order not found");
             }
         }
+
+        [HttpPut("{id}/confirm")]
+        public async Task<IActionResult> ConfirmOrder(int id)
+        {
+            try
+            {
+                await _service.ConfirmAsync(id);
+                return Ok(new { message = "Order confirmed successfully" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Order not found");
+            }
+        }
     }
 }

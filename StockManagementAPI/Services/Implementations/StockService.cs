@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using StockManagementAPI.DTOs;
-using StockManagementAPI.DTOs.Messages;
+using Microsoft.EntityFrameworkCore;
 using StockManagementApi.Models;
 using StockManagementApi.Repositories.Interfaces;
 using StockManagementApi.Services.Interfaces;
+using StockManagementAPI.DTOs;
+using StockManagementAPI.DTOs.Messages;
 using StockManagementAPI.Services.Interfaces;
 using System.Text.Json;
 
@@ -316,6 +317,57 @@ namespace StockManagementAPI.Services.Implementations
                         BookISBN = null
                     }).ToList()
                 });
+        }
+
+        // ✅ THÊM: Method để đếm tổng số transactions với filter
+        public async Task<int> GetTransactionCountAsync(string? searchTerm = null, string? transactionType = null,
+            string? status = null, int? createdBy = null, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            try
+            {
+                var query = _repository.GetQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    query = query.Where(t => t.Note != null && t.Note.ToLower().Contains(searchTerm.ToLower()));
+                }
+
+                if (!string.IsNullOrEmpty(transactionType))
+                {
+                    query = query.Where(t => t.TransactionType == transactionType);
+                }
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    query = query.Where(t => t.Status == status);
+                }
+
+                if (createdBy.HasValue)
+                {
+                    query = query.Where(t => t.CreatedBy == createdBy.Value);
+                }
+
+                if (fromDate.HasValue)
+                {
+                    query = query.Where(t => t.TransactionDate >= fromDate.Value);
+                }
+
+                if (toDate.HasValue)
+                {
+                    query = query.Where(t => t.TransactionDate <= toDate.Value);
+                }
+
+                var count = await query.CountAsync();
+                _logger.LogInformation($"📊 Transaction count: {count} with filters applied");
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting transaction count");
+                return 0;
+            }
         }
     }
 }

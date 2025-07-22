@@ -68,5 +68,15 @@ namespace OrdersManagementApi.Services
 
             return (_mapper.Map<IEnumerable<OrderReadDto>>(pagedOrders), totalCount);
         }
+
+        public async Task ConfirmAsync(int id)
+        {
+            var order = await _repository.GetByIdAsync(id);
+            if (order == null)
+                throw new KeyNotFoundException();
+
+            order.Status = "Confirmed";
+            await _repository.UpdateAsync(order);
+        }
     }
 }

@@ -24,6 +24,14 @@
         "Action": "Start"
       },
       {
+        "Path": "OrdersManagementAPI\\OrdersManagementAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BookClient\\BookClient.csproj",
+        "Action": "Start"
+      },
+      {
         "Path": "AdminUI\\AdminUI.csproj",
         "Action": "Start"
       }
