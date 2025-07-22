@@ -12,15 +12,23 @@ namespace OrdersManagementApi.Models
         public int OrderID { get; set; }
 
         [ForeignKey(nameof(OrderID))]
-        public Order Order { get; set; } = null!;
+        public virtual Order Order { get; set; } = null!;
 
         [Required]
-        public int ProductID { get; set; }
+        public int BookID { get; set; } // ✅ SỬA: Đổi từ ProductID thành BookID
 
         [Required]
         public int Quantity { get; set; }
 
         [Required]
         public decimal UnitPrice { get; set; }
+
+        // ✅ Book information (enriched từ BookAPI)
+        public string? BookTitle { get; set; }
+        public string? BookISBN { get; set; }
+        public string? BookImageUrl { get; set; }
+
+        // ✅ Computed property
+        public decimal TotalPrice => Quantity * UnitPrice;
     }
 }

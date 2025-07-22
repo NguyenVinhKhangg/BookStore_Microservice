@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Generic; // THÊM
 
 namespace OrdersManagementApi.Models
 {
@@ -21,9 +20,17 @@ namespace OrdersManagementApi.Models
 
         [Required]
         [MaxLength(50)]
-        public string Status { get; set; } = null!;
+        public string Status { get; set; } = "Pending"; // Pending, Confirmed, Processing, Shipped, Delivered, Cancelled
 
-        // ➕ THÊM DÒNG NÀY:
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        [MaxLength(1000)]
+        public string? Notes { get; set; }
+
+        // ✅ Admin fields
+        public DateTime? ConfirmedAt { get; set; }
+        public int? ConfirmedBy { get; set; }
+        public string? AdminNotes { get; set; }
+
+        // ✅ Navigation property
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
