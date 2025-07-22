@@ -1,4 +1,4 @@
-using AdminUI.Models.Stock;
+﻿using AdminUI.Models.Stock;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -192,7 +192,6 @@ namespace AdminUI.Services
                 };
             }
         }
-
         public async Task<StockTransactionResponseModel> GetTransactionByIdAsync(int id)
         {
             try
@@ -204,15 +203,44 @@ namespace AdminUI.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var transactionResponse = JsonSerializer.Deserialize<StockTransactionResponseModel>(responseContent, new JsonSerializerOptions
+                    var apiResponse = JsonSerializer.Deserialize<JsonElement>(responseContent, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return transactionResponse ?? new StockTransactionResponseModel
+                    StockTransactionViewModel transaction = null;
+
+                    if (apiResponse.TryGetProperty("data", out var dataElement))
                     {
-                        Success = false,
-                        Message = "Invalid response from server"
+                        transaction = JsonSerializer.Deserialize<StockTransactionViewModel>(dataElement.GetRawText(), new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                    }
+                    else
+                    {
+                        transaction = JsonSerializer.Deserialize<StockTransactionViewModel>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                    }
+
+                    // ✅ SỬA: Đặt BookCode = BookISBN nếu BookCode trống
+                    if (transaction?.Details != null)
+                    {
+                        foreach (var detail in transaction.Details)
+                        {
+                            if (string.IsNullOrEmpty(detail.BookCode) && !string.IsNullOrEmpty(detail.BookISBN))
+                            {
+                                detail.BookCode = detail.BookISBN;
+                            }
+                        }
+                    }
+
+                    return new StockTransactionResponseModel
+                    {
+                        Success = true,
+                        Data = transaction
                     };
                 }
                 else

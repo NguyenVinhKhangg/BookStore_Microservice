@@ -18,7 +18,7 @@ namespace StockManagementApi.Controllers
             _stockService = stockService;
         }
         
-        [Authorize(Roles = "Admin,Staff")]
+       //[Authorize(Roles = "Admin,Staff")]
         [EnableQuery]
         [HttpGet("/odata/transactions")]
         public IQueryable<StockTransactionDTO> GetTransactionsOData()
@@ -54,8 +54,8 @@ namespace StockManagementApi.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
                     
-                //var currentUserId = GetCurrentUserId();
-                var transaction = await _stockService.CreateTransactionAsync(createDto, 3);
+                var currentUserId = GetCurrentUserId();
+                var transaction = await _stockService.CreateTransactionAsync(createDto, currentUserId);
                 
                 return Ok(new { 
                     success = true, 

@@ -46,6 +46,7 @@ namespace StockManagementAPI
             });
 
             builder.Services.AddAuthorization();
+            builder.Services.AddHttpClient();
 
             // Add OData
             var modelBuilder = new ODataConventionModelBuilder();

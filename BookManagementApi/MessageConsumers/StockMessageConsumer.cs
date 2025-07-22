@@ -47,7 +47,7 @@ namespace BookManagementApi.MessageConsumers
                     RequestedConnectionTimeout = TimeSpan.FromSeconds(5)
                 };
 
-                _logger.LogInformation($"Attempting to connect to RabbitMQ at {_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
+                _logger.LogInformation($"🔌 Attempting to connect to RabbitMQ at {_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
 
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
@@ -60,17 +60,17 @@ namespace BookManagementApi.MessageConsumers
                     arguments: null);
 
                 _isConnected = true;
-                _logger.LogInformation("RabbitMQ consumer initialized successfully");
+                _logger.LogInformation("✅ RabbitMQ consumer initialized successfully");
             }
             catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
             {
                 _isConnected = false;
-                _logger.LogWarning(ex, "RabbitMQ server is unreachable. Consumer will run in degraded mode.");
+                _logger.LogWarning(ex, "⚠️ RabbitMQ server is unreachable. Consumer will run in degraded mode.");
             }
             catch (Exception ex)
             {
                 _isConnected = false;
-                _logger.LogError(ex, "Failed to initialize RabbitMQ consumer");
+                _logger.LogError(ex, "❌ Failed to initialize RabbitMQ consumer");
             }
         }
 
@@ -78,21 +78,26 @@ namespace BookManagementApi.MessageConsumers
         {
             if (!_isConnected || _channel == null)
             {
-                _logger.LogWarning("RabbitMQ channel is not available. Consumer will not process messages.");
+                _logger.LogWarning("⚠️ RabbitMQ channel is not available. Consumer will not process messages.");
                 return Task.CompletedTask;
             }
+
+            _logger.LogInformation("🚀 Starting RabbitMQ message consumer...");
 
             var consumer = new EventingBasicConsumer(_channel);
 
             consumer.Received += async (model, ea) =>
             {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+
+                _logger.LogInformation($"📥 Received message: {message}");
+
                 try
                 {
-                    var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
                     var inventoryUpdate = JsonSerializer.Deserialize<BookInventoryUpdateMessage>(message);
 
-                    _logger.LogInformation($"Nhận thông báo cập nhật tồn kho: BookId={inventoryUpdate.BookId}, Change={inventoryUpdate.QuantityChange}");
+                    _logger.LogInformation($"🔥 Processing inventory update: BookId={inventoryUpdate.BookId}, QuantityChange={inventoryUpdate.QuantityChange}, TransactionId={inventoryUpdate.TransactionId}");
 
                     // Tạo scope mới để resolve scoped services
                     using (var scope = _serviceScopeFactory.CreateScope())
@@ -107,19 +112,19 @@ namespace BookManagementApi.MessageConsumers
                         if (success)
                         {
                             _channel.BasicAck(ea.DeliveryTag, false);
-                            _logger.LogInformation($"Đã cập nhật tồn kho thành công: BookId={inventoryUpdate.BookId}");
+                            _logger.LogInformation($"✅ Successfully updated stock for BookId={inventoryUpdate.BookId}, Change={inventoryUpdate.QuantityChange}");
                         }
                         else
                         {
                             // Nếu không tìm thấy book hoặc lỗi, requeue message
                             _channel.BasicNack(ea.DeliveryTag, false, true);
-                            _logger.LogWarning($"Không thể cập nhật tồn kho: BookId={inventoryUpdate.BookId}");
+                            _logger.LogWarning($"❌ Failed to update stock for BookId={inventoryUpdate.BookId}, message requeued");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Lỗi xử lý message cập nhật tồn kho");
+                    _logger.LogError(ex, $"💥 Error processing inventory update message: {message}");
                     if (_channel?.IsOpen == true)
                     {
                         _channel.BasicNack(ea.DeliveryTag, false, true);
@@ -132,6 +137,8 @@ namespace BookManagementApi.MessageConsumers
                 autoAck: false,
                 consumer: consumer);
 
+            _logger.LogInformation($"👂 Consumer is listening on queue: {QueueName}");
+
             return Task.CompletedTask;
         }
 
@@ -139,12 +146,13 @@ namespace BookManagementApi.MessageConsumers
         {
             try
             {
+                _logger.LogInformation("🔌 Disposing RabbitMQ connections...");
                 _channel?.Close();
                 _connection?.Close();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error disposing RabbitMQ connections");
+                _logger.LogError(ex, "❌ Error disposing RabbitMQ connections");
             }
             finally
             {

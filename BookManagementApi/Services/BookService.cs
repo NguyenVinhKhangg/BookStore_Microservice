@@ -11,15 +11,18 @@ namespace BookManagementApi.Services
         private readonly IBookRepository _repo;
         private readonly IMapper _mapper;
         private readonly ICategoryApiClient _cateApi;
+        private readonly ILogger<BookService> _logger; // ✅ THÊM
 
         public BookService(
             IBookRepository repo,
             IMapper mapper,
-            ICategoryApiClient cateApi)
+            ICategoryApiClient cateApi,
+            ILogger<BookService> logger) // ✅ THÊM
         {
             _repo = repo;
             _mapper = mapper;
             _cateApi = cateApi;
+            _logger = logger; // ✅ THÊM
         }
 
         public async Task<BookDto> AddBookAsync(BookCreateDto dto)
@@ -105,10 +108,18 @@ namespace BookManagementApi.Services
 
         public async Task<bool> UpdateBookStockAsync(int bookId, int quantityChange)
         {
+            _logger.LogInformation($"🔥 UpdateBookStockAsync called - BookID: {bookId}, QuantityChange: {quantityChange}");
+
             try
             {
                 var book = await _repo.GetByIdAsync(bookId);
-                if (book == null) return false;
+                if (book == null)
+                {
+                    _logger.LogWarning($"❌ Book with ID {bookId} not found");
+                    return false;
+                }
+
+                _logger.LogInformation($"📚 Current book stock: {book.Stock}");
 
                 // Cập nhật số lượng
                 int newStock = book.Stock + quantityChange;
@@ -116,15 +127,29 @@ namespace BookManagementApi.Services
                 // Đảm bảo số lượng không âm
                 if (newStock < 0)
                 {
+                    _logger.LogWarning($"⚠️ New stock would be negative ({newStock}), setting to 0");
                     newStock = 0;
                 }
 
                 book.Stock = newStock;
+                _logger.LogInformation($"📦 Updating stock from {book.Stock - quantityChange} to {newStock}");
 
-                return await _repo.UpdateAsync(book);
+                var result = await _repo.UpdateAsync(book);
+
+                if (result)
+                {
+                    _logger.LogInformation($"✅ Book {bookId} stock updated successfully to {newStock}");
+                }
+                else
+                {
+                    _logger.LogError($"❌ Failed to update book {bookId} stock in database");
+                }
+
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, $"💥 Error updating book stock for BookID: {bookId}");
                 return false;
             }
         }

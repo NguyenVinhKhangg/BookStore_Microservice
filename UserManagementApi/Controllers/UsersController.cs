@@ -255,7 +255,7 @@ namespace UserManagementApi.Controllers
 
         #region Admin Only Endpoints
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("admin/users/{id}")]
         public async Task<IActionResult> GetUserByIdAdmin(int id)
         {

@@ -3,6 +3,7 @@
     ViewData["Title"] = "Create Stock Transaction";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
+@using AdminUI.Extensions
 
 <div class="fade-in-up">
     <div class="admin-card">
@@ -68,7 +69,7 @@
                                 <h6><i class="fas fa-boxes"></i> Total Items: <span id="totalItems">0</span></h6>
                             </div>
                             <div class="col-md-6 text-end">
-                                <h5><i class="fas fa-dollar-sign"></i> Total Amount: $<span id="totalAmount">0.00</span></h5>
+                                <h5><i class="fas fa-dong-sign"></i> Total Amount: <span id="totalAmount">0</span> VND</h5>
                             </div>
                         </div>
                     </div>
@@ -148,15 +149,17 @@
                             <input type="number" name="Details[${detailIndex}].Quantity" class="form-control quantity"
                                    min="1" value="1" onchange="calculateTotal(${detailIndex})" required />
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Unit Price ($) *</label>
-                            <input type="number" name="Details[${detailIndex}].UnitPrice" class="form-control unit-price"
-                                   step="0.01" min="0.01" onchange="calculateTotal(${detailIndex})" required />
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Total ($)</label>
-                            <input type="text" class="form-control total-price" readonly value="0.00" />
-                        </div>
+                               <div class="col-md-2">
+            <label class="form-label">Unit Price (VND) *</label>
+            <input type="number" name="Details[${detailIndex}].UnitPrice" class="form-control unit-price"
+                   step="1000" min="1000" onchange="calculateTotal(${detailIndex})" required
+                   placeholder="Nhập giá (VND)" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Total (VND)</label>
+            <input type="text" class="form-control total-price" readonly value="0 VND" />
+        </div>
                         <div class="col-md-2">
                             <label class="form-label">&nbsp;</label>
                             <div>
@@ -189,31 +192,32 @@
             }
         }
 
-        function calculateTotal(index) {
+                function calculateTotal(index) {
             const detailItem = document.querySelector(`[data-index="${index}"]`);
             const quantity = parseFloat(detailItem.querySelector('.quantity').value) || 0;
             const unitPrice = parseFloat(detailItem.querySelector('.unit-price').value) || 0;
             const total = quantity * unitPrice;
 
-            detailItem.querySelector('.total-price').value = total.toFixed(2);
+            detailItem.querySelector('.total-price').value = total.toLocaleString('vi-VN') + ' VND';
             updateSummary();
         }
 
-        function updateSummary() {
+               function updateSummary() {
             const details = document.querySelectorAll('.detail-item');
             let totalItems = 0;
             let totalAmount = 0;
 
             details.forEach(detail => {
                 const quantity = parseFloat(detail.querySelector('.quantity').value) || 0;
-                const total = parseFloat(detail.querySelector('.total-price').value) || 0;
+                const unitPrice = parseFloat(detail.querySelector('.unit-price').value) || 0;
+                const total = quantity * unitPrice;
 
                 totalItems += quantity;
                 totalAmount += total;
             });
 
             document.getElementById('totalItems').textContent = totalItems;
-            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            document.getElementById('totalAmount').textContent = totalAmount.toLocaleString('vi-VN');
         }
 
         function selectBook(index) {
@@ -269,7 +273,7 @@
                 });
         }
 
-        function displayBooks(books) {
+               function displayBooks(books) {
             const bookList = document.getElementById('bookList');
 
             if (books.length === 0) {
@@ -297,7 +301,7 @@
                             Stock: ${book.stock}
                         </span>
                     </div>
-                    <small class="text-success"><strong>Price: $${book.price.toFixed(2)}</strong></small>
+                    <small class="text-success"><strong>Price: ${book.price.toLocaleString('vi-VN')} VND</strong></small>
                 </div>
             `).join('');
 
@@ -313,7 +317,7 @@
                 // Auto-fill price if unit price is empty
                 const unitPriceInput = detailItem.querySelector('.unit-price');
                 if (!unitPriceInput.value || unitPriceInput.value === '0') {
-                    unitPriceInput.value = bookPrice.toFixed(2);
+                    unitPriceInput.value = bookPrice;
                     calculateTotal(selectedBookIndex);
                 }
 

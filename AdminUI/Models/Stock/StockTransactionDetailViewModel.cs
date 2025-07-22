@@ -1,4 +1,5 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AdminUI.Models.Stock
 {
@@ -11,10 +12,15 @@ namespace AdminUI.Models.Stock
         
         [Display(Name = "Book ID")]
         public int BookID { get; set; }
-        
+
         [Display(Name = "Book Title")]
-        public string BookTitle { get; set; }
-        
+        [JsonPropertyName("bookName")] // ✅ THÊM: Map từ bookName trong API
+        public string? BookTitle { get; set; }
+
+        [Display(Name = "Book ISBN")]
+        [JsonPropertyName("bookISBN")] // ✅ THÊM: Map từ bookISBN trong API
+        public string? BookISBN { get; set; }
+
         [Display(Name = "Book Code")]
         public string BookCode { get; set; }
         
