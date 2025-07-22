@@ -8,8 +8,9 @@ namespace OrdersManagementApi.Services
     {
         Task<IEnumerable<OrderReadDto>> GetAllAsync();
         Task<OrderReadDto> GetByIdAsync(int id);
-        Task<OrderReadDto> AddAsync(OrderCreateDto order);
-        Task UpdateAsync(int id, OrderUpdateDto order);
+        Task<OrderReadDto> AddAsync(OrderCreateDto orderDto);
+        Task UpdateAsync(int id, OrderUpdateDto orderDto);
         Task DeleteAsync(int id);
+        Task<(IEnumerable<OrderReadDto> Orders, int TotalCount)> GetOrdersAsync(string searchTerm, string statusFilter, int page, int pageSize);
     }
 }

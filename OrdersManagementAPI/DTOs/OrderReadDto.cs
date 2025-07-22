@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+// ✅ Updated OrderReadDto.cs WITHOUT OrderItemReadDto
+using System.ComponentModel.DataAnnotations;
 
 namespace OrdersManagementApi.DTOs
 {
@@ -9,7 +11,7 @@ namespace OrdersManagementApi.DTOs
         public int UserID { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime OrderDate { get; set; }
-        public string? Status { get; set; } // Thay đổi thành string?
+        public string? Status { get; set; } // Optional string
     }
 
     public class OrderCreateDto
@@ -22,7 +24,7 @@ namespace OrdersManagementApi.DTOs
         public DateTime OrderDate { get; set; }
         [Required]
         [MaxLength(50)]
-        public string? Status { get; set; } // Thay đổi thành string?
+        public string? Status { get; set; }
     }
 
     public class OrderUpdateDto
@@ -37,6 +39,6 @@ namespace OrdersManagementApi.DTOs
         public DateTime OrderDate { get; set; }
         [Required]
         [MaxLength(50)]
-        public string? Status { get; set; } // Thay đổi thành string?
+        public string? Status { get; set; }
     }
 }

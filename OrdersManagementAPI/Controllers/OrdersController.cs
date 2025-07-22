@@ -17,6 +17,15 @@ namespace OrdersManagementApi.Controllers
             _service = service;
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrders([FromQuery] string searchTerm = "", [FromQuery] string statusFilter = "", [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var (orders, totalCount) = await _service.GetOrdersAsync(searchTerm, statusFilter, page, pageSize);
+            return Ok(new { Orders = orders, TotalCount = totalCount });
+        }
+
+      
         [HttpGet]
         [EnableQuery]
         public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetOrders()

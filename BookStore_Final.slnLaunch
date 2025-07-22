@@ -16,11 +16,15 @@
         "Action": "Start"
       },
       {
-        "Path": "BookClient\\BookClient.csproj",
+        "Path": "CartManagementApi\\CartManagementApi.csproj",
         "Action": "Start"
       },
       {
-        "Path": "CartManagementApi\\CartManagementApi.csproj",
+        "Path": "StockManagementAPI\\StockManagementAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "AdminUI\\AdminUI.csproj",
         "Action": "Start"
       }
     ]

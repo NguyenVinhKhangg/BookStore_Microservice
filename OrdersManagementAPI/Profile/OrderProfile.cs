@@ -11,6 +11,8 @@ namespace OrdersManagementApi.Profiles
             CreateMap<Order, OrderReadDto>();
             CreateMap<OrderCreateDto, Order>();
             CreateMap<OrderUpdateDto, Order>();
+
+
         }
     }
 }

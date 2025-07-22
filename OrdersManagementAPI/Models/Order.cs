@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic; // THÊM
 
 namespace OrdersManagementApi.Models
 {
@@ -21,5 +22,8 @@ namespace OrdersManagementApi.Models
         [Required]
         [MaxLength(50)]
         public string Status { get; set; } = null!;
+
+        // ➕ THÊM DÒNG NÀY:
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
