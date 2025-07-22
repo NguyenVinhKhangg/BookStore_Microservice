@@ -1,72 +1,237 @@
 ﻿@model dynamic
 @using BookClient.Models
-
-<h2>Orders</h2>
-
-@if (Model is List<Order>)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Product(s)</th>
-                <th>Order Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model)
-            {
-                <tr>
-                    <td>@order.OrderID</td>
-                    <td>
-                        <ul class="mb-0 ps-3">
-                            @foreach (var item in order.OrderItems)
-                            {
-                                <li>@item.BookName (x@item.Quantity)</li>
-                            }
-                        </ul>
-                    </td>
-                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                    <td>@order.Status</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+@{
+    ViewData["Title"] = "Orders";
 }
-else if (Model is Order)
-{
-    var order = (Order)Model;
-    <div>
-        <p><strong>Order ID:</strong> @order.OrderID</p>
-        <p><strong>Status:</strong> @order.Status</p>
-        <p><strong>Order Date:</strong> @order.OrderDate.ToString("dd/MM/yyyy")</p>
 
-        <h4>Order Details:</h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Book</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in order.OrderItems)
-                {
-                    <tr>
-                        <td>@item.BookName</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Price.ToString("N0") đ</td>
-                        <td>@(item.Price* item.Quantity).ToString("N0") đ</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Orders</h2>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search by Order ID or Book Name" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="pageSize" class="form-select">
+                        <option value="5">5 per page</option>
+                        <option value="10">10 per page</option>
+                        <option value="20">20 per page</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Orders Table -->
+    @if (Model is List<Order>)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover table-bordered" id="ordersTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Product(s)</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderRows">
+                        @foreach (var order in Model)
+                        {
+                            <tr class="order-row" data-status="@order.Status">
+                                <td><a href="@Url.Action("Details", "Orders", new { id = order.OrderID })" class="text-primary">@order.OrderID</a></td>
+                                <td>
+                                    <ul class="mb-0 ps-3">
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <li class="book-name">@item.BookName (x@item.Quantity)</li>
+                                        }
+                                </ul>
+                            </td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="badge
+                                            @(order.Status == "Pending" ? "bg-warning" :
+                                                                                order.Status == "Shipped" ? "bg-info" :
+                                                                                order.Status == "Delivered" ? "bg-success" :
+                                                                                "bg-danger")">
+                                @order.Status
+                            </span>
+                        </td>
+                    </tr>
+                                        }
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-3">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
+    }
+    else if (Model is Order)
+    {
+        var order = (Order)Model;
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Order Details</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Order ID:</strong> @order.OrderID</p>
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="badge
+                                    @(order.Status == "Pending" ? "bg-warning" :
+                                                                    order.Status == "Shipped" ? "bg-info" :
+                                                                    order.Status == "Delivered" ? "bg-success" :
+                                                                    "bg-danger")">
+                            @order.Status
+                        </span>
+                    </p>
+                    <p><strong>Order Date:</strong> @order.OrderDate.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+
+                <table class="table table-bordered table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Book</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.BookName</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Price.ToString("N0") đ</td>
+                                <td>@(item.Price* item.Quantity).ToString("N0") đ</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            No order data available.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-paginate@0.3.1/jquery.paginate.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize pagination
+            $('#ordersTable').paginate({
+                perPage: 5,
+                container: '#pagination',
+                autoScroll: false
+            });
+
+            // Update pagination when page size changes
+            $('#pageSize').change(function () {
+                let pageSize = parseInt($(this).val());
+                $('#ordersTable').paginate({
+                    perPage: pageSize,
+                    container: '#pagination',
+                    autoScroll: false
+                });
+                filterOrders();
+            });
+
+            // Search functionality
+            $('#searchInput').on('input', function () {
+                filterOrders();
+            });
+
+            // Status filter
+            $('#statusFilter').change(function () {
+                filterOrders();
+            });
+
+            function filterOrders() {
+                let searchText = $('#searchInput').val().toLowerCase();
+                let statusFilter = $('#statusFilter').val().toLowerCase();
+
+                $('.order-row').each(function () {
+                    let orderId = $(this).find('td:first').text().toLowerCase();
+                    let bookNames = $(this).find('.book-name').map(function () {
+                        return $(this).text().toLowerCase();
+                    }).get();
+                    let status = $(this).data('status').toString().toLowerCase();
+
+                    let matchesSearch = searchText === '' ||
+                        orderId.includes(searchText) ||
+                        bookNames.some(name => name.includes(searchText));
+                    let matchesStatus = statusFilter === '' || status === statusFilter;
+
+                    $(this).toggle(matchesSearch && matchesStatus);
+                });
+
+                // Reinitialize pagination after filtering
+                $('#ordersTable').paginate({
+                    perPage: parseInt($('#pageSize').val()),
+                    container: '#pagination',
+                    autoScroll: false
+                });
+            }
+        });
+    </script>
 }
-else
-{
-    <p>No order data available.</p>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        .badge {
+            font-size: 0.9em;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .pagination .page-link {
+            color: #007bff;
+        }
+
+        .table-primary {
+            background-color: #e7f1ff;
+        }
+    </style>
 }

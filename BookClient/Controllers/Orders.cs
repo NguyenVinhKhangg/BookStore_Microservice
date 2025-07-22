@@ -4,85 +4,41 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using BookClient.Models;
+using BookClient.Services;
 
 namespace BookClient.Controllers
 {
     public class OrderController : Controller
     {
-        private readonly HttpClient _httpClient;
+        private readonly IOrderService _orderService;
 
-        public OrderController(IHttpClientFactory httpClientFactory)
+        public OrderController(IOrderService orderService)
         {
-            _httpClient = httpClientFactory.CreateClient("OrderAPI");
+            _orderService = orderService;
         }
 
         public async Task<IActionResult> Index(int cartId)
         {
-            var response = await _httpClient.GetAsync($"Carts/{cartId}");
-            if (!response.IsSuccessStatusCode)
-            {
-                return NotFound();
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            var cartData = JsonConvert.DeserializeObject<CartViewModel>(content);
-            if (cartData == null)
-            {
-                return NotFound();
-            }
-
-            var order = new Order
-            {
-                CartID = cartId,
-                UserID = cartData.UserID.ToString(),
-                OrderItems = await GetOrderItemsFromApi(cartId)
-            };
-
+            var order = await _orderService.CreateOrderFromCartAsync(cartId);
             return View("~/Views/Orders/Order.cshtml", order);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var response = await _httpClient.GetAsync($"Orders/{id}");
-            if (!response.IsSuccessStatusCode)
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if (order == null || order.OrderID == 0)
             {
                 return NotFound();
             }
-
-            var content = await response.Content.ReadAsStringAsync();
-            var order = JsonConvert.DeserializeObject<Order>(content);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            order.OrderItems = await GetOrderItemsFromApi(order.CartID);
             return View("~/Views/Orders/Order.cshtml", order);
         }
 
-        public async Task<IActionResult> MyOrders()
+        public async Task<IActionResult> MyOrders(int page = 1, int pageSize = 5, string search = "", string status = "")
         {
-            var response = await _httpClient.GetAsync("Orders");
-            if (!response.IsSuccessStatusCode)
-            {
-                return View("~/Views/Orders/Order.cshtml", new List<Order>());
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            var orders = JsonConvert.DeserializeObject<List<Order>>(content) ?? new List<Order>();
+            var orders = await _orderService.GetAllOrdersAsync(page, pageSize, search, status);
+            ViewBag.TotalPages = (int)Math.Ceiling((double)100 / pageSize); // Giả định, cần lấy từ API
+            ViewBag.CurrentPage = page;
             return View("~/Views/Orders/Order.cshtml", orders);
-        }
-
-        private async Task<List<OrderItem>> GetOrderItemsFromApi(int cartId)
-        {
-            var response = await _httpClient.GetAsync($"Carts/{cartId}/Items");
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var items = JsonConvert.DeserializeObject<List<OrderItem>>(content);
-                return items ?? new List<OrderItem>();
-            }
-            return new List<OrderItem>();
         }
     }
 
