@@ -9,7 +9,7 @@
       <validation algorithm="HMACSHA256" />
       <masterKey p4:requiresEncryption="true" xmlns:p4="http://schemas.asp.net/2015/03/dataProtection">
         <!-- Warning: the key below is in an unencrypted form. -->
-        <value>SP0g6IZu4MioJrOgMovNANUlVh32JeImA9m8UcTawPUG+I4fb46c5IGeQz5YBRkKkH/rFewHbhOI3v4So93KJA==</value>
+        <value>Enter_Your_Key_Here</value>
       </masterKey>
     </descriptor>
   </descriptor>
